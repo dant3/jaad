@@ -57,6 +57,7 @@ class FFT implements FFTTables {
 
 	void process(float[][] in, boolean forward) {
 		final int imOff = (forward ? 2 : 1);
+		final int scale = (forward ? 1 : length);
 		//bit-reversal
 		int ii = 0;
 		for(int i = 0; i<length; i++) {
@@ -121,10 +122,10 @@ class FFT implements FFTTables {
 					zRe = in[i+j+k][0]*rootRe-in[i+j+k][1]*rootIm;
 					zIm = in[i+j+k][0]*rootIm+in[i+j+k][1]*rootRe;
 
-					in[i+j+k][0] = in[j+k][0]-zRe;
-					in[i+j+k][1] = in[j+k][1]-zIm;
-					in[j+k][0] = in[j+k][0]+zRe;
-					in[j+k][1] = in[j+k][1]+zIm;
+					in[i+j+k][0] = (in[j+k][0]-zRe)*scale;
+					in[i+j+k][1] = (in[j+k][1]-zIm)*scale;
+					in[j+k][0] = (in[j+k][0]+zRe)*scale;
+					in[j+k][1] = (in[j+k][1]+zIm)*scale;
 				}
 			}
 		}
