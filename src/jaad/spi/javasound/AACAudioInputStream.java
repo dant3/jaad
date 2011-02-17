@@ -33,7 +33,7 @@ class AACAudioInputStream extends AsynchronousAudioInputStream {
 
 	AACAudioInputStream(InputStream in, AudioFormat format, long length) throws IOException {
 		super(in, format, length);
-		final DecoderConfig conf = DecoderConfig.parseTransportHeader(in);
+		final DecoderConfig conf = DecoderConfig.parseTransportHeader(in,DecoderConfig.MAXIMUM_FRAME_SIZE);
 		decoder = new Decoder(conf);
 		sampleBuffer = new SampleBuffer();
 	}

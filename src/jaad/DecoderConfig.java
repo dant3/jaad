@@ -31,6 +31,7 @@ import java.io.InputStream;
  */
 public class DecoderConfig implements Constants {
 
+	public static final int MAXIMUM_FRAME_SIZE = 6144;
 	private final BitStream in;
 	private Profile profile;
 	private SampleFrequency sampleFrequency;
@@ -239,26 +240,39 @@ public class DecoderConfig implements Constants {
 	/**
 	 * Reads and parses a transport header from the InputStream. The method can
 	 * detect and parse ADTS and ADIF headers.
-	 * @return a DecoderConfig
+	 * The maximum number of bytes to skip can be passed as parameter. This is
+	 * useful since some streams (like internet radios) may start within a
+	 * frame. The method then skippes until it finds the next header.
+	 * @param input the InputStream to read from
+	 * @maxSkip the maximum number of bytes to skip while searching for a header.
+	 * @return a DecoderConfig or null if no header was found
 	 */
-	public static DecoderConfig parseTransportHeader(InputStream input) throws AACException {
+	public static DecoderConfig parseTransportHeader(InputStream input,int maxSkip) throws AACException {
 		final InputBitStream in = new InputBitStream(input);
 		final DecoderConfig config = new DecoderConfig(in);
-		if(ADIFHeader.isPresent(in)) {
-			final ADIFHeader adif = ADIFHeader.readHeader(in);
-			final PCE pce = adif.getFirstPCE();
-			config.profile = pce.getProfile();
-			config.sampleFrequency = pce.getSampleFrequency();
-			config.channelConfiguration = ChannelConfiguration.forInt(pce.getChannelCount());
-			return config;
+		int left = maxSkip;
+		do {
+			if(ADIFHeader.isPresent(in)) {
+				final ADIFHeader adif = ADIFHeader.readHeader(in);
+				final PCE pce = adif.getFirstPCE();
+				config.profile = pce.getProfile();
+				config.sampleFrequency = pce.getSampleFrequency();
+				config.channelConfiguration = ChannelConfiguration.forInt(pce.getChannelCount());
+				return config;
+			}
+			else if(ADTSFrame.isPresent(in)) {
+				final ADTSFrame adts = ADTSFrame.readFrame(in);
+				config.profile = adts.getProfile();
+				config.sampleFrequency = adts.getSampleFrequency();
+				config.channelConfiguration = adts.getChannelConfiguration();
+				return config;
+			}
+			else if(left>0) {
+				left--;
+				in.skipBits(8);
+			}
 		}
-		else if(ADTSFrame.isPresent(in)) {
-			final ADTSFrame adts = ADTSFrame.readFrame(in);
-			config.profile = adts.getProfile();
-			config.sampleFrequency = adts.getSampleFrequency();
-			config.channelConfiguration = adts.getChannelConfiguration();
-			return config;
-		}
-		else throw new AACException("no transport header found");
+		while(left>=0);
+		return null;
 	}
 }

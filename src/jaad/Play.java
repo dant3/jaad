@@ -29,7 +29,7 @@ import javax.sound.sampled.SourceDataLine;
  */
 public class Play {
 
-	private static final String USAGE = "usage:\njaad.Main [-mp4] <infile> <outfile>\n\n\t-mp4\tinput file is in MP4 container format";
+	private static final String USAGE = "usage:\njaad.Play [-mp4] <infile>\n\n\t-mp4\tinput file is in MP4 container format";
 
 	public static void main(String[] args) {
 		try {
@@ -88,7 +88,7 @@ public class Play {
 		SourceDataLine line = null;
 		byte[] b;
 		try {
-			final DecoderConfig conf = DecoderConfig.parseTransportHeader(new FileInputStream(in));
+			final DecoderConfig conf = DecoderConfig.parseTransportHeader(new FileInputStream(in),DecoderConfig.MAXIMUM_FRAME_SIZE);
 			final Decoder dec = new Decoder(conf);
 			final SampleBuffer buf = new SampleBuffer();
 			while(true) {

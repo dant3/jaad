@@ -84,7 +84,7 @@ public final class ADTSFrame {
 		id = in.readBool();
 		layer = in.readBits(2);
 		protectionAbsent = in.readBool();
-		profile = Profile.forInt(in.readBits(2));
+		profile = Profile.forInt(in.readBits(2)+1);
 		sampleFrequency = SampleFrequency.forInt(in.readBits(4));
 		privateBit = in.readBool();
 		channelConfiguration = ChannelConfiguration.forInt(in.readBits(3));

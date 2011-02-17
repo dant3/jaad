@@ -110,8 +110,8 @@ class MDCT implements MDCTTables {
 			buf[k][0] =  (tmp[0]*sincos[k][0])+(tmp[1]*sincos[k][1]);
 			buf[k][1] = (tmp[1]*sincos[k][0])-(tmp[0]*sincos[k][1]);
 
-			buf[k][0] *= scale;
-			buf[k][1] *= scale;
+			buf[k][0] *= N;
+			buf[k][1] *= N;
 
 			tmp[0] =  in[N2-1-n]-in[n];
 			tmp[1] =  in[N2+n]+in[N-1-n];
@@ -119,8 +119,8 @@ class MDCT implements MDCTTables {
 			buf[k+N8][0] = (tmp[0]*sincos[k+N8][0])+(tmp[1]*sincos[k+N8][1]);
 			buf[k+N8][1] = (tmp[1]*sincos[k+N8][0])-(tmp[0]*sincos[k+N8][1]);
 
-			buf[k+N8][0] *= scale;
-			buf[k+N8][1] *= scale;
+			buf[k+N8][0] *= N;
+			buf[k+N8][1] *= N;
 		}
 
 		//complex FFT, non-scaling

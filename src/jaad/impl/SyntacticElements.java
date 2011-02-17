@@ -196,7 +196,7 @@ public class SyntacticElements implements Constants {
 		fils[curFIL].decode(in, prev, config.getSampleFrequency());
 		curFIL++;
 
-		if(!sbrPresent&&prev!=null&&prev.isSBRPresent()) {
+		if(prev!=null&&prev.isSBRPresent()) {
 			sbrPresent = true;
 			if(!psPresent&&prev.getSBR().isPSUsed()) psPresent = true;
 		}
@@ -232,6 +232,7 @@ public class SyntacticElements implements Constants {
 			else if(e instanceof CCE) {
 				//applies invquant and save the result in the CCE
 				((CCE) e).process();
+				channel++;
 			}
 		}
 	}

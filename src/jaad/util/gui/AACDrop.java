@@ -122,7 +122,7 @@ public class AACDrop extends JFrame {
 
 		private void decodeAAC(PushbackInputStream in) throws IOException {
 			try {
-				final DecoderConfig conf = DecoderConfig.parseTransportHeader(in);
+				final DecoderConfig conf = DecoderConfig.parseTransportHeader(in,DecoderConfig.MAXIMUM_FRAME_SIZE);
 				final Decoder dec = new Decoder(conf);
 
 				final SampleBuffer buf = new SampleBuffer();
