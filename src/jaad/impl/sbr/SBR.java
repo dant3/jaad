@@ -134,7 +134,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 		final int len = in.getPosition()-pos;
 		final int bitsLeft = count-len;
 		if(bitsLeft>=8) LOGGER.log(Level.WARNING, "SBR: bits left: {0}", bitsLeft);
-		else if(bitsLeft<0) throw new AACException("SBR data overread");
+		else if(bitsLeft<0) throw new AACException("SBR data overread: "+bitsLeft);
 
 		in.skipBits(bitsLeft);
 	}
@@ -582,7 +582,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 		cd[1].saveMatrix();
 	}
 
-	public void processSingleFramePS(float[] left, float[] right, boolean downSampled) {
+	public void processSingleFramePS(float[] left, float[] right, boolean downSampled) throws AACException {
 		if(bufLeftPS==null) {
 			bufLeftPS = new float[38][64][2];
 			bufRightPS = new float[38][64][2];
