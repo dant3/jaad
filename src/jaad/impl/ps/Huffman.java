@@ -5,18 +5,9 @@ import jaad.impl.BitStream;
 
 class Huffman {
 
-	public static void decode(BitStream in, boolean time, int pars, int[][] huffT, int[][] huffF, int[] par) throws AACException {
-		int n;
-		if(time) {
-			for(n = 0; n<pars; n++) {
-				par[n] = decodeHuffman(in, huffT);
-			}
-		}
-		else {
-			par[0] = decodeHuffman(in, huffF);
-			for(n = 1; n<pars; n++) {
-				par[n] = decodeHuffman(in, huffF);
-			}
+	static void decode(BitStream in, int[][] table, int[] out, int len) throws AACException {
+		for(int i = 0; i<len; i++) {
+			out[i] = decodeHuffman(in, table);
 		}
 	}
 
