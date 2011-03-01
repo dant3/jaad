@@ -9,49 +9,56 @@ class Filterbank implements PSConstants, FilterbankTables {
 		buf = new float[5][44][2];
 	}
 
+	//in: [38][64][2], out: [91][32][2]
 	void performAnalysis(float[][][] in, float[][][] out, boolean use34) {
 		int i, j;
 		for(i = 0; i<5; i++) {
 			for(j = 0; j<38; j++) {
-				in[i][j+6][0] = buf[j][i][0];
-				in[i][j+6][1] = buf[j][i][1];
+				buf[i][j+6][0] = in[j][i][0];
+				buf[i][j+6][1] = in[j][i][0];
 			}
 		}
 		if(use34) {
-			performChannelFilter4(in[0], out, 0, F34_0_12, 12, FB_LEN);
-			performChannelFilter4(in[1], out, 12, F34_1_8, 8, FB_LEN);
-			performChannelFilter4(in[2], out, 20, F34_2_4, 4, FB_LEN);
-			performChannelFilter4(in[3], out, 24, F34_2_4, 4, FB_LEN);
-			performChannelFilter4(in[4], out, 28, F34_2_4, 4, FB_LEN);
+			performChannelFilter4(buf[0], out, 0, F34_0_12, 12, FB_LEN);
+			performChannelFilter4(buf[1], out, 12, F34_1_8, 8, FB_LEN);
+			performChannelFilter4(buf[2], out, 20, F34_2_4, 4, FB_LEN);
+			performChannelFilter4(buf[3], out, 24, F34_2_4, 4, FB_LEN);
+			performChannelFilter4(buf[4], out, 28, F34_2_4, 4, FB_LEN);
 			for(i = 0; i<59; i++) {
 				for(j = 0; j<FB_LEN; j++) {
-					out[i+FB_LEN][j][0] = buf[0][j][i+5];
-					out[i+FB_LEN][j][1] = buf[1][j][i+5];
+					out[i+32][j][0] = in[j][i+5][0];
+					out[i+32][j][1] = in[j][i+5][1];
 				}
 			}
 		}
 		else {
-			performChannelFilter6(in[0], out, 0, F20_0_8, FB_LEN);
-			performChannelFilter2(in[1], out, 6, G1_Q2, FB_LEN, true);
-			performChannelFilter2(in[2], out, 8, G1_Q2, FB_LEN, false);
+			performChannelFilter6(buf[0], out, 0, F20_0_8, FB_LEN);
+			performChannelFilter2(buf[1], out, 6, G1_Q2, FB_LEN, true);
+			performChannelFilter2(buf[2], out, 8, G1_Q2, FB_LEN, false);
 			for(i = 0; i<61; i++) {
 				for(j = 0; j<FB_LEN; j++) {
-					out[i+10][j][0] = buf[0][j][i+3];
-					out[i+10][j][1] = buf[1][j][i+3];
+					out[i+10][j][0] = in[j][i+3][0];
+					out[i+10][j][1] = in[j][i+3][1];
 				}
 			}
 		}
-		//update in_buf
+		//update buf
 		for(i = 0; i<5; i++) {
-			System.arraycopy(in[i], 0, in[i+FB_LEN], 0, 6);
-			//memcpy(in[i], in[i]+32, 6 * sizeof(in[i][0]));
+			System.arraycopy(buf[i], 32, buf[i], 0, 6);
 		}
 	}
 
+	//in: [91][32][2], out: [38][64][2]
 	void performSynthesis(float[][][] in, float[][][] out, boolean use34) {
 		int i, n;
 		if(use34) {
 			for(n = 0; n<FB_LEN; n++) {
+				for(i = 0; i<5; i++) {
+					//memset(out[0][n], 0, 5*sizeof(out[0][n][0]));
+					//memset(out[1][n], 0, 5*sizeof(out[1][n][0]));
+					out[n][i][0] = 0;
+					out[n][i][1] = 0;
+				}
 				for(i = 0; i<12; i++) {
 					out[n][0][0] += in[i][n][0];
 					out[n][0][1] += in[i][n][1];
@@ -71,8 +78,8 @@ class Filterbank implements PSConstants, FilterbankTables {
 			}
 			for(i = 0; i<59; i++) {
 				for(n = 0; n<FB_LEN; n++) {
-					out[n][i+5][0] = in[i+FB_LEN][n][0];
-					out[n][i+5][1] = in[i+FB_LEN][n][1];
+					out[n][i+5][0] = in[i+32][n][0];
+					out[n][i+5][1] = in[i+32][n][1];
 				}
 			}
 		}
