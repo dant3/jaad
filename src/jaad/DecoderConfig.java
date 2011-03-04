@@ -247,7 +247,7 @@ public class DecoderConfig implements Constants {
 	 * @maxSkip the maximum number of bytes to skip while searching for a header.
 	 * @return a DecoderConfig or null if no header was found
 	 */
-	public static DecoderConfig parseTransportHeader(InputStream input,int maxSkip) throws AACException {
+	public static DecoderConfig parseTransportHeader(InputStream input, int maxSkip) throws AACException {
 		final InputBitStream in = new InputBitStream(input);
 		final DecoderConfig config = new DecoderConfig(in);
 		int left = maxSkip;
@@ -267,10 +267,8 @@ public class DecoderConfig implements Constants {
 				config.channelConfiguration = adts.getChannelConfiguration();
 				return config;
 			}
-			else if(left>0) {
-				left--;
-				in.skipBits(8);
-			}
+			else if(left>0) in.skipBits(8);
+			left--;
 		}
 		while(left>=0);
 		return null;
