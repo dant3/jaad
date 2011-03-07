@@ -41,7 +41,6 @@ public class Play {
 			else decodeAAC(args[0]);
 		}
 		catch(Exception e) {
-			e.printStackTrace();
 			System.err.println("error while decoding: "+e.toString());
 		}
 	}
@@ -88,7 +87,7 @@ public class Play {
 		SourceDataLine line = null;
 		byte[] b;
 		try {
-			final DecoderConfig conf = DecoderConfig.parseTransportHeader(new FileInputStream(in),DecoderConfig.MAXIMUM_FRAME_SIZE);
+			final DecoderConfig conf = DecoderConfig.parseTransportHeader(new FileInputStream(in), 0);
 			final Decoder dec = new Decoder(conf);
 			final SampleBuffer buf = new SampleBuffer();
 			while(true) {

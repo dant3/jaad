@@ -46,8 +46,6 @@ public class SyntacticElements implements Constants {
 
 	public SyntacticElements(DecoderConfig config) {
 		this.config = config;
-		this.sbrPresent = config.isSBRPresent();
-		psPresent = false;
 
 		pce = new PCE();
 		elements = new Element[4*MAX_ELEMENTS];
@@ -55,10 +53,7 @@ public class SyntacticElements implements Constants {
 		dses = new DSE[MAX_ELEMENTS];
 		fils = new FIL[MAX_ELEMENTS];
 
-		curElem = 0;
-		curCCE = 0;
-		curDSE = 0;
-		curFIL = 0;
+		startNewFrame();
 	}
 
 	public final void startNewFrame() {
@@ -66,6 +61,8 @@ public class SyntacticElements implements Constants {
 		curCCE = 0;
 		curDSE = 0;
 		curFIL = 0;
+		sbrPresent = false;
+		psPresent = false;
 	}
 
 	public void decode(BitStream in) throws AACException {

@@ -129,7 +129,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 
 		//first frame should have a header
 		if(headerCount>0) decodeData(in, stereo);
-		else LOGGER.warning("no SBR header found");
+		//else LOGGER.warning("no SBR header found");
 
 		final int len = in.getPosition()-pos;
 		final int bitsLeft = count-len;
@@ -400,10 +400,13 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 
 		switch(extensionID) {
 			case EXTENSION_ID_PS:
-				if(!psExtensionRead) psExtensionRead = true;
-				if(ps==null) ps = new PS();
-				ret = ps.decode(in);
-				if(!psUsed&&ps.hasHeader()) psUsed = true;
+				if(!psExtensionRead) {
+					psExtensionRead = true;
+					if(ps==null) ps = new PS();
+					ret = ps.decode(in);
+					if(!psUsed&&ps.hasHeader()) psUsed = true;
+				}
+				else ret = 0;
 				break;
 			default:
 				extensionData = in.readBits(6);
@@ -607,7 +610,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 		}
 
 		//perform parametric stereo
-		ps.process(bufLeftPS, bufRightPS);
+		ps.process(bufLeftPS, bufRightPS, kx+M);
 
 		if(qmfs[1]==null) qmfs[1] = new QMFSynthesis(filterBank, downSampled ? 32 : 64);
 		//subband synthesis

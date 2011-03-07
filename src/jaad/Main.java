@@ -78,7 +78,7 @@ public class Main {
 	private static void decodeAAC(String in, String out) throws IOException {
 		WaveFileWriter wav = null;
 		try {
-			final DecoderConfig conf = DecoderConfig.parseTransportHeader(new FileInputStream(in), DecoderConfig.MAXIMUM_FRAME_SIZE);
+			final DecoderConfig conf = DecoderConfig.parseTransportHeader(new FileInputStream(in), 0);
 			final Decoder dec = new Decoder(conf);
 
 			final SampleBuffer buf = new SampleBuffer();
