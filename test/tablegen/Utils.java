@@ -66,10 +66,10 @@ class Utils {
 					sb.append(f[i][j][k]).append("f");
 				}
 				sb.append("}");
-				if(j<f.length-1) sb.append(",\n");
+				if(j<f[i].length-1) sb.append(",\n");
 			}
 			sb.append("}");
-			if(i<f.length-1) sb.append(", ");
+			if(i<f.length-1) sb.append(",\n");
 			System.out.println(sb.toString());
 		}
 		System.out.println("};");
@@ -84,21 +84,21 @@ class Utils {
 			sb = new StringBuilder();
 			sb.append("{");
 			for(int j = 0; j<f[i].length; j++) {
-				if(j>0) sb.append(", ");
 				sb.append("{");
 				for(int k = 0; k<f[i][j].length; k++) {
-					if(k>0) sb.append(", ");
 					sb.append("{");
 					for(int l = 0; l<f[i][j][k].length; l++) {
 						if(l>0) sb.append(", ");
 						sb.append(f[i][j][k][l]).append("f");
 					}
 					sb.append("}");
+					if(k<f[i][j].length-1) sb.append(",\n");
 				}
 				sb.append("}");
+				if(j<f[i].length-1) sb.append(",\n");
 			}
 			sb.append("}");
-			if(i<f.length-1) sb.append(",");
+			if(i<f.length-1) sb.append(",\n");
 			System.out.println(sb.toString());
 		}
 		System.out.println("};");
