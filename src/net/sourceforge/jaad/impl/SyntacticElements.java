@@ -14,20 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.impl;
+package net.sourceforge.jaad.impl;
 
-import jaad.ChannelConfiguration;
-import jaad.SampleFrequency;
-import jaad.AACException;
-import jaad.DecoderConfig;
-import jaad.Profile;
-import jaad.SampleBuffer;
-import jaad.impl.filterbank.FilterBank;
-import jaad.impl.noise.PNS;
-import jaad.impl.prediction.LTPrediction;
-import jaad.impl.sbr.SBR;
-import jaad.impl.stereo.IS;
-import jaad.impl.stereo.MS;
+import net.sourceforge.jaad.ChannelConfiguration;
+import net.sourceforge.jaad.SampleFrequency;
+import net.sourceforge.jaad.AACException;
+import net.sourceforge.jaad.DecoderConfig;
+import net.sourceforge.jaad.Profile;
+import net.sourceforge.jaad.SampleBuffer;
+import net.sourceforge.jaad.impl.filterbank.FilterBank;
+import net.sourceforge.jaad.impl.noise.PNS;
+import net.sourceforge.jaad.impl.prediction.LTPrediction;
+import net.sourceforge.jaad.impl.sbr.SBR;
+import net.sourceforge.jaad.impl.stereo.IS;
+import net.sourceforge.jaad.impl.stereo.MS;
 import java.util.logging.Level;
 
 public class SyntacticElements implements Constants {

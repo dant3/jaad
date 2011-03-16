@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.spi.javasound;
+package net.sourceforge.jaad.spi.javasound;
 
-import jaad.Decoder;
-import jaad.DecoderConfig;
-import jaad.SampleBuffer;
-import jaad.util.mp4.AudioFrame;
-import jaad.util.mp4.MP4Reader;
+import net.sourceforge.jaad.Decoder;
+import net.sourceforge.jaad.DecoderConfig;
+import net.sourceforge.jaad.SampleBuffer;
+import net.sourceforge.jaad.util.mp4.AudioFrame;
+import net.sourceforge.jaad.util.mp4.MP4Reader;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.sound.sampled.AudioFormat;

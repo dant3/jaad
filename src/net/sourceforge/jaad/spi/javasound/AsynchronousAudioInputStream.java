@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.spi.javasound;
+package net.sourceforge.jaad.spi.javasound;
 
-import jaad.spi.javasound.CircularBuffer.Trigger;
+import net.sourceforge.jaad.spi.javasound.CircularBuffer.Trigger;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.sound.sampled.AudioFormat;

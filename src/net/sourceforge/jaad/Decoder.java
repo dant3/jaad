@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad;
+package net.sourceforge.jaad;
 
-import jaad.impl.BitStream;
-import jaad.impl.Constants;
-import jaad.impl.PCE;
-import jaad.impl.SyntacticElements;
-import jaad.impl.filterbank.FilterBank;
-import jaad.impl.transport.ADIFHeader;
-import jaad.impl.transport.ADTSFrame;
+import net.sourceforge.jaad.impl.BitStream;
+import net.sourceforge.jaad.impl.Constants;
+import net.sourceforge.jaad.impl.PCE;
+import net.sourceforge.jaad.impl.SyntacticElements;
+import net.sourceforge.jaad.impl.filterbank.FilterBank;
+import net.sourceforge.jaad.impl.transport.ADIFHeader;
+import net.sourceforge.jaad.impl.transport.ADTSFrame;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 

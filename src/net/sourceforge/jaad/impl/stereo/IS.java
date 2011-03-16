@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.impl.stereo;
+package net.sourceforge.jaad.impl.stereo;
 
-import jaad.impl.CPE;
-import jaad.impl.Constants;
-import jaad.impl.ICSInfo;
-import jaad.impl.ICStream;
-import jaad.impl.SectionData;
-import jaad.impl.prediction.ICPrediction;
+import net.sourceforge.jaad.impl.CPE;
+import net.sourceforge.jaad.impl.Constants;
+import net.sourceforge.jaad.impl.ICSInfo;
+import net.sourceforge.jaad.impl.ICStream;
+import net.sourceforge.jaad.impl.SectionData;
+import net.sourceforge.jaad.impl.prediction.ICPrediction;
 
 /**
  * Intensity stereo

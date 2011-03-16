@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.impl.sbr;
+package net.sourceforge.jaad.impl.sbr;
 
-import jaad.AACException;
-import jaad.impl.BitStream;
-import jaad.impl.Constants;
+import net.sourceforge.jaad.AACException;
+import net.sourceforge.jaad.impl.BitStream;
+import net.sourceforge.jaad.impl.Constants;
 
 class ChannelData implements SBRConstants, HuffmanTables {
 

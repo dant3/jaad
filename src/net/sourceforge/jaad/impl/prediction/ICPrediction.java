@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.impl.prediction;
+package net.sourceforge.jaad.impl.prediction;
 
-import jaad.AACException;
-import jaad.SampleFrequency;
-import jaad.impl.BitStream;
-import jaad.impl.Constants;
-import jaad.impl.ICSInfo;
-import jaad.impl.ICStream;
+import net.sourceforge.jaad.AACException;
+import net.sourceforge.jaad.SampleFrequency;
+import net.sourceforge.jaad.impl.BitStream;
+import net.sourceforge.jaad.impl.Constants;
+import net.sourceforge.jaad.impl.ICSInfo;
+import net.sourceforge.jaad.impl.ICStream;
 import java.util.logging.Level;
 
 /**

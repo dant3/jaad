@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.impl.transport;
+package net.sourceforge.jaad.impl.transport;
 
-import jaad.AACException;
-import jaad.Profile;
-import jaad.impl.BitStream;
-import jaad.ChannelConfiguration;
-import jaad.SampleFrequency;
+import net.sourceforge.jaad.AACException;
+import net.sourceforge.jaad.Profile;
+import net.sourceforge.jaad.impl.BitStream;
+import net.sourceforge.jaad.ChannelConfiguration;
+import net.sourceforge.jaad.SampleFrequency;
 
 public final class ADTSFrame {
 

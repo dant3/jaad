@@ -1,4 +1,4 @@
-package jaad.impl.ps;
+package net.sourceforge.jaad.impl.ps;
 
 class Filterbank implements FilterbankTables {
 

@@ -1,7 +1,7 @@
-package jaad.impl.ps;
+package net.sourceforge.jaad.impl.ps;
 
-import jaad.AACException;
-import jaad.impl.BitStream;
+import net.sourceforge.jaad.AACException;
+import net.sourceforge.jaad.impl.BitStream;
 import java.util.Arrays;
 
 public class PS implements PSConstants, PSTables, HuffmanTables {

@@ -1,4 +1,4 @@
-package jaad.impl.ps;
+package net.sourceforge.jaad.impl.ps;
 
 interface PSConstants {
 

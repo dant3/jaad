@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.util.mp4.boxes;
+package net.sourceforge.jaad.util.mp4.boxes;
 
-import jaad.util.mp4.FullBox;
-import jaad.util.mp4.MP4InputStream;
+import net.sourceforge.jaad.util.mp4.FullBox;
+import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

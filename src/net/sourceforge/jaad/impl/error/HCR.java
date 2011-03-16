@@ -14,16 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.impl.error;
+package net.sourceforge.jaad.impl.error;
 
-import jaad.AACException;
-import jaad.impl.BitStream;
-import jaad.impl.Constants;
-import jaad.impl.ICSInfo;
-import jaad.impl.ICStream;
-import jaad.impl.SectionData;
-import jaad.impl.huffman.HCB;
-import jaad.impl.huffman.Huffman;
+import net.sourceforge.jaad.AACException;
+import net.sourceforge.jaad.impl.BitStream;
+import net.sourceforge.jaad.impl.Constants;
+import net.sourceforge.jaad.impl.ICSInfo;
+import net.sourceforge.jaad.impl.ICStream;
+import net.sourceforge.jaad.impl.SectionData;
+import net.sourceforge.jaad.impl.huffman.HCB;
+import net.sourceforge.jaad.impl.huffman.Huffman;
 
 /**
  * Huffman Codeword Reordering

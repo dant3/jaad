@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.impl.transport;
+package net.sourceforge.jaad.impl.transport;
 
-import jaad.AACException;
-import jaad.impl.BitStream;
-import jaad.impl.PCE;
+import net.sourceforge.jaad.AACException;
+import net.sourceforge.jaad.impl.BitStream;
+import net.sourceforge.jaad.impl.PCE;
 
 public final class ADIFHeader {
 

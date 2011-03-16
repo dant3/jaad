@@ -1,4 +1,4 @@
-package jaad.impl.gain;
+package net.sourceforge.jaad.impl.gain;
 
 interface PQFTables {
 

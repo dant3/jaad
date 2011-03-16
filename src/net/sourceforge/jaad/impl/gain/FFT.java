@@ -1,4 +1,4 @@
-package jaad.impl.gain;
+package net.sourceforge.jaad.impl.gain;
 
 //complex FFT of length 128/16, inplace
 class FFT {

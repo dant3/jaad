@@ -1,4 +1,4 @@
-package jaad.impl.gain;
+package net.sourceforge.jaad.impl.gain;
 
 //inverse polyphase quadrature filter
 class IPQF implements GCConstants, PQFTables {

@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.impl.filterbank;
+package net.sourceforge.jaad.impl.filterbank;
 
-import jaad.AACException;
-import jaad.impl.Constants;
-import jaad.impl.ICSInfo.WindowSequence;
+import net.sourceforge.jaad.AACException;
+import net.sourceforge.jaad.impl.Constants;
+import net.sourceforge.jaad.impl.ICSInfo.WindowSequence;
 
 public class FilterBank implements Constants, SineWindows, KBDWindows {
 

@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad;
+package net.sourceforge.jaad;
 
-import jaad.util.mp4.AudioFrame;
-import jaad.util.mp4.MP4Reader;
+import net.sourceforge.jaad.util.mp4.AudioFrame;
+import net.sourceforge.jaad.util.mp4.MP4Reader;
 import java.io.FileInputStream;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;

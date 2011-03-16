@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.spi.javasound;
+package net.sourceforge.jaad.spi.javasound;
 
-import jaad.impl.BitStream;
-import jaad.impl.transport.ADIFHeader;
-import jaad.impl.transport.ADTSFrame;
+import net.sourceforge.jaad.impl.BitStream;
+import net.sourceforge.jaad.impl.transport.ADIFHeader;
+import net.sourceforge.jaad.impl.transport.ADTSFrame;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;

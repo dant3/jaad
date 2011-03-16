@@ -14,18 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.impl;
+package net.sourceforge.jaad.impl;
 
-import jaad.AACException;
-import jaad.ChannelConfiguration;
-import jaad.DecoderConfig;
-import jaad.impl.error.HCR;
-import jaad.impl.error.RVLC;
-import jaad.impl.gain.GainControl;
-import jaad.impl.huffman.HCB;
-import jaad.impl.huffman.Huffman;
-import jaad.impl.invquant.InvQuant;
-import jaad.impl.noise.TNS;
+import net.sourceforge.jaad.AACException;
+import net.sourceforge.jaad.ChannelConfiguration;
+import net.sourceforge.jaad.DecoderConfig;
+import net.sourceforge.jaad.impl.error.HCR;
+import net.sourceforge.jaad.impl.error.RVLC;
+import net.sourceforge.jaad.impl.gain.GainControl;
+import net.sourceforge.jaad.impl.huffman.HCB;
+import net.sourceforge.jaad.impl.huffman.Huffman;
+import net.sourceforge.jaad.impl.invquant.InvQuant;
+import net.sourceforge.jaad.impl.noise.TNS;
 import java.util.logging.Level;
 
 public class ICStream implements Constants, HCB {

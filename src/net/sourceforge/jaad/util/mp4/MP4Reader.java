@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.util.mp4;
+package net.sourceforge.jaad.util.mp4;
 
-import jaad.util.mp4.boxes.*;
-import jaad.util.mp4.boxes.SampleToChunkBox.SampleToChunkEntry;
+import net.sourceforge.jaad.util.mp4.boxes.*;
+import net.sourceforge.jaad.util.mp4.boxes.SampleToChunkBox.SampleToChunkEntry;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;

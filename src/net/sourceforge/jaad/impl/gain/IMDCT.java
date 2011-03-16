@@ -1,7 +1,7 @@
-package jaad.impl.gain;
+package net.sourceforge.jaad.impl.gain;
 
-import jaad.AACException;
-import jaad.impl.ICSInfo.WindowSequence;
+import net.sourceforge.jaad.AACException;
+import net.sourceforge.jaad.impl.ICSInfo.WindowSequence;
 
 //inverse modified discrete cosine transform
 class IMDCT implements GCConstants, IMDCTTables, Windows {

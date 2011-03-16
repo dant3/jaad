@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.impl.noise;
+package net.sourceforge.jaad.impl.noise;
 
 /**
  * Tables of coefficients used for TNS.

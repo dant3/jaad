@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.util.mp4.boxes;
+package net.sourceforge.jaad.util.mp4.boxes;
 
-import jaad.util.mp4.BoxFactory;
-import jaad.util.mp4.ContainerBox;
-import jaad.util.mp4.ContainerBoxImpl;
-import jaad.util.mp4.MP4InputStream;
+import net.sourceforge.jaad.util.mp4.BoxFactory;
+import net.sourceforge.jaad.util.mp4.ContainerBox;
+import net.sourceforge.jaad.util.mp4.ContainerBoxImpl;
+import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 
 public class SampleTableBox extends ContainerBoxImpl {

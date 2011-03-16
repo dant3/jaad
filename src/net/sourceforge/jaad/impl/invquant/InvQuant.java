@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.impl.invquant;
+package net.sourceforge.jaad.impl.invquant;
 
-import jaad.impl.ICSInfo;
+import net.sourceforge.jaad.impl.ICSInfo;
 
 /**
  * Standard inverse quantization and scalefactor applying.

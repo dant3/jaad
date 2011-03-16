@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jaad.impl.huffman;
+package net.sourceforge.jaad.impl.huffman;
 
 //binary
 interface HCB9 {
