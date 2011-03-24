@@ -20,15 +20,7 @@ import java.io.IOException;
 
 public class MP4Exception extends IOException {
 
-	public static final int MOVIE_BOX_AT_END = 0;
-	private final int type;
-
-	public MP4Exception(String message, int type) {
+	public MP4Exception(String message) {
 		super(message);
-		this.type = type;
-	}
-
-	public int getType() {
-		return type;
 	}
 }

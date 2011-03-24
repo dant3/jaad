@@ -58,38 +58,8 @@ public class AudioFrame implements Comparable<AudioFrame> {
 	//frames are sorted by timestamp
 	public int compareTo(AudioFrame af) {
 		int ret = 0;
-		if(time>af.getTime()) {
-			ret = 1;
-		}
-		else if(time<af.getTime()) {
-			ret = -1;
-		}
-		else if(time==af.getTime()&&offset>af.getOffset()) {
-			ret = 1;
-		}
-		else if(time==af.getTime()&&offset<af.getOffset()) {
-			ret = -1;
-		}
+		if(time>af.getTime()||(time==af.getTime()&&offset>af.getOffset())) ret = 1;
+		else if(time<af.getTime()||(time==af.getTime()&&offset<af.getOffset())) ret = -1;
 		return ret;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		boolean b = false;
-		if(o instanceof AudioFrame) {
-			final AudioFrame af = (AudioFrame) o;
-			b = (af.offset==offset)&&(af.time==time)&&(af.size==size);
-		}
-		return b;
-	}
-
-	@Override
-	public int hashCode() {
-		int hash = 3;
-		hash = 97*hash+(int) (offset^(offset>>>32));
-		hash = 97*hash+size;
-		hash = 97*hash+(int) (Double.doubleToLongBits(time)^(Double.doubleToLongBits(time)>>>32));
-		hash = 97*hash+Arrays.hashCode(data);
-		return hash;
 	}
 }

@@ -38,12 +38,12 @@ public class EntryDescriptor {
 	private byte[] dsid;
 
 	public static EntryDescriptor createDescriptor(MP4InputStream stream) throws IOException {
-		final int tag = (int) stream.readBytes(1);
+		final int tag = stream.read();
 		int readed = 1;
 		int size = 0;
 		int b = 0;
 		do {
-			b = (int) stream.readBytes(1);
+			b = stream.read();
 			size <<= 7;
 			size |= b&0x7f;
 			readed++;
@@ -77,7 +77,7 @@ public class EntryDescriptor {
 
 	public void createESDescriptor(MP4InputStream in) throws IOException {
 		in.skipBytes(2);
-		final int flags = (int) in.readBytes(1);
+		final int flags = in.read();
 		final boolean streamDependenceFlag = (flags&(1<<7))!=0;
 		final boolean urlFlag = (flags&(1<<6))!=0;
 		final boolean ocrFlag = (flags&(1<<5))!=0;
@@ -87,8 +87,8 @@ public class EntryDescriptor {
 			bytesRead += 2;
 		}
 		if(urlFlag) {
-			final int len = (int) in.readBytes(1);
-			in.readString(len);
+			final int len = in.read();
+			in.skipBytes(len);
 			bytesRead += len+1;
 		}
 		if(ocrFlag) {

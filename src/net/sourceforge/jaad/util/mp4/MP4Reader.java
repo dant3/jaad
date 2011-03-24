@@ -39,7 +39,7 @@ public class MP4Reader implements BoxTypes {
 	private List<Long> chunks;
 	private byte[] decoderSpecificInfo;
 	private long sampleDuration;
-	private double timeScale;
+	private double sampleRate;
 	private long duration, channels;
 
 	/**
@@ -72,7 +72,7 @@ public class MP4Reader implements BoxTypes {
 			}
 			else if(type==MEDIA_DATA_BOX) {
 				if(moovFound) break;
-				else throw new MP4Exception("movie box at end of file", MP4Exception.MOVIE_BOX_AT_END);
+				else throw new MP4Exception("movie box at end of file");
 			}
 		}
 	}
@@ -103,7 +103,7 @@ public class MP4Reader implements BoxTypes {
 		if(smhd!=null) {
 			final ContainerBox stbl = (ContainerBox) minf.getChild(SAMPLE_TABLE_BOX);
 			if(stbl!=null) parseSampleTable(stbl);
-			timeScale = (mdhd).getTimeScale()*1.0;
+			sampleRate = mdhd.getTimeScale();
 		}
 	}
 
@@ -117,22 +117,16 @@ public class MP4Reader implements BoxTypes {
 		}
 
 		final TimeToSampleBox stts = (TimeToSampleBox) stbl.getChild(TIME_TO_SAMPLE_BOX);
-		if(stts!=null) {
-			sampleDuration = stts.getSampleDuration();
-		}
+		if(stts!=null) sampleDuration = stts.getSampleDuration();
 
 		final SampleSizeBox stsz = (SampleSizeBox) stbl.getChild(SAMPLE_SIZE_BOX);
-		if(stsz!=null) {
-			samples = stsz.getSamples();
-		}
+		if(stsz!=null) samples = stsz.getSamples();
 
 		final SampleToChunkBox stsc = (SampleToChunkBox) stbl.getChild(SAMPLE_TO_CHUNK_BOX);
-		if(stsz!=null) {
-			sampleToChunkEntries = stsc.getEntries();
-		}
+		if(stsc!=null) sampleToChunkEntries = stsc.getEntries();
 
 		final ChunkOffsetBox stco = (ChunkOffsetBox) stbl.getChild(CHUNK_OFFSET_BOX);
-		if(stsz!=null) {
+		if(stco!=null) {
 			if(chunks==null) chunks = stco.getChunks();
 			else chunks.addAll(stco.getChunks());
 		}
@@ -183,7 +177,7 @@ public class MP4Reader implements BoxTypes {
 				sampleCount = record.getSamplesPerChunk();
 				pos = chunks.get(chunk-1).longValue();
 				while(sampleCount>0) {
-					ts = (sampleDuration*(sample-1))/timeScale;
+					ts = (sampleDuration*(sample-1))/sampleRate;
 					size = samples.get(sample-1).intValue();
 					/* TODO: instantiating all frames is not necessary;
 					 * perhaps save the values and don't instantiate until
@@ -254,8 +248,8 @@ public class MP4Reader implements BoxTypes {
 	 * Returns the audio time scale (sample rate).
 	 * @return the time scale
 	 */
-	public double getTimeScale() {
-		return timeScale;
+	public double getSampleRate() {
+		return sampleRate;
 	}
 
 	/**
@@ -263,7 +257,7 @@ public class MP4Reader implements BoxTypes {
 	 * @return the duration
 	 */
 	public double getDuration() {
-		return (double) duration/timeScale;
+		return (double) duration/sampleRate;
 	}
 
 	/**

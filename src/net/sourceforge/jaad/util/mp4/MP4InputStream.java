@@ -42,22 +42,8 @@ public class MP4InputStream {
 			offset++;
 			n--;
 		}
-		if(i==-1) {
-			throw new EOFException();
-		}
-		return result;
-	}
-
-	public String readString(int n) throws IOException {
-		int c = -1;
-		final StringBuilder sb = new StringBuilder();
-		while(n>0&&(c = in.read())!=-1) {
-			sb.append((char) c);
-			offset++;
-			n--;
-		}
-		if(c==-1) throw new EOFException();
-		return sb.toString();
+		if(i==-1) throw new EOFException();
+		else return result;
 	}
 
 	public boolean readBytes(byte[] b) throws IOException {
