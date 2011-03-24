@@ -135,11 +135,11 @@ public class Decoder implements Constants {
 			syntacticElements.sendToOutput(buffer);
 		}
 		catch(AACException e) {
-			buffer.setData(new byte[0], 0, 0, 0);
+			buffer.setData(new byte[0], 0, 0, 0, 0);
 			throw e;
 		}
 		catch(Exception e) {
-			buffer.setData(new byte[0], 0, 0, 0);
+			buffer.setData(new byte[0], 0, 0, 0, 0);
 			throw new AACException(e);
 		}
 	}

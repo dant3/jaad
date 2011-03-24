@@ -35,6 +35,7 @@ public class SyntacticElements implements Constants {
 	//global properties
 	private DecoderConfig config;
 	private boolean sbrPresent, psPresent;
+	private int bitsRead;
 	//elements
 	private final PCE pce;
 	private final Element[] elements; //SCE, LFE and CPE
@@ -63,9 +64,12 @@ public class SyntacticElements implements Constants {
 		curFIL = 0;
 		sbrPresent = false;
 		psPresent = false;
+		bitsRead = 0;
 	}
 
 	public void decode(BitStream in) throws AACException {
+		final int start = in.getPosition(); //should be 0
+
 		int type;
 		Element prev = null;
 		boolean content = true;
@@ -150,6 +154,8 @@ public class SyntacticElements implements Constants {
 			}
 		}
 		in.byteAlign();
+
+		bitsRead =  in.getPosition()-start;
 	}
 
 	private Element decodeSCE_LFE(BitStream in) throws AACException {
@@ -426,6 +432,6 @@ public class SyntacticElements implements Constants {
 			}
 		}
 
-		buffer.setData(b, freq, chs, 16);
+		buffer.setData(b, freq, chs, 16, bitsRead);
 	}
 }

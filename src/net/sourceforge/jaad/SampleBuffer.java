@@ -24,6 +24,7 @@ package net.sourceforge.jaad;
 public class SampleBuffer {
 
 	private int sampleRate, channels, bitsPerSample;
+	private double length, bitrate, encodedBitrate;
 	private byte[] data;
 
 	public SampleBuffer() {
@@ -66,10 +67,49 @@ public class SampleBuffer {
 		return bitsPerSample;
 	}
 
-	public void setData(byte[] data, int sampleRate, int channels, int bitsPerSample) {
+	/**
+	 * Returns the length of the current frame in seconds.
+	 * length = samplesPerChannel / sampleRate
+	 * @return the length in seconds
+	 */
+	public double getLength() {
+		return length;
+	}
+
+	/**
+	 * Returns the bitrate of the decoded PCM data.
+	 * <code>bitrate = (samplesPerChannel * bitsPerSample) / length</code>
+	 * @return the bitrate
+	 */
+	public double getBitrate() {
+		return bitrate;
+	}
+
+	/**
+	 * Returns the AAC bitrate of the current frame.
+	 * @return the AAC bitrate
+	 */
+	public double getEncodedBitrate() {
+		return encodedBitrate;
+	}
+
+	public void setData(byte[] data, int sampleRate, int channels, int bitsPerSample, int bitsRead) {
 		this.data = data;
 		this.sampleRate = sampleRate;
 		this.channels = channels;
 		this.bitsPerSample = bitsPerSample;
+
+		if(sampleRate==0) {
+			length = 0;
+			bitrate = 0;
+			encodedBitrate = 0;
+		}
+		else {
+			final int bytesPerSample = bitsPerSample/8; //usually 2
+			final int samplesPerChannel = data.length/(bytesPerSample*channels); //=1024
+			length = (double) samplesPerChannel/(double) sampleRate;
+			bitrate = (double) (samplesPerChannel*bitsPerSample*channels)/length;
+			encodedBitrate = (double) bitsRead/length;
+		}
 	}
 }
