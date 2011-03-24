@@ -409,7 +409,6 @@ public class SyntacticElements implements Constants {
 		final int length = (sbrPresent ? 2 : 1)*config.getFrameLength();
 		int freq = config.getSampleFrequency().getFrequency();
 		if(sbrPresent) freq *= 2;
-		buffer.setFormat(freq, chs, 16);
 
 		byte[] b = buffer.getData();
 		if(b.length!=chs*length*2) b = new byte[chs*length*2];
@@ -427,6 +426,6 @@ public class SyntacticElements implements Constants {
 			}
 		}
 
-		buffer.setData(b);
+		buffer.setData(b, freq, chs, 16);
 	}
 }

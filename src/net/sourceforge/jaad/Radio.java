@@ -58,8 +58,7 @@ public class Radio {
 			while(true) {
 				if(!dec.decodeFrame(buf)) break;
 
-				final SampleBuffer.Format format = buf.getFormat();
-				final AudioFormat aufmt = new AudioFormat(format.getSampleRate(), format.getBitsPerSample(), format.getChannels(), true, true);
+				final AudioFormat aufmt = new AudioFormat(buf.getSampleRate(), buf.getBitsPerSample(), buf.getChannels(), true, true);
 				if(line!=null&&!line.getFormat().matches(aufmt)) {
 					//format has changed (e.g. SBR has started)
 					line.stop();

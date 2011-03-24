@@ -63,10 +63,7 @@ public class Main {
 				frame = mp4.readNextFrame();
 				dec.decodeFrame(frame.getData(), buf);
 
-				if(wav==null) {
-					final SampleBuffer.Format format = buf.getFormat();
-					wav = new WaveFileWriter(new File(out), format.getSampleRate(), format.getChannels(), format.getBitsPerSample());
-				}
+				if(wav==null) wav = new WaveFileWriter(new File(out), buf.getSampleRate(), buf.getChannels(), buf.getBitsPerSample());
 				wav.write(buf.getData());
 			}
 		}
@@ -85,10 +82,7 @@ public class Main {
 			while(true) {
 				if(!dec.decodeFrame(buf)) break;
 
-				if(wav==null) {
-					final SampleBuffer.Format format = buf.getFormat();
-					wav = new WaveFileWriter(new File(out), format.getSampleRate(), format.getChannels(), format.getBitsPerSample());
-				}
+				if(wav==null) wav = new WaveFileWriter(new File(out), buf.getSampleRate(), buf.getChannels(), buf.getBitsPerSample());
 				wav.write(buf.getData());
 			}
 		}

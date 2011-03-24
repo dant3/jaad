@@ -17,7 +17,7 @@
 package net.sourceforge.jaad.util.mp4.boxes;
 
 import net.sourceforge.jaad.util.mp4.FullBox;
-import jaad.util.mp4.MP4InputStream;
+import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 
 public class MovieHeaderBox extends FullBox {

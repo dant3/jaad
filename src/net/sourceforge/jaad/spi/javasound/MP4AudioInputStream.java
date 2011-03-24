@@ -46,8 +46,7 @@ class MP4AudioInputStream extends AsynchronousAudioInputStream {
 		if(audioFormat==null) {
 			//read first frame
 			decodeFrame();
-			final SampleBuffer.Format f = sampleBuffer.getFormat();
-			audioFormat = new AudioFormat(f.getSampleRate(), 16, f.getChannels(), true, true);
+			audioFormat = new AudioFormat(sampleBuffer.getSampleRate(), sampleBuffer.getBitsPerSample(), sampleBuffer.getChannels(), true, true);
 			saved = sampleBuffer.getData();
 		}
 		return audioFormat;

@@ -22,7 +22,7 @@ import net.sourceforge.jaad.DecoderConfig;
 import net.sourceforge.jaad.Profile;
 import net.sourceforge.jaad.impl.prediction.ICPrediction;
 import net.sourceforge.jaad.impl.prediction.LTPrediction;
-import net.sourceforge.java.util.Arrays;
+import java.util.Arrays;
 
 public class ICSInfo implements Constants, ScaleFactorBands {
 

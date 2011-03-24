@@ -65,8 +65,7 @@ public class Play {
 				dec.decodeFrame(frame.getData(), buf);
 
 				if(line==null) {
-					final SampleBuffer.Format format = buf.getFormat();
-					final AudioFormat aufmt = new AudioFormat(format.getSampleRate(), format.getBitsPerSample(), format.getChannels(), true, true);
+					final AudioFormat aufmt = new AudioFormat(buf.getSampleRate(), buf.getBitsPerSample(), buf.getChannels(), true, true);
 					line = AudioSystem.getSourceDataLine(aufmt);
 					line.open();
 					line.start();
@@ -94,8 +93,7 @@ public class Play {
 				if(!dec.decodeFrame(buf)) break;
 
 				if(line==null) {
-					final SampleBuffer.Format format = buf.getFormat();
-					final AudioFormat aufmt = new AudioFormat(format.getSampleRate(), format.getBitsPerSample(), format.getChannels(), true, true);
+					final AudioFormat aufmt = new AudioFormat(buf.getSampleRate(), buf.getBitsPerSample(), buf.getChannels(), true, true);
 					line = AudioSystem.getSourceDataLine(aufmt);
 					line.open();
 					line.start();

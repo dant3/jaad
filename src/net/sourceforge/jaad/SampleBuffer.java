@@ -23,52 +23,14 @@ package net.sourceforge.jaad;
  */
 public class SampleBuffer {
 
-	/**
-	 * This class represents the format of the raw PCM data stored in the
-	 * sample buffer.
-	 */
-	public static class Format {
-
-		private int sampleRate, channels, bitsPerSample;
-
-		public Format(int sampleRate, int channels, int bitsPerSample) {
-			this.sampleRate = sampleRate;
-			this.channels = channels;
-			this.bitsPerSample = bitsPerSample;
-		}
-
-		public int getSampleRate() {
-			return sampleRate;
-		}
-
-		public int getChannels() {
-			return channels;
-		}
-
-		public int getBitsPerSample() {
-			return bitsPerSample;
-		}
-	}
-	private final Format format;
+	private int sampleRate, channels, bitsPerSample;
 	private byte[] data;
 
 	public SampleBuffer() {
 		data = new byte[0];
-		format = new Format(0, 0, 0);
-	}
-
-	/**
-	 * Returns the format of this sample buffer's data.
-	 * @return the audio format
-	 */
-	public Format getFormat() {
-		return format;
-	}
-
-	public void setFormat(int sampleRate, int channels, int bitsPerSample) {
-		format.sampleRate = sampleRate;
-		format.channels = channels;
-		format.bitsPerSample = bitsPerSample;
+		sampleRate = 0;
+		channels = 0;
+		bitsPerSample = 0;
 	}
 
 	/**
@@ -79,7 +41,35 @@ public class SampleBuffer {
 		return data;
 	}
 
-	public void setData(byte[] data) {
+	/**
+	 * Returns the data's sample rate.
+	 * @return the sample rate
+	 */
+	public int getSampleRate() {
+		return sampleRate;
+	}
+
+	/**
+	 * Returns the number of channels stored in the data buffer.
+	 * @return the number of channels
+	 */
+	public int getChannels() {
+		return channels;
+	}
+
+	/**
+	 * Returns the number of bits per sample. Usually this is 16, meaning a
+	 * sample is stored in two bytes.
+	 * @return the number of bits per sample
+	 */
+	public int getBitsPerSample() {
+		return bitsPerSample;
+	}
+
+	public void setData(byte[] data, int sampleRate, int channels, int bitsPerSample) {
 		this.data = data;
+		this.sampleRate = sampleRate;
+		this.channels = channels;
+		this.bitsPerSample = bitsPerSample;
 	}
 }
