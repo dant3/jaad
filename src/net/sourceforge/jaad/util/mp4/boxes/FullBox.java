@@ -16,37 +16,17 @@
  */
 package net.sourceforge.jaad.util.mp4.boxes;
 
-import net.sourceforge.jaad.util.mp4.BoxTypes;
-import net.sourceforge.jaad.util.mp4.FullBox;
-import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import net.sourceforge.jaad.util.mp4.MP4InputStream;
 
-public class ChunkOffsetBox extends FullBox {
+public class FullBox extends BoxImpl {
 
-	private final List<Long> chunks;
-
-	public ChunkOffsetBox() {
-		super();
-		chunks = new ArrayList<Long>();
-	}
+	protected int version, flags;
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
-		final int entryCount = (int) in.readBytes(4);
+		version = in.read();
+		flags = (int) in.readBytes(3);
 		left -= 4;
-		final int len = (type==BoxTypes.CHUNK_LARGE_OFFSET_BOX) ? 8 : 4;
-		long x;
-		for(int i = 0; i<entryCount; i++) {
-			x = in.readBytes(len);
-			chunks.add(Long.valueOf(x));
-			left -= len;
-		}
-	}
-
-	public List<Long> getChunks() {
-		return chunks;
 	}
 }

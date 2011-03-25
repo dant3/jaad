@@ -14,17 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4;
+package net.sourceforge.jaad.util.mp4.boxes.impl;
 
+import net.sourceforge.jaad.util.mp4.boxes.FullBox;
+import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 
-public interface Box {
+public class MovieHeaderBox extends FullBox {
 
-	Box getParent();
+	private long timescale, duration;
 
-	void decode(MP4InputStream in) throws IOException;
+	@Override
+	public void decode(MP4InputStream in) throws IOException {
+		super.decode(in);
+		if(version==1) {
+			in.skipBytes(16);
+			timescale = in.readBytes(4);
+			duration = in.readBytes(8);
+			left -= 28;
+		}
+		else {
+			in.skipBytes(8);
+			timescale = in.readBytes(4);
+			duration = in.readBytes(4);
+			left -= 16;
+		}
+	}
 
-	long getSize();
-
-	long getType();
+	public long getDuration() {
+		return duration;
+	}
 }

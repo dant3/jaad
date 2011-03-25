@@ -14,30 +14,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4.boxes;
+package net.sourceforge.jaad.util.mp4.boxes.impl;
 
-import net.sourceforge.jaad.util.mp4.FullBox;
+import net.sourceforge.jaad.util.mp4.boxes.BoxTypes;
+import net.sourceforge.jaad.util.mp4.boxes.FullBox;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class TimeToSampleBox extends FullBox {
+public class ChunkOffsetBox extends FullBox {
 
-	private long sampleDuration;
+	private final List<Long> chunks;
+
+	public ChunkOffsetBox() {
+		super();
+		chunks = new ArrayList<Long>();
+	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 		final int entryCount = (int) in.readBytes(4);
 		left -= 4;
+		final int len = (type==BoxTypes.CHUNK_LARGE_OFFSET_BOX) ? 8 : 4;
+		long x;
 		for(int i = 0; i<entryCount; i++) {
-			if(i==0) sampleDuration = in.readBytes(4);
-			else in.skipBytes(4);
-			in.skipBytes(4);
-			left -= 8;
+			x = in.readBytes(len);
+			chunks.add(Long.valueOf(x));
+			left -= len;
 		}
 	}
 
-	public long getSampleDuration() {
-		return sampleDuration;
+	public List<Long> getChunks() {
+		return chunks;
 	}
 }

@@ -17,12 +17,22 @@
 package net.sourceforge.jaad.util.mp4;
 
 import net.sourceforge.jaad.util.mp4.boxes.*;
-import net.sourceforge.jaad.util.mp4.boxes.SampleToChunkBox.SampleToChunkEntry;
+import net.sourceforge.jaad.util.mp4.boxes.impl.SampleSizeBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.SampleDescriptionBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.AudioSampleEntryBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.ChunkOffsetBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.MediaHeaderBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.MovieHeaderBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.TimeToSampleBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.ESDBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.EntryDescriptor;
+import net.sourceforge.jaad.util.mp4.boxes.impl.SampleToChunkBox.SampleToChunkEntry;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.sourceforge.jaad.util.mp4.boxes.impl.SampleToChunkBox;
 
 /**
  * An MP4 demultiplexer that can extract the DecoderSpecificInfo and all audio

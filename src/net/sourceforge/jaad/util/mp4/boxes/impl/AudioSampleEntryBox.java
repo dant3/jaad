@@ -14,34 +14,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4.boxes;
+package net.sourceforge.jaad.util.mp4.boxes.impl;
 
-import net.sourceforge.jaad.util.mp4.FullBox;
+import net.sourceforge.jaad.util.mp4.boxes.ContainerBoxImpl;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 
-public class MovieHeaderBox extends FullBox {
+public class AudioSampleEntryBox extends ContainerBoxImpl {
 
-	private long timescale, duration;
+	private int channelCount, sampleSize, sampleRate;
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
+		in.skipBytes(6); //reserved
+		in.skipBytes(2); //dataReferenceIndex
+		in.skipBytes(8); //reserved
+		channelCount = (int) in.readBytes(2);
+		sampleSize = (int) in.readBytes(2);
+		in.skipBytes(4);
+		sampleRate = (int) in.readBytes(2);
+		in.skipBytes(2);
+		left -= 28;
 		super.decode(in);
-		if(version==1) {
-			in.skipBytes(16);
-			timescale = in.readBytes(4);
-			duration = in.readBytes(8);
-			left -= 28;
-		}
-		else {
-			in.skipBytes(8);
-			timescale = in.readBytes(4);
-			duration = in.readBytes(4);
-			left -= 16;
-		}
 	}
 
-	public long getDuration() {
-		return duration;
+	public int getChannelCount() {
+		return channelCount;
+	}
+
+	public int getSampleRate() {
+		return sampleRate;
+	}
+
+	public int getSampleSize() {
+		return sampleSize;
 	}
 }

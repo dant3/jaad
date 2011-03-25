@@ -14,26 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4.boxes;
+package net.sourceforge.jaad.util.mp4.boxes.impl;
 
-import net.sourceforge.jaad.util.mp4.BoxImpl;
+import net.sourceforge.jaad.util.mp4.boxes.BoxFactory;
+import net.sourceforge.jaad.util.mp4.boxes.ContainerBox;
+import net.sourceforge.jaad.util.mp4.boxes.ContainerBoxImpl;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 
-public class FileTypeBox extends BoxImpl {
+public class SampleTableBox extends ContainerBoxImpl {
 
-	protected long majorBrand, minorVersion;
-	protected long[] compatibleBrands;
+	private boolean sound = false;
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		majorBrand = in.readBytes(4);
-		minorVersion = in.readBytes(4);
-		left -= 8;
-		compatibleBrands = new long[(int) left/4];
-		for(int i = 0; i<compatibleBrands.length; i++) {
-			compatibleBrands[i] = in.readBytes(4);
-			left -= 4;
-		}
+		sound = ((ContainerBox) parent).containsChild(BoxFactory.SOUND_MEDIA_HEADER_BOX);
+		//skip the contents if it contains video or meta data
+		if(sound) super.decode(in);
+	}
+
+	public boolean isSound() {
+		return sound;
 	}
 }

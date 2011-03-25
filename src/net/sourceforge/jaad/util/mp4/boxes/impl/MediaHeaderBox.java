@@ -14,26 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4.boxes;
+package net.sourceforge.jaad.util.mp4.boxes.impl;
 
-import net.sourceforge.jaad.util.mp4.BoxFactory;
-import net.sourceforge.jaad.util.mp4.ContainerBox;
-import net.sourceforge.jaad.util.mp4.ContainerBoxImpl;
+import net.sourceforge.jaad.util.mp4.boxes.FullBox;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 
-public class SampleTableBox extends ContainerBoxImpl {
+public class MediaHeaderBox extends FullBox {
 
-	private boolean sound = false;
+	private long timeScale;
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		sound = ((ContainerBox) parent).containsChild(BoxFactory.SOUND_MEDIA_HEADER_BOX);
-		//skip the contents if it contains video or meta data
-		if(sound) super.decode(in);
+		super.decode(in);
+		final int len = (version==1) ? 8 : 4;
+		in.skipBytes(2*len); //creationTime, modificationTime
+
+		timeScale = in.readBytes(4);
+		in.skipBytes(len); //duration
+
+		in.skipBytes(4); //language
+		left -= 8+(3*len);
 	}
 
-	public boolean isSound() {
-		return sound;
+	public long getTimeScale() {
+		return timeScale;
 	}
 }

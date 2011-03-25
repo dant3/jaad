@@ -14,14 +14,45 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4;
+package net.sourceforge.jaad.util.mp4.boxes.impl;
 
+import net.sourceforge.jaad.util.mp4.boxes.FullBox;
+import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class UnknownBox extends BoxImpl {
+public class SampleSizeBox extends FullBox {
+
+	private int sampleSize;
+	private final List<Integer> samples;
+
+	public SampleSizeBox() {
+		super();
+		samples = new ArrayList<Integer>();
+	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		//no need to read, box will be skipped
+		super.decode(in);
+		sampleSize = (int) in.readBytes(4);
+		final int sampleCount = (int) in.readBytes(4);
+		left -= 8;
+		if(sampleSize==0) {
+			int x;
+			for(int i = 0; i<sampleCount; i++) {
+				x = (int) in.readBytes(4);
+				samples.add(Integer.valueOf(x));
+				left -= 4;
+			}
+		}
+	}
+
+	public int getSampleSize() {
+		return sampleSize;
+	}
+
+	public List<Integer> getSamples() {
+		return samples;
 	}
 }

@@ -16,32 +16,13 @@
  */
 package net.sourceforge.jaad.util.mp4.boxes;
 
-import net.sourceforge.jaad.util.mp4.FullContainerBox;
-import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
+import net.sourceforge.jaad.util.mp4.MP4InputStream;
 
-public class TrackHeaderBox extends FullContainerBox {
-
-	private int trackID;
+public class UnknownBox extends BoxImpl {
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
-		if(version==1) {
-			in.skipBytes(16);
-			trackID = (int) in.readBytes(4);
-			in.skipBytes(12);
-			left -= 32;
-		}
-		else {
-			in.skipBytes(8);
-			trackID = (int) in.readBytes(4);
-			in.skipBytes(8);
-			left -= 20;
-		}
-	}
-
-	public int getTrackID() {
-		return trackID;
+		//no need to read, box will be skipped
 	}
 }

@@ -14,22 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4;
+package net.sourceforge.jaad.util.mp4.boxes;
 
-import net.sourceforge.jaad.util.mp4.boxes.MediaDataBox;
-import net.sourceforge.jaad.util.mp4.boxes.AudioSampleEntryBox;
-import net.sourceforge.jaad.util.mp4.boxes.ChunkOffsetBox;
-import net.sourceforge.jaad.util.mp4.boxes.ESDBox;
-import net.sourceforge.jaad.util.mp4.boxes.FileTypeBox;
-import net.sourceforge.jaad.util.mp4.boxes.MediaHeaderBox;
-import net.sourceforge.jaad.util.mp4.boxes.MovieHeaderBox;
-import net.sourceforge.jaad.util.mp4.boxes.SampleDescriptionBox;
-import net.sourceforge.jaad.util.mp4.boxes.SampleSizeBox;
-import net.sourceforge.jaad.util.mp4.boxes.SampleTableBox;
-import net.sourceforge.jaad.util.mp4.boxes.SampleToChunkBox;
-import net.sourceforge.jaad.util.mp4.boxes.TimeToSampleBox;
-import net.sourceforge.jaad.util.mp4.boxes.TrackHeaderBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.MediaDataBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.AudioSampleEntryBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.ChunkOffsetBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.ESDBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.FileTypeBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.MediaHeaderBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.MovieHeaderBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.SampleDescriptionBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.SampleSizeBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.SampleTableBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.SampleToChunkBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.TimeToSampleBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.TrackHeaderBox;
 import java.io.IOException;
+import net.sourceforge.jaad.util.mp4.MP4InputStream;
 
 public class BoxFactory implements BoxTypes {
 

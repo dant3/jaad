@@ -14,16 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4.boxes;
+package net.sourceforge.jaad.util.mp4.boxes.impl;
 
-import net.sourceforge.jaad.util.mp4.BoxImpl;
-import net.sourceforge.jaad.util.mp4.MP4InputStream;
-import java.io.IOException;
-
-public class MediaDataBox extends BoxImpl {
-
-	@Override
-	public void decode(MP4InputStream in) throws IOException {
-		//media data is found, do nothing
-	}
-}
+/**
+* Some box types needed to extract all audio data from an MP4 stream.
+*/

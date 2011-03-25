@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4;
+package net.sourceforge.jaad.util.mp4.boxes;
 
 public interface BoxTypes {
 
@@ -30,6 +30,7 @@ public interface BoxTypes {
 	int MEDIA_INFORMATION_BOX = 1835626086; //minf
 	int MOVIE_BOX = 1836019574; //moov
 	int MOVIE_HEADER_BOX = 1836476516; //mvhd
+	int PROGRESSIVE_DOWNLOAD_INFORMATION_BOX = 0; //pdin
 	int SAMPLE_DESCRIPTION_BOX = 1937011556; //stsd
 	int SAMPLE_SIZE_BOX = 1937011578; //stsz
 	int SAMPLE_TABLE_BOX = 1937007212; //stbl

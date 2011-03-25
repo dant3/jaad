@@ -16,6 +16,11 @@
  */
 package net.sourceforge.jaad.util.mp4.boxes;
 
-/**
-* Some box types needed to extract all audio data from an MP4 stream.
-*/
+public interface ContainerBox extends Box {
+
+	Box getChild(int type);
+	
+	Box getChild(int type,int num);
+
+	boolean containsChild(int type);
+}

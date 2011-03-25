@@ -46,7 +46,7 @@ public class MP4InputStream {
 		else return result;
 	}
 
-	public boolean readBytes(byte[] b) throws IOException {
+	public boolean readBytes(final byte[] b) throws IOException {
 		int read = 0;
 		int i;
 		while(read<b.length) {
@@ -60,7 +60,20 @@ public class MP4InputStream {
 		return read==b.length;
 	}
 
-	public void skipBytes(long n) throws IOException {
+	public String readString(final int n) throws IOException {
+		int i = -1;
+		int pos = 0;
+		char[] c = new char[n];
+		while(pos<n&&(i = in.read())!=-1) {
+			c[pos] = (char) i;
+			offset++;
+			pos++;
+		}
+		if(i==-1) throw new EOFException();
+		return new String(c, 0, pos);
+	}
+
+	public void skipBytes(final long n) throws IOException {
 		offset += n;
 		in.skip(n);
 	}

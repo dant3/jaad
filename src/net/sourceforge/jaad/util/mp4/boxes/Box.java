@@ -14,13 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4;
+package net.sourceforge.jaad.util.mp4.boxes;
 
-public interface ContainerBox extends Box {
+import java.io.IOException;
+import net.sourceforge.jaad.util.mp4.MP4InputStream;
 
-	Box getChild(int type);
-	
-	Box getChild(int type,int num);
+public interface Box {
 
-	boolean containsChild(int type);
+	Box getParent();
+
+	void decode(MP4InputStream in) throws IOException;
+
+	long getSize();
+
+	long getType();
 }

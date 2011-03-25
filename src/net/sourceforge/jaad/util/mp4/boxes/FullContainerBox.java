@@ -14,28 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4;
+package net.sourceforge.jaad.util.mp4.boxes;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import net.sourceforge.jaad.util.mp4.MP4InputStream;
 
-public class ContainerBoxImpl extends BoxImpl implements ContainerBox {
+public abstract class FullContainerBox extends FullBox implements ContainerBox {
 
 	protected List<Box> children;
 
-	public ContainerBoxImpl() {
+	public FullContainerBox() {
 		super();
 		children = new ArrayList<Box>(4);
 	}
 
-	@Override
-	public void decode(MP4InputStream in) throws IOException {
+	protected void readChildren(MP4InputStream in, long left) throws IOException {
 		Box box;
 		while(left>0) {
 			box = BoxFactory.parseBox(this, in);
 			left -= box.getSize();
-			if(!(box instanceof UnknownBox)) {
+			if(box!=null) {
 				children.add(box);
 			}
 		}

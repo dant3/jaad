@@ -14,24 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4.boxes;
+package net.sourceforge.jaad.util.mp4.boxes.impl;
 
-import net.sourceforge.jaad.util.mp4.FullBox;
+import net.sourceforge.jaad.util.mp4.boxes.BoxImpl;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 
-public class ESDBox extends FullBox {
-
-	private EntryDescriptor esd;
+public class MediaDataBox extends BoxImpl {
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
-		esd = EntryDescriptor.createDescriptor(in);
-		left -= esd.getBytesRead();
-	}
-
-	public EntryDescriptor getEntryDescriptor() {
-		return esd;
+		//media data is found, do nothing
 	}
 }

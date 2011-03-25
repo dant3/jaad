@@ -14,18 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4;
+package net.sourceforge.jaad.util.mp4.boxes.impl;
 
+import net.sourceforge.jaad.util.mp4.boxes.FullBox;
+import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 
-public class FullBox extends BoxImpl {
+public class TimeToSampleBox extends FullBox {
 
-	protected int version, flags;
+	private long sampleDuration;
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		version = in.read();
-		flags = (int) in.readBytes(3);
+		super.decode(in);
+		final int entryCount = (int) in.readBytes(4);
 		left -= 4;
+		for(int i = 0; i<entryCount; i++) {
+			if(i==0) sampleDuration = in.readBytes(4);
+			else in.skipBytes(4);
+			in.skipBytes(4);
+			left -= 8;
+		}
+	}
+
+	public long getSampleDuration() {
+		return sampleDuration;
 	}
 }

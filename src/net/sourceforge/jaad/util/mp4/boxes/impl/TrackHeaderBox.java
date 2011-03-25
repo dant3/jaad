@@ -14,45 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4.boxes;
+package net.sourceforge.jaad.util.mp4.boxes.impl;
 
-import net.sourceforge.jaad.util.mp4.FullBox;
+import net.sourceforge.jaad.util.mp4.boxes.FullContainerBox;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-public class SampleSizeBox extends FullBox {
+public class TrackHeaderBox extends FullContainerBox {
 
-	private int sampleSize;
-	private final List<Integer> samples;
-
-	public SampleSizeBox() {
-		super();
-		samples = new ArrayList<Integer>();
-	}
+	private int trackID;
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
-		sampleSize = (int) in.readBytes(4);
-		final int sampleCount = (int) in.readBytes(4);
-		left -= 8;
-		if(sampleSize==0) {
-			int x;
-			for(int i = 0; i<sampleCount; i++) {
-				x = (int) in.readBytes(4);
-				samples.add(Integer.valueOf(x));
-				left -= 4;
-			}
+		if(version==1) {
+			in.skipBytes(16);
+			trackID = (int) in.readBytes(4);
+			in.skipBytes(12);
+			left -= 32;
+		}
+		else {
+			in.skipBytes(8);
+			trackID = (int) in.readBytes(4);
+			in.skipBytes(8);
+			left -= 20;
 		}
 	}
 
-	public int getSampleSize() {
-		return sampleSize;
-	}
-
-	public List<Integer> getSamples() {
-		return samples;
+	public int getTrackID() {
+		return trackID;
 	}
 }

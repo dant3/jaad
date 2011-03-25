@@ -14,39 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4.boxes;
+package net.sourceforge.jaad.util.mp4.boxes.impl;
 
-import net.sourceforge.jaad.util.mp4.ContainerBoxImpl;
+import net.sourceforge.jaad.util.mp4.boxes.FullBox;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 
-public class AudioSampleEntryBox extends ContainerBoxImpl {
+public class ESDBox extends FullBox {
 
-	private int channelCount, sampleSize, sampleRate;
+	private EntryDescriptor esd;
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		in.skipBytes(6); //reserved
-		in.skipBytes(2); //dataReferenceIndex
-		in.skipBytes(8); //reserved
-		channelCount = (int) in.readBytes(2);
-		sampleSize = (int) in.readBytes(2);
-		in.skipBytes(4);
-		sampleRate = (int) in.readBytes(2);
-		in.skipBytes(2);
-		left -= 28;
 		super.decode(in);
+		esd = EntryDescriptor.createDescriptor(in);
+		left -= esd.getBytesRead();
 	}
 
-	public int getChannelCount() {
-		return channelCount;
-	}
-
-	public int getSampleRate() {
-		return sampleRate;
-	}
-
-	public int getSampleSize() {
-		return sampleSize;
+	public EntryDescriptor getEntryDescriptor() {
+		return esd;
 	}
 }
