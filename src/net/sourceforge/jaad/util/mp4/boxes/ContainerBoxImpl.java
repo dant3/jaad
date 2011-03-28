@@ -25,8 +25,8 @@ public class ContainerBoxImpl extends BoxImpl implements ContainerBox {
 
 	protected List<Box> children;
 
-	public ContainerBoxImpl() {
-		super();
+	public ContainerBoxImpl(String name,String shortName) {
+		super(name,shortName);
 		children = new ArrayList<Box>(4);
 	}
 

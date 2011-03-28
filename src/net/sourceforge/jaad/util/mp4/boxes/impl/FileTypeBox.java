@@ -22,14 +22,24 @@ import java.io.IOException;
 
 public class FileTypeBox extends BoxImpl {
 
-	public static final String BRAND_MP41 = "mp41";
-	public static final String BRAND_ISOM = "isom";
-	public static final String BRAND_ISO2 = "iso2";
-	public static final String BRAND_ISO3 = "iso3";
-	public static final String BRAND_AVC1 = "avc1";
-	public static final String BRAND_MP71 = "mp71";
+	public static final String BRAND_ISO_BASE_MEDIA = "isom";
+	public static final String BRAND_ISO_BASE_MEDIA_2 = "iso2";
+	public static final String BRAND_ISO_BASE_MEDIA_3 = "iso3";
+	public static final String BRAND_MP4_1 = "mp41";
+	public static final String BRAND_MP4_2 = "mp42";
+	public static final String BRAND_MOBILE_MP4 = "mmp4";
+	public static final String BRAND_QUICKTIME = "qm  ";
+	public static final String BRAND_AVC = "avc1";
+	public static final String BRAND_AUDIO = "M4A ";
+	public static final String BRAND_AUDIO_2 = "M4B ";
+	public static final String BRAND_AUDIO_ENCRYPTED = "M4P ";
+	public static final String BRAND_MP7 = "mp71";
 	protected String majorBrand, minorVersion;
 	protected String[] compatibleBrands;
+
+	public FileTypeBox() {
+		super("File Type Box", "ftyp");
+	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {

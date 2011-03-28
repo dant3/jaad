@@ -21,6 +21,10 @@ import net.sourceforge.jaad.util.mp4.MP4InputStream;
 
 public class UnknownBox extends BoxImpl {
 
+	public UnknownBox() {
+		super("unknown","");
+	}
+
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		//no need to read, box will be skipped

@@ -24,6 +24,10 @@ public class TimeToSampleBox extends FullBox {
 
 	private long sampleDuration;
 
+	public TimeToSampleBox() {
+		super("Time To Sample Box", "stts");
+	}
+
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);

@@ -28,4 +28,8 @@ public interface Box {
 	long getSize();
 
 	long getType();
+
+	String getName();
+
+	String getShortName();
 }

@@ -25,8 +25,8 @@ public abstract class FullContainerBox extends FullBox implements ContainerBox {
 
 	protected List<Box> children;
 
-	public FullContainerBox() {
-		super();
+	protected FullContainerBox(String name, String shortName) {
+		super(name, shortName);
 		children = new ArrayList<Box>(4);
 	}
 

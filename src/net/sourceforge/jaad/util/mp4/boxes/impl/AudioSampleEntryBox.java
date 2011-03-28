@@ -24,6 +24,10 @@ public class AudioSampleEntryBox extends ContainerBoxImpl {
 
 	private int channelCount, sampleSize, sampleRate;
 
+	public AudioSampleEntryBox() {
+		super("Audio Sample Entry Box", "mp4a");
+	}
+
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		in.skipBytes(6); //reserved

@@ -49,7 +49,7 @@ public class SampleToChunkBox extends FullBox {
 	private final List<SampleToChunkEntry> entries;
 
 	public SampleToChunkBox() {
-		super();
+		super("Sample To Chunk Box", "stsc");
 		entries = new ArrayList<SampleToChunkEntry>();
 	}
 

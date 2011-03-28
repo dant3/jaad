@@ -49,6 +49,7 @@ public class BoxFactory implements BoxTypes {
 		}
 
 		final BoxImpl box = forType(type);
+		System.out.println(box.getShortName());
 		box.setParams(size, type, parent, left);
 		box.decode(in);
 		//if mdat found, don't skip
@@ -67,13 +68,19 @@ public class BoxFactory implements BoxTypes {
 				box = new FileTypeBox();
 				break;
 			case MOVIE_BOX:
+				box = new ContainerBoxImpl("Movie Box","moov");
+				break;
 			case TRACK_BOX:
+				box = new ContainerBoxImpl("Track Box","trak");
+				break;
 			case MEDIA_BOX:
+				box = new ContainerBoxImpl("Media Box","mdia");
+				break;
 			case MEDIA_INFORMATION_BOX:
-				box = new ContainerBoxImpl();
+				box = new ContainerBoxImpl("Media Information Box","minf");
 				break;
 			case SOUND_MEDIA_HEADER_BOX:
-				box = new FullBox();
+				box = new FullBox("Sound Media Header Box","smhd");
 				break;
 			case MOVIE_HEADER_BOX:
 				box = new MovieHeaderBox();

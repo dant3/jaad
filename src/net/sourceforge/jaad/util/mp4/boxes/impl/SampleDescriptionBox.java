@@ -28,7 +28,7 @@ public class SampleDescriptionBox extends FullBox {
 	private AudioSampleEntryBox mp4a;
 
 	public SampleDescriptionBox() {
-		super();
+		super("Sample Description Box", "stsd");
 	}
 
 	@Override

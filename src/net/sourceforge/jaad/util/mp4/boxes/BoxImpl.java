@@ -21,8 +21,14 @@ import net.sourceforge.jaad.util.mp4.MP4InputStream;
 
 public abstract class BoxImpl implements Box {
 
+	private String name, shortName;
 	protected long size, type, left;
 	protected Box parent;
+
+	protected BoxImpl(String name, String shortName) {
+		this.name = name;
+		this.shortName = shortName;
+	}
 
 	void setParams(long size, long type, Box parent, long left) {
 		this.size = size;
@@ -54,5 +60,12 @@ public abstract class BoxImpl implements Box {
 
 	public Box getParent() {
 		return parent;
+	}
+
+	public String getName() {
+		return name;
+	}
+	public String getShortName() {
+		return shortName;
 	}
 }

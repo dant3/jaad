@@ -26,6 +26,10 @@ public class SampleTableBox extends ContainerBoxImpl {
 
 	private boolean sound = false;
 
+	public SampleTableBox() {
+		super("Sample Table Box", "stbl");
+	}
+
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		sound = ((ContainerBox) parent).containsChild(BoxFactory.SOUND_MEDIA_HEADER_BOX);

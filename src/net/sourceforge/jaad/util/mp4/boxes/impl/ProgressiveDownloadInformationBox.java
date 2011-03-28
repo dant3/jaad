@@ -1,34 +1,41 @@
 package net.sourceforge.jaad.util.mp4.boxes.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import net.sourceforge.jaad.util.mp4.boxes.FullBox;
 
 public class ProgressiveDownloadInformationBox extends FullBox {
 
-	private List<Long> rate, initialDelay;
+	private Map<Long, Long> pairs;
 
 	public ProgressiveDownloadInformationBox() {
-		rate = new ArrayList<Long>();
-		initialDelay = new ArrayList<Long>();
+		super("Progressive Download Information Box", "pdin");
+		pairs = new HashMap<Long, Long>();
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
+		long rate, initialDelay;
 		while(left>0) {
-			rate.add(in.readBytes(4));
-			initialDelay.add(in.readBytes(4));
+			rate = in.readBytes(4);
+			initialDelay = in.readBytes(4);
+			pairs.put(rate, initialDelay);
 		}
 	}
 
-	public List<Long> getInitialDelay() {
-		return initialDelay;
-	}
-
-	public List<Long> getRate() {
-		return rate;
+	/**
+	 * The map containing pairs of numbers specifying combinations of effective 
+	 * file download bitrate in units of bytes/sec and a suggested initial 
+	 * playback delay in units of milliseconds.
+	 * A suitable initial delay can be obtained by linear interpolation between
+	 * pairs, or by extrapolation from the first or last entry, using an
+	 * estimated download rate.
+	 * @return a map containing pairs of download bitrate and initial delay
+	 */
+	public Map<Long, Long> getInformationPairs() {
+		return pairs;
 	}
 }

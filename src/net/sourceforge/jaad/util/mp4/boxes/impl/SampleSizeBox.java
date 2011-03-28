@@ -28,7 +28,7 @@ public class SampleSizeBox extends FullBox {
 	private final List<Integer> samples;
 
 	public SampleSizeBox() {
-		super();
+		super("Sample Size Box", "stsz");
 		samples = new ArrayList<Integer>();
 	}
 

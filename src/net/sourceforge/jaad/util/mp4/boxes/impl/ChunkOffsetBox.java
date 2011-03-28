@@ -28,7 +28,7 @@ public class ChunkOffsetBox extends FullBox {
 	private final List<Long> chunks;
 
 	public ChunkOffsetBox() {
-		super();
+		super("Chunk Offset Box", "stco");
 		chunks = new ArrayList<Long>();
 	}
 

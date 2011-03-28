@@ -24,6 +24,10 @@ public class TrackHeaderBox extends FullContainerBox {
 
 	private int trackID;
 
+	public TrackHeaderBox() {
+		super("Track Header Box", "tkhd");
+	}
+
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);

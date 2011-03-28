@@ -24,6 +24,10 @@ public class MediaHeaderBox extends FullBox {
 
 	private long timeScale;
 
+	public MediaHeaderBox() {
+		super("Media Header Box", "mdhd");
+	}
+
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);

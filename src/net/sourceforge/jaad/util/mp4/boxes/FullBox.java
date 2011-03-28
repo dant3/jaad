@@ -23,6 +23,10 @@ public class FullBox extends BoxImpl {
 
 	protected int version, flags;
 
+	public FullBox(String name, String shortName) {
+		super(name, shortName);
+	}
+
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		version = in.read();

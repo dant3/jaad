@@ -22,6 +22,10 @@ import java.io.IOException;
 
 public class MediaDataBox extends BoxImpl {
 
+	public MediaDataBox() {
+		super("Media Data Box", "mdat");
+	}
+
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		//media data is found, do nothing

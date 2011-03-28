@@ -24,6 +24,10 @@ public class ESDBox extends FullBox {
 
 	private EntryDescriptor esd;
 
+	public ESDBox() {
+		super("ESD Box", "esds");
+	}
+
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
