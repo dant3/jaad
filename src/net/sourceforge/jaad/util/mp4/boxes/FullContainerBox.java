@@ -30,7 +30,7 @@ public abstract class FullContainerBox extends FullBox implements ContainerBox {
 		children = new ArrayList<Box>(4);
 	}
 
-	protected void readChildren(MP4InputStream in, long left) throws IOException {
+	protected void readChildren(MP4InputStream in) throws IOException {
 		Box box;
 		while(left>0) {
 			box = BoxFactory.parseBox(this, in);

@@ -207,7 +207,13 @@ public class DecoderConfig implements Constants {
 					else config.coreCoderDelay = 0;
 					config.extensionFlag = in.readBool();
 
-					if(config.channelConfiguration==ChannelConfiguration.CHANNEL_CONFIG_NONE); //PCE()
+					if(config.channelConfiguration==ChannelConfiguration.CHANNEL_CONFIG_NONE) {
+						PCE pce = new PCE();
+						pce.decode(in);
+						config.profile = pce.getProfile();
+						config.sampleFrequency = pce.getSampleFrequency();
+						config.channelConfiguration = ChannelConfiguration.forInt(pce.getChannelCount());
+					}
 
 					if(config.extensionFlag) {
 						if(config.profile.isErrorResilientProfile()) {

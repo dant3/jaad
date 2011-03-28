@@ -40,27 +40,25 @@ public class MovieHeaderBox extends FullBox {
 			modificationTime = in.readBytes(8);
 			timeScale = in.readBytes(4);
 			duration = in.readBytes(8);
-			left -= 28;
 		}
 		else {
 			creationTime = in.readBytes(4);
 			modificationTime = in.readBytes(4);
 			timeScale = in.readBytes(4);
 			duration = in.readBytes(4);
-			left -= 16;
 		}
 
 		//rate: 16.16 fixed point
-		rate = getFloatingPoint(in.readBytes(4));
+		rate = getFloatingPoint(in.readBytes(4), MASK16);
 		//volume: 8.8 fixed point
-		volume = getFloatingPoint(in.readBytes(2));
+		volume = getFloatingPoint(in.readBytes(2), MASK8);
 
 		in.skipBytes(2); //reserved
 		in.skipBytes(4); //reserved
 		in.skipBytes(4); //reserved
 
 		for(int i = 0; i<9; i++) {
-			matrix[i] = getFloatingPoint(in.readBytes(4));
+			matrix[i] = getFloatingPoint(in.readBytes(4), MASK16);
 		}
 
 		in.skipBytes(24); //reserved
@@ -161,11 +159,5 @@ public class MovieHeaderBox extends FullBox {
 	 */
 	public long getNextTrackID() {
 		return nextTrackID;
-	}
-
-	private double getFloatingPoint(long l) {
-		long mantissa = (l&0xFFFF)<<52;
-		long exponent = l&0xFFFF;
-		return Double.longBitsToDouble(mantissa|exponent);
 	}
 }
