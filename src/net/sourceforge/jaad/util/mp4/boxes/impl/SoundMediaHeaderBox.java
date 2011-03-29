@@ -24,11 +24,8 @@ public class SoundMediaHeaderBox extends FullBox {
 		super.decode(in);
 
 		balance = in.readFixedPoint(2, MP4InputStream.MASK8);
-		System.out.println("fixed point: "+balance);
 		in.skipBytes(2); //reserved
 		left -= 4;
-		System.out.println("position: "+in.getOffset());
-		System.out.println("left: "+left);
 	}
 
 	/**

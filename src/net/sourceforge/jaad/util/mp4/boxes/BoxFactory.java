@@ -40,13 +40,7 @@ public class BoxFactory implements BoxTypes {
 		final BoxImpl box = forType(type);
 
 		//DEBUG
-		byte[] b = new byte[4];
-		int shift;
-		for(int i = 0; i<4; i++) {
-			shift = (3-i)*8;
-			b[i] = (byte) ((type>>shift)&0xFF);
-		}
-		System.out.println(new String(b));
+		System.out.println(box.getShortName());
 		//
 
 		box.setParams(size, type, parent, left);
@@ -70,16 +64,6 @@ public class BoxFactory implements BoxTypes {
 			left -= 16;
 		}
 
-		//DEBUG
-		byte[] b = new byte[4];
-		int shift;
-		for(int i = 0; i<4; i++) {
-			shift = (3-i)*8;
-			b[i] = (byte) ((type>>shift)&0xFF);
-		}
-		System.out.println(new String(b));
-		//
-
 		SampleEntry entry;
 		switch(handlerType) {
 			case HandlerBox.TYPE_VIDEO:
@@ -102,6 +86,9 @@ public class BoxFactory implements BoxTypes {
 		}
 
 		if(entry!=null) {
+			//DEBUG
+			System.out.println(entry.getShortName());
+			//
 			entry.setParams(size, type, parent, left);
 			entry.decode(in);
 		}
@@ -112,12 +99,14 @@ public class BoxFactory implements BoxTypes {
 	private static BoxImpl forType(long type) {
 		BoxImpl box;
 		switch((int) type) {
-			case MEDIA_DATA_BOX:
-				box = new MediaDataBox();
-				break;
+			//top level
 			case FILE_TYPE_BOX:
 				box = new FileTypeBox();
 				break;
+			case MEDIA_DATA_BOX:
+				box = new MediaDataBox();
+				break;
+			//only container
 			case MOVIE_BOX:
 				box = new ContainerBoxImpl("Movie Box", "moov");
 				break;
@@ -127,12 +116,20 @@ public class BoxFactory implements BoxTypes {
 			case MEDIA_BOX:
 				box = new ContainerBoxImpl("Media Box", "mdia");
 				break;
-			case HANDLER_BOX:
-				box = new HandlerBox();
-				break;
 			case MEDIA_INFORMATION_BOX:
 				box = new ContainerBoxImpl("Media Information Box", "minf");
 				break;
+			case DATA_INFORMATION_BOX:
+				box = new ContainerBoxImpl("Data Information Box", "dinf");
+				break;
+			case MOVIE_EXTENDS_BOX:
+				box = new ContainerBoxImpl("Movie Extends Box", "mvex");
+				break;
+			//
+			case HANDLER_BOX:
+				box = new HandlerBox();
+				break;
+			//media header
 			case VIDEO_MEDIA_HEADER_BOX:
 				box = new VideoMediaHeaderBox();
 				break;
@@ -154,6 +151,7 @@ public class BoxFactory implements BoxTypes {
 			case MEDIA_HEADER_BOX:
 				box = new MediaHeaderBox();
 				break;
+			//sample table
 			case SAMPLE_TABLE_BOX:
 				box = new SampleTableBox();
 				break;
@@ -178,6 +176,26 @@ public class BoxFactory implements BoxTypes {
 			case CHUNK_OFFSET_BOX:
 			case CHUNK_LARGE_OFFSET_BOX:
 				box = new ChunkOffsetBox();
+				break;
+			case PADDING_BIT_BOX:
+				box = new PaddingBitBox();
+				break;
+			//track data layout boxes
+			case DATA_ENTRY_URL_BOX:
+				box = new DataEntryUrlBox();
+				break;
+			case DATA_ENTRY_URN_BOX:
+				box = new DataEntryUrnBox();
+				break;
+			case DATA_REFERENCE_BOX:
+				box = new DataReferenceBox();
+				break;
+			case DEGRADATION_PRIORITY_BOX:
+				box = new DegradationPriorityBox();
+				break;
+			//movie fragments
+			case MOVIE_EXTENDS_HEADER_BOX:
+				box = new MovieExtendsHeaderBox();
 				break;
 			default:
 				box = new UnknownBox();

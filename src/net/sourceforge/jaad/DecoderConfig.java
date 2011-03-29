@@ -250,7 +250,7 @@ public class DecoderConfig implements Constants {
 	 * useful since some streams (like internet radios) may start within a
 	 * frame. The method then skippes until it finds the next header.
 	 * @param input the InputStream to read from
-	 * @maxSkip the maximum number of bytes to skip while searching for a header.
+	 * @param maxSkip the maximum number of bytes to skip while searching for a header.
 	 * @return a DecoderConfig or null if no header was found
 	 */
 	public static DecoderConfig parseTransportHeader(InputStream input, int maxSkip) throws AACException {

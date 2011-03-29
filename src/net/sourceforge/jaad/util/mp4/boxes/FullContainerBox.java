@@ -35,9 +35,16 @@ public abstract class FullContainerBox extends FullBox implements ContainerBox {
 		while(left>0) {
 			box = BoxFactory.parseBox(this, in);
 			left -= box.getSize();
-			if(box!=null) {
-				children.add(box);
-			}
+			if(box!=null) children.add(box);
+		}
+	}
+
+	protected void readChildren(MP4InputStream in, long count) throws IOException {
+		Box box;
+		for(long l = 0; l<count; l++) {
+			box = BoxFactory.parseBox(this, in);
+			left -= box.getSize();
+			if(box!=null) children.add(box);
 		}
 	}
 

@@ -46,14 +46,13 @@ public class Decoder implements Constants {
 	private ADTSFrame adtsFrame;
 
 	/**
-	 * The methods indicates, which profiles are current supported by the
-	 * decoder.
-	 * @param p an AAC profile
+	 * The methods returns true, if a profile is supported by the decoder.
+	 * @param profile an AAC profile
 	 * @return true if the specified profile can be decoded
 	 * @see Profile#isDecodingSupported()
 	 */
-	public static boolean canDecode(Profile p) {
-		return p.isDecodingSupported();
+	public static boolean canDecode(Profile profile) {
+		return profile.isDecodingSupported();
 	}
 
 	/**
