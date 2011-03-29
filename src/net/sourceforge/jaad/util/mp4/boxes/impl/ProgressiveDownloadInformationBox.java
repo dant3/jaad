@@ -6,6 +6,17 @@ import java.util.Map;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import net.sourceforge.jaad.util.mp4.boxes.FullBox;
 
+/**
+ * The Progressive download information box aids the progressive download of an
+ * ISO file. The box contains pairs of numbers (to the end of the box)
+ * specifying combinations of effective file download bitrate in units of
+ * bytes/sec and a suggested initial playback delay in units of milliseconds.
+ *
+ * The download rate can be estimated from the download rate and obtain an upper
+ * estimate for a suitable initial delay by linear interpolation between pairs,
+ * or by extrapolation from the first or last entry.
+ * @author in-somnia
+ */
 public class ProgressiveDownloadInformationBox extends FullBox {
 
 	private Map<Long, Long> pairs;
@@ -27,13 +38,8 @@ public class ProgressiveDownloadInformationBox extends FullBox {
 	}
 
 	/**
-	 * The map containing pairs of numbers specifying combinations of effective 
-	 * file download bitrate in units of bytes/sec and a suggested initial 
-	 * playback delay in units of milliseconds.
-	 * A suitable initial delay can be obtained by linear interpolation between
-	 * pairs, or by extrapolation from the first or last entry, using an
-	 * estimated download rate.
-	 * @return a map containing pairs of download bitrate and initial delay
+	 * The map contains pairs of bitrates and playback delay.
+	 * @return the information pairs
 	 */
 	public Map<Long, Long> getInformationPairs() {
 		return pairs;

@@ -16,38 +16,51 @@
  */
 package net.sourceforge.jaad.util.mp4.boxes.impl;
 
-import net.sourceforge.jaad.util.mp4.boxes.Box;
 import net.sourceforge.jaad.util.mp4.boxes.BoxFactory;
-import net.sourceforge.jaad.util.mp4.boxes.BoxTypes;
-import net.sourceforge.jaad.util.mp4.boxes.FullBox;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
+import net.sourceforge.jaad.util.mp4.boxes.BoxTypes;
+import net.sourceforge.jaad.util.mp4.boxes.ContainerBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.sampleentries.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import net.sourceforge.jaad.util.mp4.boxes.FullBox;
 
+/**
+ * The sample description table gives detailed information about the coding type
+ * used, and any initialization information needed for that coding.
+ * @author in-somnia
+ */
 public class SampleDescriptionBox extends FullBox {
 
-	private AudioSampleEntryBox mp4a;
+	private List<SampleEntry> sampleEntries;
 
 	public SampleDescriptionBox() {
 		super("Sample Description Box", "stsd");
+		sampleEntries = new ArrayList<SampleEntry>();
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
+
 		final int entryCount = (int) in.readBytes(4);
 		left -= 4;
-		Box box;
+
+		final HandlerBox handler = (HandlerBox) ((ContainerBox) parent.getParent().getParent()).getChild(BoxTypes.HANDLER_BOX);
+		final int handlerType = handler.getHandlerType();
+
+		SampleEntry entry;
 		for(int i = 0; i<entryCount; i++) {
-			box = BoxFactory.parseBox(this, in);
-			left -= box.getSize();
-			if(box.getType()==BoxTypes.AUDIO_SAMPLE_ENTRY_BOX) {
-				mp4a = (AudioSampleEntryBox) box;
-				break;
+			entry = BoxFactory.createSampleEntry(this, in, handlerType);
+			if(entry!=null) {
+				left -= entry.getSize();
+				sampleEntries.add(entry);
 			}
 		}
 	}
 
-	public AudioSampleEntryBox getMP4A() {
-		return mp4a;
+	public List<SampleEntry> getSampleEntries() {
+		return sampleEntries;
 	}
 }

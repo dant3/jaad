@@ -16,12 +16,32 @@
  */
 package net.sourceforge.jaad.util.mp4.boxes.impl;
 
-import net.sourceforge.jaad.util.mp4.boxes.BoxFactory;
-import net.sourceforge.jaad.util.mp4.boxes.ContainerBox;
 import net.sourceforge.jaad.util.mp4.boxes.ContainerBoxImpl;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 
+/**
+ * The sample table contains all the time and data indexing of the media samples
+ * in a track. Using the tables here, it is possible to locate samples in time,
+ * determine their type (e.g. I-frame or not), and determine their size,
+ * container, and offset into that container.
+ *
+ * If the track that contains the Sample Table Box references no data, then the
+ * Sample Table Box does not need to contain any sub-boxes (this is not a very
+ * useful media track).
+ *
+ * If the track that the Sample Table Box is contained in does reference data,
+ * then the following sub-boxes are required: Sample Description, Sample Size,
+ * Sample To Chunk, and Chunk Offset. Further, the Sample Description Box shall
+ * contain at least one entry. A Sample Description Box is required because it
+ * contains the data reference index field which indicates which Data Reference
+ * Box to use to retrieve the media samples. Without the Sample Description, it
+ * is not possible to determine where the media samples are stored. The Sync
+ * Sample Box is optional. If the Sync Sample Box is not present, all samples
+ * are sync samples.
+ *
+ * @author in-somnia
+ */
 public class SampleTableBox extends ContainerBoxImpl {
 
 	private boolean sound = false;
@@ -32,11 +52,10 @@ public class SampleTableBox extends ContainerBoxImpl {
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		sound = ((ContainerBox) parent).containsChild(BoxFactory.SOUND_MEDIA_HEADER_BOX);
-		//skip the contents if it contains video or meta data
-		if(sound) super.decode(in);
+		super.decode(in);
 	}
 
+	//TODO: not good, find another way!
 	public boolean isSound() {
 		return sound;
 	}

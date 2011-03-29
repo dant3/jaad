@@ -4,18 +4,24 @@ public class MP4BoxTypes {
 
 	private static final String[][] NAMES = {
 		{"AUDIO_SAMPLE_ENTRY_BOX", "mp4a"},
+		{"BIT_RATE_BOX", "btrt"},
 		{"CHUNK_OFFSET_BOX", "stco"},
 		{"CHUNK_LARGE_OFFSET_BOX", "co64"},
+		{"CLEAN_APERTURE_BOX ", "clap"},
 		{"ESD_BOX", "esds"},
 		{"EXTENDED_BOX", "uuid"},
 		{"FILE_TYPE_BOX", "ftyp"},
+		{"HANDLER_BOX", "hdlr"},
+		{"HINT_MEDIA_HEADER_BOX", "hmhd"},
 		{"MEDIA_BOX", "mdia"},
 		{"MEDIA_DATA_BOX", "mdat"},
 		{"MEDIA_HEADER_BOX", "mdhd"},
 		{"MEDIA_INFORMATION_BOX", "minf"},
 		{"MOVIE_BOX", "moov"},
 		{"MOVIE_HEADER_BOX", "mvhd"},
+		{"NULL_MEDIA_HEADER_BOX", "nmhd"},
 		{"PROGRESSIVE_DOWNLOAD_INFORMATION_BOX", "pdin"},
+		{"PIXEL_ASPECT_RATIO_BOX", "pasp"},
 		{"SAMPLE_DESCRIPTION_BOX", "stsd"},
 		{"SAMPLE_SIZE_BOX", "stsz"},
 		{"SAMPLE_TABLE_BOX", "stbl"},
@@ -23,7 +29,10 @@ public class MP4BoxTypes {
 		{"SOUND_MEDIA_HEADER_BOX", "smhd"},
 		{"TIME_TO_SAMPLE_BOX", "stts"},
 		{"TRACK_BOX", "trak"},
-		{"TRACK_HEADER_BOX", "tkhd"}
+		{"TRACK_HEADER_BOX", "tkhd"},
+		{"VIDEO_MEDIA_HEADER_BOX", "vmhd"},
+		{"TEXT_METADATA_SAMPLE_ENTRY", "mett"},
+		{"XML_METADATA_SAMPLE_ENTRY", "metx"}
 	};
 
 	public static void main(String[] args) {

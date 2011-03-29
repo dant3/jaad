@@ -16,21 +16,10 @@
  */
 package net.sourceforge.jaad.util.mp4.boxes;
 
-import net.sourceforge.jaad.util.mp4.boxes.impl.MediaDataBox;
-import net.sourceforge.jaad.util.mp4.boxes.impl.AudioSampleEntryBox;
-import net.sourceforge.jaad.util.mp4.boxes.impl.ChunkOffsetBox;
-import net.sourceforge.jaad.util.mp4.boxes.impl.ESDBox;
-import net.sourceforge.jaad.util.mp4.boxes.impl.FileTypeBox;
-import net.sourceforge.jaad.util.mp4.boxes.impl.MediaHeaderBox;
-import net.sourceforge.jaad.util.mp4.boxes.impl.MovieHeaderBox;
-import net.sourceforge.jaad.util.mp4.boxes.impl.SampleDescriptionBox;
-import net.sourceforge.jaad.util.mp4.boxes.impl.SampleSizeBox;
-import net.sourceforge.jaad.util.mp4.boxes.impl.SampleTableBox;
-import net.sourceforge.jaad.util.mp4.boxes.impl.SampleToChunkBox;
-import net.sourceforge.jaad.util.mp4.boxes.impl.TimeToSampleBox;
-import net.sourceforge.jaad.util.mp4.boxes.impl.TrackHeaderBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.sampleentries.*;
 import java.io.IOException;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
+import net.sourceforge.jaad.util.mp4.boxes.impl.*;
 
 public class BoxFactory implements BoxTypes {
 
@@ -49,12 +38,74 @@ public class BoxFactory implements BoxTypes {
 		}
 
 		final BoxImpl box = forType(type);
-		System.out.println(box.getShortName());
+
+		//DEBUG
+		byte[] b = new byte[4];
+		int shift;
+		for(int i = 0; i<4; i++) {
+			shift = (3-i)*8;
+			b[i] = (byte) ((type>>shift)&0xFF);
+		}
+		System.out.println(new String(b));
+		//
+
 		box.setParams(size, type, parent, left);
 		box.decode(in);
 		//if mdat found, don't skip
 		if(box.getType()!=MEDIA_DATA_BOX) in.skipBytes(box.getLeft());
 		return box;
+	}
+
+	public static SampleEntry createSampleEntry(Box parent, MP4InputStream in, int handlerType) throws IOException {
+		long size = in.readBytes(4);
+		long left = size-4;
+		if(size==1) {
+			size = in.readBytes(8);
+			left -= 8;
+		}
+		long type = in.readBytes(4);
+		left -= 4;
+		if(type==EXTENDED_BOX) {
+			type = in.readBytes(16);
+			left -= 16;
+		}
+
+		//DEBUG
+		byte[] b = new byte[4];
+		int shift;
+		for(int i = 0; i<4; i++) {
+			shift = (3-i)*8;
+			b[i] = (byte) ((type>>shift)&0xFF);
+		}
+		System.out.println(new String(b));
+		//
+
+		SampleEntry entry;
+		switch(handlerType) {
+			case HandlerBox.TYPE_VIDEO:
+				entry = new VideoSampleEntry();
+				break;
+			case HandlerBox.TYPE_SOUND:
+				entry = new AudioSampleEntry();
+				break;
+			case HandlerBox.TYPE_HINT:
+				entry = new HintSampleEntry();
+				break;
+			case HandlerBox.TYPE_META:
+				if(type==TEXT_METADATA_SAMPLE_ENTRY) entry = new TextMetadataSampleEntry();
+				else if(type==XML_METADATA_SAMPLE_ENTRY) entry = new XMLMetadataSampleEntry();
+				else entry = null;
+				break;
+			default:
+				entry = null;
+				break;
+		}
+
+		if(entry!=null) {
+			entry.setParams(size, type, parent, left);
+			entry.decode(in);
+		}
+		return entry;
 	}
 
 	//TODO: this is ugly!
@@ -68,19 +119,31 @@ public class BoxFactory implements BoxTypes {
 				box = new FileTypeBox();
 				break;
 			case MOVIE_BOX:
-				box = new ContainerBoxImpl("Movie Box","moov");
+				box = new ContainerBoxImpl("Movie Box", "moov");
 				break;
 			case TRACK_BOX:
-				box = new ContainerBoxImpl("Track Box","trak");
+				box = new ContainerBoxImpl("Track Box", "trak");
 				break;
 			case MEDIA_BOX:
-				box = new ContainerBoxImpl("Media Box","mdia");
+				box = new ContainerBoxImpl("Media Box", "mdia");
+				break;
+			case HANDLER_BOX:
+				box = new HandlerBox();
 				break;
 			case MEDIA_INFORMATION_BOX:
-				box = new ContainerBoxImpl("Media Information Box","minf");
+				box = new ContainerBoxImpl("Media Information Box", "minf");
+				break;
+			case VIDEO_MEDIA_HEADER_BOX:
+				box = new VideoMediaHeaderBox();
 				break;
 			case SOUND_MEDIA_HEADER_BOX:
-				box = new FullBox("Sound Media Header Box","smhd");
+				box = new SoundMediaHeaderBox();
+				break;
+			case HINT_MEDIA_HEADER_BOX:
+				box = new HintMediaHeaderBox();
+				break;
+			case NULL_MEDIA_HEADER_BOX:
+				box = new FullBox("Null Media Header Box", "nmhd");
 				break;
 			case MOVIE_HEADER_BOX:
 				box = new MovieHeaderBox();
@@ -97,6 +160,9 @@ public class BoxFactory implements BoxTypes {
 			case SAMPLE_DESCRIPTION_BOX:
 				box = new SampleDescriptionBox();
 				break;
+			case BIT_RATE_BOX:
+				box = new BitRateBox();
+				break;
 			case TIME_TO_SAMPLE_BOX:
 				box = new TimeToSampleBox();
 				break;
@@ -108,9 +174,6 @@ public class BoxFactory implements BoxTypes {
 				break;
 			case ESD_BOX:
 				box = new ESDBox();
-				break;
-			case AUDIO_SAMPLE_ENTRY_BOX:
-				box = new AudioSampleEntryBox();
 				break;
 			case CHUNK_OFFSET_BOX:
 			case CHUNK_LARGE_OFFSET_BOX:

@@ -14,32 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4.boxes.impl;
+package net.sourceforge.jaad.util.mp4.boxes.impl.sampleentries;
 
-import net.sourceforge.jaad.util.mp4.boxes.ContainerBoxImpl;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 
-public class AudioSampleEntryBox extends ContainerBoxImpl {
+public class AudioSampleEntry extends SampleEntry {
 
 	private int channelCount, sampleSize, sampleRate;
 
-	public AudioSampleEntryBox() {
-		super("Audio Sample Entry Box", "mp4a");
+	public AudioSampleEntry() {
+		super("Audio Sample Entry", "mp4a");
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		in.skipBytes(6); //reserved
-		in.skipBytes(2); //dataReferenceIndex
+		super.decode(in);
+
 		in.skipBytes(8); //reserved
 		channelCount = (int) in.readBytes(2);
 		sampleSize = (int) in.readBytes(2);
-		in.skipBytes(4);
-		sampleRate = (int) in.readBytes(2);
-		in.skipBytes(2);
+		in.skipBytes(2); //pre-defined: 0
+		in.skipBytes(2); //reserved
+		sampleRate = ((int) in.readBytes(4))>>16;
 		left -= 28;
-		super.decode(in);
+
+		readChildren(in);
 	}
 
 	public int getChannelCount() {

@@ -22,6 +22,8 @@ import java.io.InputStream;
 
 public class MP4InputStream {
 
+	public static final int MASK8 = 0xFF;
+	public static final int MASK16 = 0xFFFF;
 	private final InputStream in;
 	private long offset = 0;
 
@@ -71,6 +73,28 @@ public class MP4InputStream {
 		}
 		if(i==-1) throw new EOFException();
 		return new String(c, 0, pos);
+	}
+
+	public String readUTFString(int max) throws IOException {
+		byte[] b = new byte[max];
+		int pos = 0;
+		int i;
+		while((i = in.read())!=0) {
+			if(i==-1) break;
+			b[pos] = (byte) i;
+			offset++;
+			pos++;
+		}
+		offset++;
+
+		return new String(b, "UTF-8");
+	}
+
+	public double readFixedPoint(int len, int mask) throws IOException {
+		long l = readBytes(len);
+		long mantissa = (l&mask)<<52;
+		long exponent = l&mask;
+		return Double.longBitsToDouble(mantissa|exponent);
 	}
 
 	public void skipBytes(final long n) throws IOException {

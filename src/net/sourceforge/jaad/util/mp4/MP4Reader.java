@@ -19,7 +19,7 @@ package net.sourceforge.jaad.util.mp4;
 import net.sourceforge.jaad.util.mp4.boxes.*;
 import net.sourceforge.jaad.util.mp4.boxes.impl.SampleSizeBox;
 import net.sourceforge.jaad.util.mp4.boxes.impl.SampleDescriptionBox;
-import net.sourceforge.jaad.util.mp4.boxes.impl.AudioSampleEntryBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.sampleentries.AudioSampleEntry;
 import net.sourceforge.jaad.util.mp4.boxes.impl.ChunkOffsetBox;
 import net.sourceforge.jaad.util.mp4.boxes.impl.MediaHeaderBox;
 import net.sourceforge.jaad.util.mp4.boxes.impl.MovieHeaderBox;
@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import net.sourceforge.jaad.util.mp4.boxes.impl.SampleToChunkBox;
+import net.sourceforge.jaad.util.mp4.boxes.impl.sampleentries.SampleEntry;
 
 /**
  * An MP4 demultiplexer that can extract the DecoderSpecificInfo and all audio
@@ -120,7 +121,8 @@ public class MP4Reader implements BoxTypes {
 	private void parseSampleTable(ContainerBox stbl) throws IOException {
 		final SampleDescriptionBox stsd = (SampleDescriptionBox) stbl.getChild(SAMPLE_DESCRIPTION_BOX);
 		if(stsd!=null) {
-			final AudioSampleEntryBox mp4a = stsd.getMP4A();
+			final List<SampleEntry> sampleEntries = stsd.getSampleEntries();
+			final AudioSampleEntry mp4a = (AudioSampleEntry) sampleEntries.get(0);
 			channels = mp4a.getChannelCount();
 			final Box esds = mp4a.getChild(ESD_BOX);
 			if(esds!=null) findDecoderSpecificInfo((ESDBox) esds);

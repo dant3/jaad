@@ -21,8 +21,6 @@ import net.sourceforge.jaad.util.mp4.MP4InputStream;
 
 public abstract class BoxImpl implements Box {
 
-	protected static final int MASK8 = 0xFF;
-	protected static final int MASK16 = 0xFFFF;
 	private String name, shortName;
 	protected long size, type, left;
 	protected Box parent;
@@ -32,7 +30,7 @@ public abstract class BoxImpl implements Box {
 		this.shortName = shortName;
 	}
 
-	void setParams(long size, long type, Box parent, long left) {
+	public void setParams(long size, long type, Box parent, long left) {
 		this.size = size;
 		this.type = type;
 		this.parent = parent;
@@ -70,11 +68,5 @@ public abstract class BoxImpl implements Box {
 
 	public String getShortName() {
 		return shortName;
-	}
-
-	protected double getFloatingPoint(long l, int mask) {
-		long mantissa = (l&mask)<<52;
-		long exponent = l&mask;
-		return Double.longBitsToDouble(mantissa|exponent);
 	}
 }

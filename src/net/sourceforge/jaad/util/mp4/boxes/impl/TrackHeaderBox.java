@@ -20,6 +20,22 @@ import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 import net.sourceforge.jaad.util.mp4.boxes.FullBox;
 
+/**
+ * This box specifies the characteristics of a single track. Exactly one Track
+ * Header Box is contained in a track. In the absence of an edit list, the
+ * presentation of a track starts at the beginning of the overall presentation.
+ * An empty edit is used to offset the start time of a track.
+ * If in a presentation all tracks have neither trackInMovie nor trackInPreview
+ * set, then all tracks shall be treated as if both flags were set on all
+ * tracks. Hint tracks should not have the track header flags set, so that they
+ * are ignored for local playback and preview.
+ * The width and height in the track header are measured on a notional 'square'
+ * (uniform) grid. Track video data is normalized to these dimensions
+ * (logically) before any transformation or placement caused by a layup or
+ * composition system. Track (and movie) matrices, if used, also operate in this
+ * uniformly-scaled space.
+ * @author in-somnia
+ */
 public class TrackHeaderBox extends FullBox {
 
 	private long creationTime, modificationTime, duration;
@@ -57,16 +73,16 @@ public class TrackHeaderBox extends FullBox {
 
 		layer = (int) in.readBytes(2);
 		alternateGroup = (int) in.readBytes(2);
-		volume = getFloatingPoint(in.readBytes(2), MASK8);
+		volume = in.readFixedPoint(2, MP4InputStream.MASK8);
 
 		in.skipBytes(2);
 
 		for(int i = 0; i<9; i++) {
-			matrix[i] = getFloatingPoint(in.readBytes(4), MASK16);
+			matrix[i] = in.readFixedPoint(4, MP4InputStream.MASK16);
 		}
 
-		width = getFloatingPoint(in.readBytes(4), MASK16);
-		height = getFloatingPoint(in.readBytes(4), MASK16);
+		width = in.readFixedPoint(4, MP4InputStream.MASK16);
+		height = in.readFixedPoint(4, MP4InputStream.MASK16);
 
 		left = 0;
 	}

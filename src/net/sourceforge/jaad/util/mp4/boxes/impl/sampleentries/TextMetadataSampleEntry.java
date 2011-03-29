@@ -14,30 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4.boxes.impl;
+package net.sourceforge.jaad.util.mp4.boxes.impl.sampleentries;
 
-import net.sourceforge.jaad.util.mp4.boxes.BoxImpl;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
 
-/**
- * The Media Data Box contains the media data. In video tracks, this box would
- * contain video frames. A presentation may contain zero or more Media Data
- * Boxes. The actual media data follows the type field; its structure is
- * described by the metadata in the movie box.
- * There may be any number of these boxes in the file (including zero, if all
- * the media data is in other files). The metadata refers to media data by its
- * absolute offset within the file.
- * @author in-somnia
- */
-public class MediaDataBox extends BoxImpl {
+public class TextMetadataSampleEntry extends MetadataSampleEntry {
 
-	public MediaDataBox() {
-		super("Media Data Box", "mdat");
+	private String mimeType;
+
+	public TextMetadataSampleEntry() {
+		super("Text Metadata Sample Entry", "mett");
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		//media data is found, do nothing
+		super.decode(in);
+
+		mimeType = in.readUTFString((int) left);
+		left -= mimeType.length();
+
+		readChildren(in);
+	}
+
+	/**
+	 * Provides a MIME type which identifies the content format of the timed
+	 * metadata. Examples for this field are 'text/html' and 'text/plain'.
+	 * 
+	 * @return the content's MIME type
+	 */
+	public String getMimeType() {
+		return mimeType;
 	}
 }

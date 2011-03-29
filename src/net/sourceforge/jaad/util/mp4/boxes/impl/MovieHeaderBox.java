@@ -19,10 +19,18 @@ package net.sourceforge.jaad.util.mp4.boxes.impl;
 import net.sourceforge.jaad.util.mp4.boxes.FullBox;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import java.io.IOException;
+import java.util.Date;
+import net.sourceforge.jaad.util.mp4.boxes.Utils;
 
+/**
+ * The movie header box defines overall information which is media-independent,
+ * and relevant to the entire presentation considered as a whole.
+ * @author in-somnia
+ */
 public class MovieHeaderBox extends FullBox {
 
-	private long creationTime, modificationTime, timeScale, duration;
+	private Date creationTime, modificationTime;
+	private long timeScale, duration;
 	private double rate, volume;
 	private double[] matrix;
 	private long nextTrackID;
@@ -36,29 +44,29 @@ public class MovieHeaderBox extends FullBox {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 		if(version==1) {
-			creationTime = in.readBytes(8);
-			modificationTime = in.readBytes(8);
+			creationTime = Utils.getDate(in.readBytes(8));
+			modificationTime = Utils.getDate(in.readBytes(8));
 			timeScale = in.readBytes(4);
 			duration = in.readBytes(8);
 		}
 		else {
-			creationTime = in.readBytes(4);
-			modificationTime = in.readBytes(4);
+			creationTime = Utils.getDate(in.readBytes(4));
+			modificationTime = Utils.getDate(in.readBytes(4));
 			timeScale = in.readBytes(4);
 			duration = in.readBytes(4);
 		}
 
 		//rate: 16.16 fixed point
-		rate = getFloatingPoint(in.readBytes(4), MASK16);
+		rate = in.readFixedPoint(4, MP4InputStream.MASK16);
 		//volume: 8.8 fixed point
-		volume = getFloatingPoint(in.readBytes(2), MASK8);
+		volume = in.readFixedPoint(2, MP4InputStream.MASK8);
 
 		in.skipBytes(2); //reserved
 		in.skipBytes(4); //reserved
 		in.skipBytes(4); //reserved
 
 		for(int i = 0; i<9; i++) {
-			matrix[i] = getFloatingPoint(in.readBytes(4), MASK16);
+			matrix[i] = in.readFixedPoint(4, MP4InputStream.MASK16);
 		}
 
 		in.skipBytes(24); //reserved
@@ -73,7 +81,7 @@ public class MovieHeaderBox extends FullBox {
 	 * presentation in seconds since midnight, Jan. 1, 1904, in UTC time.
 	 * @return the creation time
 	 */
-	public long getCreationTime() {
+	public Date getCreationTime() {
 		return creationTime;
 	}
 
@@ -82,7 +90,7 @@ public class MovieHeaderBox extends FullBox {
 	 * the presentation was modified in seconds since midnight, Jan. 1, 1904,
 	 * in UTC time.
 	 */
-	public long getModificationTime() {
+	public Date getModificationTime() {
 		return modificationTime;
 	}
 

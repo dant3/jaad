@@ -22,6 +22,19 @@ import java.util.ArrayList;
 import java.util.List;
 import net.sourceforge.jaad.util.mp4.boxes.BoxImpl;
 
+/**
+ * The Track Reference Box provides a reference from the containing track to
+ * another track in the presentation. These references are typed. A 'hint'
+ * reference links from the containing hint track to the media data that it
+ * hints. A content description reference 'cdsc' links a descriptive or
+ * metadata track to the content which it describes.
+ *
+ * Exactly one Track Reference Box can be contained within the Track Box.
+ *
+ * If this box is not present, the track is not referencing any other track in
+ * any way. The reference array is sized to fill the reference type box.
+ * @author in-somnia
+ */
 public class TrackReferenceBox extends BoxImpl {
 
 	private String referenceType;
@@ -57,7 +70,7 @@ public class TrackReferenceBox extends BoxImpl {
 	}
 
 	/**
-	 * The track IDs are integer that provide a reference from the containing
+	 * The track IDs are integers that provide a reference from the containing
 	 * track to other tracks in the presentation. Track IDs are never re-used
 	 * and cannot be equal to zero.
 	 * @return the track IDs this box refers to
