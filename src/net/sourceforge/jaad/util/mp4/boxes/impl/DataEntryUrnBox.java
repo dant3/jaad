@@ -18,10 +18,10 @@ public class DataEntryUrnBox extends FullBox {
 
 		if((flags&1)==0) {
 			referenceName = in.readUTFString((int) left, MP4InputStream.UTF8);
-			left -= referenceName.length();
+			left -= referenceName.length()+1;
 			if(left>0) {
 				location = in.readUTFString((int) left, MP4InputStream.UTF8);
-				left -= location.length();
+				left -= location.length()+1;
 			}
 		}
 	}

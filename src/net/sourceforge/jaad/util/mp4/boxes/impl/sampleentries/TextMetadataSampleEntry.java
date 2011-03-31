@@ -32,7 +32,7 @@ public class TextMetadataSampleEntry extends MetadataSampleEntry {
 		super.decode(in);
 
 		mimeType = in.readUTFString((int) left, MP4InputStream.UTF8);
-		left -= mimeType.length();
+		left -= mimeType.length()+1;
 
 		readChildren(in);
 	}

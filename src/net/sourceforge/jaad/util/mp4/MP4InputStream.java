@@ -79,6 +79,7 @@ public class MP4InputStream {
 	}
 
 	public String readUTFString(int max, String encoding) throws IOException {
+		long x = offset;
 		byte[] b = new byte[max];
 		int pos = 0;
 		int i;
@@ -90,7 +91,7 @@ public class MP4InputStream {
 		}
 		offset++;
 
-		return new String(b, encoding);
+		return new String(b, 0, pos, encoding);
 	}
 
 	public String readUTFString(int max) throws IOException {

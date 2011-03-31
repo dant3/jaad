@@ -47,7 +47,7 @@ public class HandlerBox extends FullBox {
 		left -= 20;
 
 		handlerName = in.readUTFString((int) left, MP4InputStream.UTF8);
-		left -= handlerName.length();
+		left -= handlerName.length()+1;
 	}
 
 	/**

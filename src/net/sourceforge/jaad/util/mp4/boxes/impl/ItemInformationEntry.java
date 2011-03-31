@@ -24,11 +24,11 @@ public class ItemInformationEntry extends FullBox {
 			itemProtectionIndex = (int) in.readBytes(2);
 			left -= 4;
 			itemName = in.readUTFString((int) left, MP4InputStream.UTF8);
-			left -= itemName.length();
+			left -= itemName.length()+1;
 			contentType = in.readUTFString((int) left, MP4InputStream.UTF8);
-			left -= contentType.length();
+			left -= contentType.length()+1;
 			contentEncoding = in.readUTFString((int) left, MP4InputStream.UTF8); //optional
-			left -= contentEncoding.length();
+			left -= contentEncoding.length()+1;
 		}
 		if(version==1) {
 			if(left>0) {
@@ -37,7 +37,7 @@ public class ItemInformationEntry extends FullBox {
 				left -= 4;
 				if(left>0) {
 					extension = Extension.forType((int) extensionType);
-					if(extension!=null) extension.decode(in);
+					if(extension!=null) left -= extension.decode(in);
 				}
 			}
 		}
@@ -135,7 +135,8 @@ public class ItemInformationEntry extends FullBox {
 			return ext;
 		}
 
-		abstract void decode(MP4InputStream in) throws IOException;
+		//returns the number of bytes read
+		abstract int decode(MP4InputStream in) throws IOException;
 	}
 
 	public static class FDExtension extends Extension {
@@ -145,7 +146,7 @@ public class ItemInformationEntry extends FullBox {
 		private long[] groupID;
 
 		@Override
-		void decode(MP4InputStream in) throws IOException {
+		int decode(MP4InputStream in) throws IOException {
 			contentLocation = in.readUTFString(100, MP4InputStream.UTF8);
 			contentMD5 = in.readUTFString(100, MP4InputStream.UTF8);
 
@@ -157,6 +158,8 @@ public class ItemInformationEntry extends FullBox {
 			for(int i = 0; i<entryCount; i++) {
 				groupID[i] = in.readBytes(4);
 			}
+
+			return contentLocation.length()+contentMD5.length()+19+(entryCount*4);
 		}
 
 		/**

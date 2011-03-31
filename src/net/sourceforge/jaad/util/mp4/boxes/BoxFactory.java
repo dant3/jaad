@@ -43,7 +43,7 @@ public class BoxFactory implements BoxTypes {
 		final BoxImpl box = forType(type);
 
 		//DEBUG
-		System.out.println(box.getShortName());
+		//System.out.println(box.getShortName());
 		//
 
 		box.setParams(size, type, parent, left);

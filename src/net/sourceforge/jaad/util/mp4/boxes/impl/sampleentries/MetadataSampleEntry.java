@@ -16,7 +16,7 @@ abstract class MetadataSampleEntry extends SampleEntry {
 		super.decode(in);
 
 		contentEncoding = in.readUTFString((int) left, MP4InputStream.UTF8);
-		left -= contentEncoding.length();
+		left -= contentEncoding.length()+1;
 	}
 
 	/**

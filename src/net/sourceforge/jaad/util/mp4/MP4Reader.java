@@ -77,7 +77,7 @@ public class MP4Reader implements BoxTypes {
 		while(true) {
 			box = BoxFactory.parseBox(null, in);
 			//DEBUG:
-			//System.out.println(box.toTreeString(0));
+			System.out.println(box.toTreeString(0));
 			type = box.getType();
 			if(type==MOVIE_BOX) {
 				moovFound = true;
