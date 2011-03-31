@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 
-public abstract class FullContainerBox extends FullBox implements ContainerBox {
+public class FullContainerBox extends FullBox implements ContainerBox {
 
 	protected List<Box> children;
 

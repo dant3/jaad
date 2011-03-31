@@ -3,7 +3,10 @@ package tablegen;
 public class MP4BoxTypes {
 
 	private static final String[][] NAMES = {
+		{"EXTENDED_BOX", "uuid"},
+		{"ADDITIONAL_METADATA_CONTAINER_BOX", "meco"},
 		{"AUDIO_SAMPLE_ENTRY_BOX", "mp4a"},
+		{"BINARY_XML_BOX", "bxml"},
 		{"BIT_RATE_BOX", "btrt"},
 		{"CHUNK_OFFSET_BOX", "stco"},
 		{"CHUNK_LARGE_OFFSET_BOX", "co64"},
@@ -17,15 +20,20 @@ public class MP4BoxTypes {
 		{"EDIT_BOX", "edts"},
 		{"EDIT_LIST_BOX", "elst"},
 		{"ESD_BOX", "esds"},
-		{"EXTENDED_BOX", "uuid"},
 		{"FILE_TYPE_BOX", "ftyp"},
 		{"FREE_SPACE_BOX", "free"},
 		{"HANDLER_BOX", "hdlr"},
 		{"HINT_MEDIA_HEADER_BOX", "hmhd"},
+		{"ITEM_INFORMATION_BOX", "iinf"},
+		{"ITEM_INFORMATION_ENTRY", "infe"},
+		{"ITEM_LOCATION_BOX", "iloc"},
+		{"ITEM_PROTECTION_BOX", "ipro"},
 		{"MEDIA_BOX", "mdia"},
 		{"MEDIA_DATA_BOX", "mdat"},
 		{"MEDIA_HEADER_BOX", "mdhd"},
 		{"MEDIA_INFORMATION_BOX", "minf"},
+		{"META_BOX", "meta"},
+		{"META_BOX_RELATION_BOX", "mere"},
 		{"MOVIE_BOX", "moov"},
 		{"MOVIE_EXTENDS_BOX", "mvex"},
 		{"MOVIE_EXTENDS_HEADER_BOX", "mehd"},
@@ -33,7 +41,8 @@ public class MP4BoxTypes {
 		{"MOVIE_FRAGMENT_HEADER_BOX", "mfhd"},
 		{"MOVIE_HEADER_BOX", "mvhd"},
 		{"NULL_MEDIA_HEADER_BOX", "nmhd"},
-		{"PADDING_BIT_BOX", "padp"},
+		{"PADDING_BIT_BOX", "padb"},
+		{"PRIMARY_ITEM_BOX", "pitm"},
 		{"PROGRESSIVE_DOWNLOAD_INFORMATION_BOX", "pdin"},
 		{"PIXEL_ASPECT_RATIO_BOX", "pasp"},
 		{"SAMPLE_DEPENDENCY_TYPE_BOX", "sdtp"},
@@ -59,8 +68,8 @@ public class MP4BoxTypes {
 		{"USER_DATA_BOX", "udta"},
 		{"VIDEO_MEDIA_HEADER_BOX", "vmhd"},
 		{"TEXT_METADATA_SAMPLE_ENTRY", "mett"},
-		{"XML_METADATA_SAMPLE_ENTRY", "metx"}
-	};
+		{"XML_BOX", "xml "},
+		{"XML_METADATA_SAMPLE_ENTRY", "metx"},};
 
 	public static void main(String[] args) {
 		for(int i = 0; i<NAMES.length; i++) {

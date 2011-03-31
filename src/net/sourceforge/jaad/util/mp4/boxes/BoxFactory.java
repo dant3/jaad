@@ -35,7 +35,7 @@ public class BoxFactory implements BoxTypes {
 		}
 		long type = in.readBytes(4);
 		left -= 4;
-		if(type==EXTENDED_BOX) {
+		if(type==EXTENDED_TYPE) {
 			type = in.readBytes(16);
 			left -= 16;
 		}
@@ -43,7 +43,7 @@ public class BoxFactory implements BoxTypes {
 		final BoxImpl box = forType(type);
 
 		//DEBUG
-		//System.out.println(box.getShortName());
+		System.out.println(box.getShortName());
 		//
 
 		box.setParams(size, type, parent, left);
@@ -65,7 +65,7 @@ public class BoxFactory implements BoxTypes {
 		}
 		long type = in.readBytes(4);
 		left -= 4;
-		if(type==EXTENDED_BOX) {
+		if(type==EXTENDED_TYPE) {
 			type = in.readBytes(16);
 			left -= 16;
 		}
@@ -249,6 +249,36 @@ public class BoxFactory implements BoxTypes {
 				box = new TrackSelectionBox();
 				break;
 			//meta data support
+			case META_BOX:
+				box = new FullContainerBox("Meta Box", "meta");
+				break;
+			case XML_BOX:
+				box = new XMLBox();
+				break;
+			case BINARY_XML_BOX:
+				box = new BinaryXMLBox();
+				break;
+			case ITEM_LOCATION_BOX:
+				box = new ItemLocationBox();
+				break;
+			case PRIMARY_ITEM_BOX:
+				box = new PrimaryItemBox();
+				break;
+			case ITEM_PROTECTION_BOX:
+				box = new ItemProtectionBox();
+				break;
+			case ITEM_INFORMATION_BOX:
+				box = new ItemInformationBox();
+				break;
+			case ITEM_INFORMATION_ENTRY:
+				box = new ItemInformationEntry();
+				break;
+			case ADDITIONAL_METADATA_CONTAINER_BOX:
+				box = new ContainerBoxImpl("Additional Metadata Container Box", "meco");
+				break;
+			case META_BOX_RELATION_BOX:
+				box = new MetaBoxRelationBox();
+				break;
 			//
 			case BIT_RATE_BOX:
 				box = new BitRateBox();
@@ -257,8 +287,19 @@ public class BoxFactory implements BoxTypes {
 				box = new ESDBox();
 				break;
 			default:
+				LOGGER.log(Level.INFO, "unknown box type: {0}", longToString(type));
 				box = new UnknownBox();
 		}
 		return box;
+	}
+
+	//debugging method
+	private static String longToString(long l) {
+		StringBuilder sb = new StringBuilder();
+		sb.append((char) ((l>>24)&0xFF));
+		sb.append((char) ((l>>16)&0xFF));
+		sb.append((char) ((l>>8)&0xFF));
+		sb.append((char) (l&0xFF));
+		return sb.toString();
 	}
 }
