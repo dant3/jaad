@@ -19,8 +19,6 @@ public class HintSampleEntry extends SampleEntry {
 		data = new byte[(int) left];
 		in.readBytes(data);
 		left = 0;
-
-		readChildren(in);
 	}
 
 	public byte[] getData() {

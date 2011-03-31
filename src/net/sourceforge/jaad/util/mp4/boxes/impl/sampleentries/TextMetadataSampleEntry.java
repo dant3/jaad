@@ -31,7 +31,7 @@ public class TextMetadataSampleEntry extends MetadataSampleEntry {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 
-		mimeType = in.readUTFString((int) left);
+		mimeType = in.readUTFString((int) left, MP4InputStream.UTF8);
 		left -= mimeType.length();
 
 		readChildren(in);

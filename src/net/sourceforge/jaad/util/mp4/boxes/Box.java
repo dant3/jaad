@@ -21,7 +21,7 @@ import net.sourceforge.jaad.util.mp4.MP4InputStream;
 
 public interface Box {
 
-	Box getParent();
+	ContainerBox getParent();
 
 	void decode(MP4InputStream in) throws IOException;
 
@@ -32,4 +32,6 @@ public interface Box {
 	String getName();
 
 	String getShortName();
+
+	String toTreeString(int off);
 }

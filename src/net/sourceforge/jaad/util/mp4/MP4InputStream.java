@@ -24,6 +24,9 @@ public class MP4InputStream {
 
 	public static final int MASK8 = 0xFF;
 	public static final int MASK16 = 0xFFFF;
+	public static final String UTF8 = "UTF-8";
+	public static final String UTF16 = "UTF-16";
+	private static final int BYTE_ORDER_MASK = 0xFEFF;
 	private final InputStream in;
 	private long offset = 0;
 
@@ -75,7 +78,7 @@ public class MP4InputStream {
 		return new String(c, 0, pos);
 	}
 
-	public String readUTFString(int max) throws IOException {
+	public String readUTFString(int max, String encoding) throws IOException {
 		byte[] b = new byte[max];
 		int pos = 0;
 		int i;
@@ -87,7 +90,13 @@ public class MP4InputStream {
 		}
 		offset++;
 
-		return new String(b, "UTF-8");
+		return new String(b, encoding);
+	}
+
+	public String readUTFString(int max) throws IOException {
+		int i = (int) readBytes(2);
+		String encoding = (i==BYTE_ORDER_MASK) ? UTF16 : UTF8;
+		return readUTFString(max, encoding);
 	}
 
 	public double readFixedPoint(int len, int mask) throws IOException {

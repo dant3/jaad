@@ -76,6 +76,8 @@ public class MP4Reader implements BoxTypes {
 		boolean moovFound = false;
 		while(true) {
 			box = BoxFactory.parseBox(null, in);
+			//DEBUG:
+			//System.out.println(box.toTreeString(0));
 			type = box.getType();
 			if(type==MOVIE_BOX) {
 				moovFound = true;
@@ -121,8 +123,8 @@ public class MP4Reader implements BoxTypes {
 	private void parseSampleTable(ContainerBox stbl) throws IOException {
 		final SampleDescriptionBox stsd = (SampleDescriptionBox) stbl.getChild(SAMPLE_DESCRIPTION_BOX);
 		if(stsd!=null) {
-			final List<SampleEntry> sampleEntries = stsd.getSampleEntries();
-			final AudioSampleEntry mp4a = (AudioSampleEntry) sampleEntries.get(0);
+			final SampleEntry[] sampleEntries = stsd.getSampleEntries();
+			final AudioSampleEntry mp4a = (AudioSampleEntry) sampleEntries[0];
 			channels = mp4a.getChannelCount();
 			final Box esds = mp4a.getChild(ESD_BOX);
 			if(esds!=null) findDecoderSpecificInfo((ESDBox) esds);

@@ -17,7 +17,7 @@ public class DataEntryUrlBox extends FullBox {
 		super.decode(in);
 
 		if((flags&1)==0) {
-			location = in.readUTFString((int) left);
+			location = in.readUTFString((int) left, MP4InputStream.UTF8);
 			left -= location.length();
 		}
 	}

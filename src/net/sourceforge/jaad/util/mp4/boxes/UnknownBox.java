@@ -22,7 +22,7 @@ import net.sourceforge.jaad.util.mp4.MP4InputStream;
 public class UnknownBox extends BoxImpl {
 
 	public UnknownBox() {
-		super("unknown","");
+		super("unknown", "");
 	}
 
 	@Override

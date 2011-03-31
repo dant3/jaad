@@ -16,14 +16,17 @@
  */
 package net.sourceforge.jaad.util.mp4.boxes;
 
-import net.sourceforge.jaad.util.mp4.boxes.impl.sampleentries.*;
-import java.io.IOException;
+import java.util.logging.Level;
 import net.sourceforge.jaad.util.mp4.MP4InputStream;
 import net.sourceforge.jaad.util.mp4.boxes.impl.*;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 public class BoxFactory implements BoxTypes {
 
-	public static Box parseBox(Box parent, MP4InputStream in) throws IOException {
+	private static final Logger LOGGER = Logger.getLogger("net.sourceforge.jaad.util.mp4.boxes.BoxFactory");
+
+	public static Box parseBox(ContainerBox parent, MP4InputStream in) throws IOException {
 		long size = in.readBytes(4);
 		long left = size-4;
 		if(size==1) {
@@ -40,17 +43,20 @@ public class BoxFactory implements BoxTypes {
 		final BoxImpl box = forType(type);
 
 		//DEBUG
-		System.out.println(box.getShortName());
+		//System.out.println(box.getShortName());
 		//
 
 		box.setParams(size, type, parent, left);
 		box.decode(in);
 		//if mdat found, don't skip
-		if(box.getType()!=MEDIA_DATA_BOX) in.skipBytes(box.getLeft());
+		left = box.getLeft();
+		if(left<0) LOGGER.log(Level.WARNING, "box: {0}, left: {1}", new String[]{box.getShortName(), Long.toString(left)});
+		if(box.getType()!=MEDIA_DATA_BOX) in.skipBytes(left);
 		return box;
 	}
 
-	public static SampleEntry createSampleEntry(Box parent, MP4InputStream in, int handlerType) throws IOException {
+	//TODO: do this without reflection?!
+	public static Box parseBox(MP4InputStream in, Class<? extends BoxImpl> boxClass) throws IOException {
 		long size = in.readBytes(4);
 		long left = size-4;
 		if(size==1) {
@@ -64,72 +70,75 @@ public class BoxFactory implements BoxTypes {
 			left -= 16;
 		}
 
-		SampleEntry entry;
-		switch(handlerType) {
-			case HandlerBox.TYPE_VIDEO:
-				entry = new VideoSampleEntry();
-				break;
-			case HandlerBox.TYPE_SOUND:
-				entry = new AudioSampleEntry();
-				break;
-			case HandlerBox.TYPE_HINT:
-				entry = new HintSampleEntry();
-				break;
-			case HandlerBox.TYPE_META:
-				if(type==TEXT_METADATA_SAMPLE_ENTRY) entry = new TextMetadataSampleEntry();
-				else if(type==XML_METADATA_SAMPLE_ENTRY) entry = new XMLMetadataSampleEntry();
-				else entry = null;
-				break;
-			default:
-				entry = null;
-				break;
+		BoxImpl box = null;
+		try {
+			box = boxClass.newInstance();
+		}
+		catch(InstantiationException ex) {
+		}
+		catch(IllegalAccessException ex) {
 		}
 
-		if(entry!=null) {
+		if(box!=null) {
 			//DEBUG
-			System.out.println(entry.getShortName());
+			//System.out.println(box.getShortName());
 			//
-			entry.setParams(size, type, parent, left);
-			entry.decode(in);
+
+			box.setParams(size, type, null, left);
+			box.decode(in);
+			in.skipBytes(box.getLeft());
 		}
-		return entry;
+		return box;
 	}
 
 	//TODO: this is ugly!
 	private static BoxImpl forType(long type) {
 		BoxImpl box;
 		switch((int) type) {
-			//top level
+			//file structure
 			case FILE_TYPE_BOX:
 				box = new FileTypeBox();
 				break;
 			case MEDIA_DATA_BOX:
 				box = new MediaDataBox();
 				break;
-			//only container
+			case FREE_SPACE_BOX:
+			case SKIP_BOX:
+				box = new FreeSpaceBox(type);
+				break;
+			case PROGRESSIVE_DOWNLOAD_INFORMATION_BOX:
+				box = new ProgressiveDownloadInformationBox();
+				break;
+			//movie structure
 			case MOVIE_BOX:
 				box = new ContainerBoxImpl("Movie Box", "moov");
 				break;
+			case MOVIE_HEADER_BOX:
+				box = new MovieHeaderBox();
+				break;
+			//track structure
 			case TRACK_BOX:
 				box = new ContainerBoxImpl("Track Box", "trak");
 				break;
+			case TRACK_HEADER_BOX:
+				box = new TrackHeaderBox();
+				break;
+			case TRACK_REFERENCE_BOX:
+				box = new TrackReferenceBox();
+				break;
+			//track media structure
 			case MEDIA_BOX:
 				box = new ContainerBoxImpl("Media Box", "mdia");
+				break;
+			case MEDIA_HEADER_BOX:
+				box = new MediaHeaderBox();
+				break;
+			case HANDLER_BOX:
+				box = new HandlerBox();
 				break;
 			case MEDIA_INFORMATION_BOX:
 				box = new ContainerBoxImpl("Media Information Box", "minf");
 				break;
-			case DATA_INFORMATION_BOX:
-				box = new ContainerBoxImpl("Data Information Box", "dinf");
-				break;
-			case MOVIE_EXTENDS_BOX:
-				box = new ContainerBoxImpl("Movie Extends Box", "mvex");
-				break;
-			//
-			case HANDLER_BOX:
-				box = new HandlerBox();
-				break;
-			//media header
 			case VIDEO_MEDIA_HEADER_BOX:
 				box = new VideoMediaHeaderBox();
 				break;
@@ -142,36 +151,56 @@ public class BoxFactory implements BoxTypes {
 			case NULL_MEDIA_HEADER_BOX:
 				box = new FullBox("Null Media Header Box", "nmhd");
 				break;
-			case MOVIE_HEADER_BOX:
-				box = new MovieHeaderBox();
-				break;
-			case TRACK_HEADER_BOX:
-				box = new TrackHeaderBox();
-				break;
-			case MEDIA_HEADER_BOX:
-				box = new MediaHeaderBox();
-				break;
-			//sample table
+			//sample tables
 			case SAMPLE_TABLE_BOX:
-				box = new SampleTableBox();
+				box = new ContainerBoxImpl("Sample Table", "stbl");
 				break;
 			case SAMPLE_DESCRIPTION_BOX:
 				box = new SampleDescriptionBox();
 				break;
-			case BIT_RATE_BOX:
-				box = new BitRateBox();
+			case DEGRADATION_PRIORITY_BOX:
+				box = new DegradationPriorityBox();
 				break;
+			case SAMPLE_SCALE_BOX:
+				box = new SampleScaleBox();
+				break;
+			//track time structures
 			case TIME_TO_SAMPLE_BOX:
 				box = new TimeToSampleBox();
+				break;
+			case SYNC_SAMPLE_BOX:
+				box = new SyncSampleBox();
+				break;
+			case SHADOW_SYNC_SAMPLE_BOX:
+				box = new ShadowSyncSampleBox();
+				break;
+			case SAMPLE_DEPENDENCY_TYPE_BOX:
+				box = new SampleDependencyTypeBox();
+				break;
+			case EDIT_BOX:
+				box = new ContainerBoxImpl("Edit Box", "edts");
+				break;
+			case EDIT_LIST_BOX:
+				box = new EditListBox();
+				break;
+			//track data layout boxes
+			case DATA_INFORMATION_BOX:
+				box = new ContainerBoxImpl("Data Information Box", "dinf");
+				break;
+			case DATA_REFERENCE_BOX:
+				box = new DataReferenceBox();
+				break;
+			case DATA_ENTRY_URL_BOX:
+				box = new DataEntryUrlBox();
+				break;
+			case DATA_ENTRY_URN_BOX:
+				box = new DataEntryUrnBox();
 				break;
 			case SAMPLE_SIZE_BOX:
 				box = new SampleSizeBox();
 				break;
 			case SAMPLE_TO_CHUNK_BOX:
 				box = new SampleToChunkBox();
-				break;
-			case ESD_BOX:
-				box = new ESDBox();
 				break;
 			case CHUNK_OFFSET_BOX:
 			case CHUNK_LARGE_OFFSET_BOX:
@@ -180,22 +209,52 @@ public class BoxFactory implements BoxTypes {
 			case PADDING_BIT_BOX:
 				box = new PaddingBitBox();
 				break;
-			//track data layout boxes
-			case DATA_ENTRY_URL_BOX:
-				box = new DataEntryUrlBox();
-				break;
-			case DATA_ENTRY_URN_BOX:
-				box = new DataEntryUrnBox();
-				break;
-			case DATA_REFERENCE_BOX:
-				box = new DataReferenceBox();
-				break;
-			case DEGRADATION_PRIORITY_BOX:
-				box = new DegradationPriorityBox();
+			case SUB_SAMPLE_INFORMATION_BOX:
+				box = new SubSampleInformationBox();
 				break;
 			//movie fragments
+			case MOVIE_EXTENDS_BOX:
+				box = new ContainerBoxImpl("Movie Extends Box", "mvex");
+				break;
 			case MOVIE_EXTENDS_HEADER_BOX:
 				box = new MovieExtendsHeaderBox();
+				break;
+			case TRACK_EXTENDS_BOX:
+				box = new TrackExtendsBox();
+				break;
+			case MOVIE_FRAGMENT_BOX:
+				box = new ContainerBoxImpl("Movie Fragment Box", "moof");
+				break;
+			case MOVIE_FRAGMENT_HEADER_BOX:
+				box = new MovieFragmentHeaderBox();
+				break;
+			case TRACK_FRAGMENT_BOX:
+				box = new ContainerBoxImpl("Track Fragment Box", "traf");
+				break;
+			//sample group structures
+			case SAMPLE_TO_GROUP_BOX:
+				box = new SampleToGroupBox();
+				break;
+			case SAMPLE_GROUP_DESCRIPTION_BOX:
+				box = new SampleGroupDescriptionBox();
+				break;
+			//user data
+			case USER_DATA_BOX:
+				box = new ContainerBoxImpl("User Data Box", "udta");
+				break;
+			case COPYRIGHT_BOX:
+				box = new CopyrightBox();
+				break;
+			case TRACK_SELECTION_BOX:
+				box = new TrackSelectionBox();
+				break;
+			//meta data support
+			//
+			case BIT_RATE_BOX:
+				box = new BitRateBox();
+				break;
+			case ESD_BOX:
+				box = new ESDBox();
 				break;
 			default:
 				box = new UnknownBox();

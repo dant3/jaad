@@ -38,6 +38,7 @@ public class ChunkOffsetBox extends FullBox {
 		final int entryCount = (int) in.readBytes(4);
 		left -= 4;
 		final int len = (type==BoxTypes.CHUNK_LARGE_OFFSET_BOX) ? 8 : 4;
+		
 		long x;
 		for(int i = 0; i<entryCount; i++) {
 			x = in.readBytes(len);

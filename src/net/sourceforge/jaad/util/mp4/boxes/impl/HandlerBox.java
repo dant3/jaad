@@ -26,7 +26,7 @@ public class HandlerBox extends FullBox {
 	public static final int TYPE_HINT = 1751740020; //hint
 	public static final int TYPE_META = 1835365473; //meta
 	public static final int TYPE_NULL = 1853189228; //null
-	private int handlerType;
+	private long handlerType;
 	private String handlerName;
 
 	public HandlerBox() {
@@ -39,14 +39,14 @@ public class HandlerBox extends FullBox {
 
 		in.skipBytes(4); //pre-defined: 0
 
-		handlerType = (int) in.readBytes(4);
+		handlerType = in.readBytes(4);
 
 		in.readBytes(4); //reserved
 		in.readBytes(4); //reserved
 		in.readBytes(4); //reserved
 		left -= 20;
 
-		handlerName = in.readUTFString((int) left);
+		handlerName = in.readUTFString((int) left, MP4InputStream.UTF8);
 		left -= handlerName.length();
 	}
 
@@ -67,7 +67,7 @@ public class HandlerBox extends FullBox {
 	 *
 	 * @return the handler type
 	 */
-	public int getHandlerType() {
+	public long getHandlerType() {
 		return handlerType;
 	}
 

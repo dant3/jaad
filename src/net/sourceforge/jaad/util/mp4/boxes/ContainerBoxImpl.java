@@ -71,4 +71,18 @@ public class ContainerBoxImpl extends BoxImpl implements ContainerBox {
 		}
 		return b;
 	}
+
+	@Override
+	public String toTreeString(int off) {
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i<off; i++) {
+			sb.append(" ");
+		}
+		sb.append(getShortName()+" ("+getName()+")");
+		for(int i = 0; i<children.size(); i++) {
+			sb.append("\n");
+			sb.append(children.get(i).toTreeString(off+1));
+		}
+		return sb.toString();
+	}
 }

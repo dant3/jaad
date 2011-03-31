@@ -31,10 +31,10 @@ public class XMLMetadataSampleEntry extends MetadataSampleEntry {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 
-		namespace = in.readUTFString((int) left);
+		namespace = in.readUTFString((int) left, MP4InputStream.UTF8);
 		left -= namespace.length();
 
-		schemaLocation = in.readUTFString((int) left);
+		schemaLocation = in.readUTFString((int) left, MP4InputStream.UTF8);
 		left -= schemaLocation.length();
 
 		readChildren(in);

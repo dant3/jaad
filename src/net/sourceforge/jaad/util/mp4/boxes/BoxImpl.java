@@ -23,14 +23,14 @@ public abstract class BoxImpl implements Box {
 
 	private String name, shortName;
 	protected long size, type, left;
-	protected Box parent;
+	protected ContainerBox parent;
 
 	protected BoxImpl(String name, String shortName) {
 		this.name = name;
 		this.shortName = shortName;
 	}
 
-	public void setParams(long size, long type, Box parent, long left) {
+	public void setParams(long size, long type, ContainerBox parent, long left) {
 		this.size = size;
 		this.type = type;
 		this.parent = parent;
@@ -58,7 +58,7 @@ public abstract class BoxImpl implements Box {
 		return size;
 	}
 
-	public Box getParent() {
+	public ContainerBox getParent() {
 		return parent;
 	}
 
@@ -68,5 +68,19 @@ public abstract class BoxImpl implements Box {
 
 	public String getShortName() {
 		return shortName;
+	}
+
+	@Override
+	public String toString() {
+		return name+" ["+shortName+"]";
+	}
+
+	public String toTreeString(int off) {
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i<off; i++) {
+			sb.append(" ");
+		}
+		sb.append(getShortName()+" ("+getName()+")");
+		return sb.toString();
 	}
 }
