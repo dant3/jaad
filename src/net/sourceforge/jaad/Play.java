@@ -16,8 +16,8 @@
  */
 package net.sourceforge.jaad;
 
-import net.sourceforge.jaad.util.mp4.AudioFrame;
-import net.sourceforge.jaad.util.mp4.MP4Reader;
+import net.sourceforge.jaad.mp4.AudioFrame;
+import net.sourceforge.jaad.mp4.MP4Reader;
 import java.io.FileInputStream;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
