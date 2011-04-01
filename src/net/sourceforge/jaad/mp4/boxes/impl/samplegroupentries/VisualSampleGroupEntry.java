@@ -1,4 +1,4 @@
-package net.sourceforge.jaad.util.mp4.boxes.impl.samplegroupentries;
+package net.sourceforge.jaad.mp4.boxes.impl.samplegroupentries;
 
 public class VisualSampleGroupEntry extends SampleGroupDescriptionEntry {
 

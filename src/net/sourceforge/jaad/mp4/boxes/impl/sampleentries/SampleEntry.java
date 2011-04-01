@@ -1,8 +1,8 @@
-package net.sourceforge.jaad.util.mp4.boxes.impl.sampleentries;
+package net.sourceforge.jaad.mp4.boxes.impl.sampleentries;
 
-import net.sourceforge.jaad.util.mp4.MP4InputStream;
+import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
-import net.sourceforge.jaad.util.mp4.boxes.ContainerBoxImpl;
+import net.sourceforge.jaad.mp4.boxes.ContainerBoxImpl;
 
 public abstract class SampleEntry extends ContainerBoxImpl {
 

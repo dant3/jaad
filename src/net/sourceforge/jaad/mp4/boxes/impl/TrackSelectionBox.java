@@ -1,10 +1,10 @@
-package net.sourceforge.jaad.util.mp4.boxes.impl;
+package net.sourceforge.jaad.mp4.boxes.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import net.sourceforge.jaad.util.mp4.MP4InputStream;
-import net.sourceforge.jaad.util.mp4.boxes.FullBox;
+import net.sourceforge.jaad.mp4.MP4InputStream;
+import net.sourceforge.jaad.mp4.boxes.FullBox;
 
 /**
  * A typical presentation stored in a file contains one alternate group per

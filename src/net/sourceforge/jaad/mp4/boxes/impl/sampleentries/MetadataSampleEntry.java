@@ -1,6 +1,6 @@
-package net.sourceforge.jaad.util.mp4.boxes.impl.sampleentries;
+package net.sourceforge.jaad.mp4.boxes.impl.sampleentries;
 
-import net.sourceforge.jaad.util.mp4.MP4InputStream;
+import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
 
 abstract class MetadataSampleEntry extends SampleEntry {

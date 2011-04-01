@@ -1,7 +1,7 @@
-package net.sourceforge.jaad.util.mp4.boxes.impl.sampleentries;
+package net.sourceforge.jaad.mp4.boxes.impl.sampleentries;
 
 import java.io.IOException;
-import net.sourceforge.jaad.util.mp4.MP4InputStream;
+import net.sourceforge.jaad.mp4.MP4InputStream;
 
 public class HintSampleEntry extends SampleEntry {
 

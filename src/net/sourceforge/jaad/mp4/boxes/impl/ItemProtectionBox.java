@@ -1,8 +1,8 @@
-package net.sourceforge.jaad.util.mp4.boxes.impl;
+package net.sourceforge.jaad.mp4.boxes.impl;
 
 import java.io.IOException;
-import net.sourceforge.jaad.util.mp4.MP4InputStream;
-import net.sourceforge.jaad.util.mp4.boxes.FullContainerBox;
+import net.sourceforge.jaad.mp4.MP4InputStream;
+import net.sourceforge.jaad.mp4.boxes.FullContainerBox;
 
 /**
  * The item protection box provides an array of item protection information, for

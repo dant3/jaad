@@ -1,10 +1,10 @@
-package net.sourceforge.jaad.util.mp4.boxes.impl;
+package net.sourceforge.jaad.mp4.boxes.impl;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import net.sourceforge.jaad.util.mp4.MP4InputStream;
-import net.sourceforge.jaad.util.mp4.boxes.FullBox;
+import net.sourceforge.jaad.mp4.MP4InputStream;
+import net.sourceforge.jaad.mp4.boxes.FullBox;
 
 /**
  * The Progressive download information box aids the progressive download of an

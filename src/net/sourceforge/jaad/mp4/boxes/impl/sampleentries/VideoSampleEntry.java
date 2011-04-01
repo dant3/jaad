@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4.boxes.impl.sampleentries;
+package net.sourceforge.jaad.mp4.boxes.impl.sampleentries;
 
-import net.sourceforge.jaad.util.mp4.MP4InputStream;
+import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
 
 public class VideoSampleEntry extends SampleEntry {

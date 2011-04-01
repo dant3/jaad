@@ -1,8 +1,8 @@
-package net.sourceforge.jaad.util.mp4.boxes.impl.samplegroupentries;
+package net.sourceforge.jaad.mp4.boxes.impl.samplegroupentries;
 
-import net.sourceforge.jaad.util.mp4.MP4InputStream;
+import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
-import net.sourceforge.jaad.util.mp4.boxes.BoxImpl;
+import net.sourceforge.jaad.mp4.boxes.BoxImpl;
 
 public abstract class SampleGroupDescriptionEntry extends BoxImpl {
 

@@ -1,8 +1,8 @@
-package net.sourceforge.jaad.util.mp4.boxes.impl;
+package net.sourceforge.jaad.mp4.boxes.impl;
 
 import java.io.IOException;
-import net.sourceforge.jaad.util.mp4.MP4InputStream;
-import net.sourceforge.jaad.util.mp4.boxes.FullBox;
+import net.sourceforge.jaad.mp4.MP4InputStream;
+import net.sourceforge.jaad.mp4.boxes.FullBox;
 
 /**
  * The Copyright box contains a copyright declaration which applies to the

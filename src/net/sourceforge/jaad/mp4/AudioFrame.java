@@ -14,9 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4;
-
-import java.util.Arrays;
+package net.sourceforge.jaad.mp4;
 
 /**
  * The AudioFrame is read and returned by the <code>MP4Reader</code>.

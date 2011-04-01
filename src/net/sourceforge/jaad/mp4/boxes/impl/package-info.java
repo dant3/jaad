@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.util.mp4.boxes.impl;
+package net.sourceforge.jaad.mp4.boxes.impl;
 
 /**
 * Some box types needed to extract all audio data from an MP4 stream.

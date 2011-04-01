@@ -1,4 +1,4 @@
-package net.sourceforge.jaad.util.mp4.boxes;
+package net.sourceforge.jaad.mp4.boxes;
 
 import java.util.Date;
 
