@@ -1,43 +1,56 @@
-profile									supported
+profile					supported
 =================================================
-Main									x
-Low Complexity					LC		x
-Low Delay						LD
-Long Term Prediction			LTP
-Error Resilient LC				ER-LC
-Error Resilient LD				ER-LD
-Error Resilient LTP				ER-LTP
-High Efficiency AAC v1 (SBR)	HE-AAC2	x
-High Efficiency AAC v2 (SBR+PS)	HE-AAC2	x
+Main						x
+Low Complexity			LC		x
+Low Delay			LD
+Long Term Prediction		LTP
+Error Resilient LC		ER-LC
+Error Resilient LD		ER-LD
+Error Resilient LTP		ER-LTP
+High Efficiency AAC v1 (SBR)	HE-AAC2		x
+High Efficiency AAC v2 (SBR+PS)	HE-AAC2		x
 
 -------------------------------------------------
 
 
 
-tool							implemented
+tool					implemented
 ======================================================
-bitstream						x
+bitstream					x
 huffman	decoding				x
-inverse quantization			x
+inverse quantization				x
 interleaved vector quant.
 TwinVQ quantization
 BSAC quantization
-pulse							x
-mid/side stereo (MS)			x
-intensity stereo (IS)			x
+pulse						x
+mid/side stereo (MS)				x
+intensity stereo (IS)				x
 channel coupling				x
-temporal noise shaping (TNS)	x
-intra-channel prediction		x
-long term prediction (LTP)		x
-perceptual noise subst. (PNS)	x
+temporal noise shaping (TNS)			x
+intra-channel prediction			x
+long term prediction (LTP)			x
+perceptual noise subst. (PNS)			x
 filterbank standard				x
 filterbank SSR
 gain control					x
 error resilience				x
-spectral band replication (SBR)	x
-parametric stereo (PS)			x
-small frame support (960/120)	x
+spectral band replication (SBR)			x
+parametric stereo (PS)				x
+small frame support (960/120)			x
+ADIF						x
+ADTS						x
 
-ADIF							x
-ADTS							x
-MP4								x
+
+
+
+MP4 file format			supported
+=========================================
+ISO base media file format v1		x
+ISO v2
+ISO v3
+MP4
+3GPP
+3GPP2
+AVC file format
+JPEG2000
+MPEG-21

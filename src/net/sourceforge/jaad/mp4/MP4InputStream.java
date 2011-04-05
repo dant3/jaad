@@ -20,6 +20,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
 
 public class MP4InputStream {
 
@@ -105,7 +106,7 @@ public class MP4InputStream {
 			pos++;
 		}
 
-		return new String(b, 0, pos, encoding);
+		return new String(b, 0, pos, Charset.forName(encoding));
 	}
 
 	public String readUTFString(int max) throws IOException {

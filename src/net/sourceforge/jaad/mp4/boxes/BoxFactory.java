@@ -64,7 +64,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(MEDIA_DATA_BOX, MediaDataBox.class);
 		BOX_CLASSES.put(MEDIA_HEADER_BOX, MediaHeaderBox.class);
 		BOX_CLASSES.put(MEDIA_INFORMATION_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(META_BOX, FullContainerBox.class);
+		BOX_CLASSES.put(META_BOX, MetaBox.class);
 		BOX_CLASSES.put(META_BOX_RELATION_BOX, MetaBoxRelationBox.class);
 		BOX_CLASSES.put(MOVIE_BOX, ContainerBoxImpl.class);
 		BOX_CLASSES.put(MOVIE_EXTENDS_BOX, ContainerBoxImpl.class);
@@ -117,7 +117,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(COMPOSER_NAME_BOX, ContainerBoxImpl.class);
 		BOX_CLASSES.put(COMMENTS_BOX, ContainerBoxImpl.class);
 		BOX_CLASSES.put(GENRE_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(GENRE_IDV3_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(CUSTOM_GENRE_BOX, ContainerBoxImpl.class);
 		BOX_CLASSES.put(COMPILATION_PART_BOX, ContainerBoxImpl.class);
 		BOX_CLASSES.put(TELEVISION_SHOW_BOX, ContainerBoxImpl.class);
 		BOX_CLASSES.put(TRACK_SORT_BOX, ContainerBoxImpl.class);
@@ -129,14 +129,15 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(LYRICS_BOX, ContainerBoxImpl.class);
 		BOX_CLASSES.put(COVER_BOX, ContainerBoxImpl.class);
 		BOX_CLASSES.put(SOFTWARE_INFORMATION_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(CUSTOM_ITUNES_METADATA_BOX, ContainerBoxImpl.class);
 		BOX_CLASSES.put(ITUNES_METADATA_BOX, ITunesMetadataBox.class);
+		BOX_CLASSES.put(ITUNES_METADATA_NAME_BOX, ITunesMetadataNameBox.class);
 		//parameter
 		PARAMETER.put(ADDITIONAL_METADATA_CONTAINER_BOX, new String[]{"Additional Metadata Container Box"});
 		PARAMETER.put(DATA_INFORMATION_BOX, new String[]{"Data Information Box"});
 		PARAMETER.put(EDIT_BOX, new String[]{"Edit Box"});
 		PARAMETER.put(MEDIA_BOX, new String[]{"Media Box"});
 		PARAMETER.put(MEDIA_INFORMATION_BOX, new String[]{"Media Information Box"});
-		PARAMETER.put(META_BOX, new String[]{"Meta Box"});
 		PARAMETER.put(MOVIE_BOX, new String[]{"Movie Box"});
 		PARAMETER.put(MOVIE_EXTENDS_BOX, new String[]{"Movie Extends Box"});
 		PARAMETER.put(MOVIE_FRAGMENT_BOX, new String[]{"Movie Fragment Box"});
@@ -158,7 +159,7 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(COMPOSER_NAME_BOX, new String[]{"Composer Name Box"});
 		PARAMETER.put(COMMENTS_BOX, new String[]{"Comments Box"});
 		PARAMETER.put(GENRE_BOX, new String[]{"Genre Box"});
-		PARAMETER.put(GENRE_IDV3_BOX, new String[]{"Genre IDv3 Box"});
+		PARAMETER.put(CUSTOM_GENRE_BOX, new String[]{"Custom Genre Box"});
 		PARAMETER.put(COMPILATION_PART_BOX, new String[]{"Compilation Part Box"});
 		PARAMETER.put(TELEVISION_SHOW_BOX, new String[]{"Television Show Box"});
 		PARAMETER.put(TRACK_SORT_BOX, new String[]{"Track Sort Box"});
@@ -170,6 +171,7 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(LYRICS_BOX, new String[]{"Lyrics Box"});
 		PARAMETER.put(COVER_BOX, new String[]{"Cover Box"});
 		PARAMETER.put(SOFTWARE_INFORMATION_BOX, new String[]{"Software Information Box"});
+		PARAMETER.put(CUSTOM_ITUNES_METADATA_BOX, new String[]{"Custom iTunes Metadata Box"});
 	}
 
 	public static Box parseBox(ContainerBox parent, MP4InputStream in) throws IOException {
@@ -192,7 +194,7 @@ public class BoxFactory implements BoxTypes {
 		box.decode(in);
 		//DEBUG:
 		//System.out.println(box.getShortName());
-		
+
 		//if mdat found, don't skip
 		//TODO: what if random access can be used??
 		left = box.getLeft();
@@ -237,18 +239,19 @@ public class BoxFactory implements BoxTypes {
 	private static BoxImpl forType(long type) {
 		BoxImpl box = null;
 
-		Long l = Long.valueOf(type);
+		final Long l = Long.valueOf(type);
 		if(BOX_CLASSES.containsKey(l)) {
 			Class<? extends BoxImpl> cl = BOX_CLASSES.get(l);
 			if(PARAMETER.containsKey(l)) {
-				String[] s = PARAMETER.get(l);
+				final String t = typeToString(type);
+				final String[] s = PARAMETER.get(l);
 				try {
 					Constructor<? extends BoxImpl> con = cl.getConstructor(String.class, String.class);
-					box = con.newInstance(s[0], typeToString(type));
+					box = con.newInstance(s[0], t);
 				}
 				catch(Exception e) {
-					LOGGER.log(Level.WARNING, "could not call constructor for "+typeToString(type), e);
-					box = new UnknownBox();
+					LOGGER.log(Level.WARNING, "could not call constructor for "+t, e);
+					box = new UnknownBox(t);
 				}
 			}
 			else {
@@ -261,7 +264,7 @@ public class BoxFactory implements BoxTypes {
 			}
 		}
 
-		if(box==null) box = new UnknownBox();
+		if(box==null) box = new UnknownBox(typeToString(l));
 		return box;
 	}
 

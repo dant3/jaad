@@ -103,8 +103,8 @@ public interface BoxTypes {
 	long TEMPO_BOX = 1953329263l; //tmpo
 	long COMPOSER_NAME_BOX = 2843177588l; //©wrt
 	long COMMENTS_BOX = 2841865588l; //©cmt
-	long GENRE_BOX = 2842125678l; //©gen
-	long GENRE_IDV3_BOX = 1735291493l; //gnre
+	long GENRE_BOX = 1735291493l; //gnre
+	long CUSTOM_GENRE_BOX = 2842125678l; //©gen
 	long COMPILATION_PART_BOX = 1668311404l; //cpil
 	long TELEVISION_SHOW_BOX = 1953919848l; //tvsh
 	long TRACK_SORT_BOX = 1936682605l; //sonm
@@ -116,5 +116,7 @@ public interface BoxTypes {
 	long LYRICS_BOX = 2842458482l; //©lyr
 	long COVER_BOX = 1668249202l; //covr
 	long SOFTWARE_INFORMATION_BOX = 2842980207l; //©too
+	long CUSTOM_ITUNES_METADATA_BOX = 757935405l; //----
 	long ITUNES_METADATA_BOX = 1684108385l; //data
+	long ITUNES_METADATA_NAME_BOX = 1851878757l; //name
 }

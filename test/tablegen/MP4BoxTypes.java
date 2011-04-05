@@ -34,7 +34,7 @@ public class MP4BoxTypes {
 		{"MEDIA_DATA_BOX", "mdat", "MediaDataBox.class"},
 		{"MEDIA_HEADER_BOX", "mdhd", "MediaHeaderBox.class"},
 		{"MEDIA_INFORMATION_BOX", "minf", "ContainerBoxImpl.class", "Media Information Box"},
-		{"META_BOX", "meta", "FullContainerBox.class", "Meta Box"},
+		{"META_BOX", "meta", "MetaBox.class"},
 		{"META_BOX_RELATION_BOX", "mere", "MetaBoxRelationBox.class"},
 		{"MOVIE_BOX", "moov", "ContainerBoxImpl.class", "Movie Box"},
 		{"MOVIE_EXTENDS_BOX", "mvex", "ContainerBoxImpl.class", "Movie Extends Box"},
@@ -90,8 +90,8 @@ public class MP4BoxTypes {
 		{"TEMPO_BOX", "tmpo", "ContainerBoxImpl.class", "Tempo Box"},
 		{"COMPOSER_NAME_BOX", "©wrt", "ContainerBoxImpl.class", "Composer Name Box"},
 		{"COMMENTS_BOX", "©cmt", "ContainerBoxImpl.class", "Comments Box"},
-		{"GENRE_BOX", "©gen", "ContainerBoxImpl.class", "Genre Box"},
-		{"GENRE_IDV3_BOX", "gnre", "ContainerBoxImpl.class", "Genre IDv3 Box"},
+		{"GENRE_BOX", "gnre", "ContainerBoxImpl.class", "Genre Box"},
+		{"CUSTOM_GENRE_BOX", "©gen", "ContainerBoxImpl.class", "Custom Genre Box"},
 		{"COMPILATION_PART_BOX", "cpil ", "ContainerBoxImpl.class", "Compilation Part Box"},
 		{"TELEVISION_SHOW_BOX", "tvsh", "ContainerBoxImpl.class", "Television Show Box"},
 		{"TRACK_SORT_BOX", "sonm", "ContainerBoxImpl.class", "Track Sort Box"},
@@ -103,7 +103,9 @@ public class MP4BoxTypes {
 		{"LYRICS_BOX", "©lyr", "ContainerBoxImpl.class", "Lyrics Box"},
 		{"COVER_BOX", "covr", "ContainerBoxImpl.class", "Cover Box"},
 		{"SOFTWARE_INFORMATION_BOX", "©too", "ContainerBoxImpl.class", "Software Information Box"},
-		{"ITUNES_METADATA_BOX", "data", "ITunesMetadataBox.class"}
+		{"CUSTOM_ITUNES_METADATA_BOX", "----", "ContainerBoxImpl.class", "Custom iTunes Metadata Box"},
+		{"ITUNES_METADATA_BOX", "data", "ITunesMetadataBox.class"},
+		{"ITUNES_METADATA_NAME_BOX", "name", "ITunesMetadataNameBox.class"}
 	};
 
 	public static void main(String[] args) {
