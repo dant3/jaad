@@ -20,7 +20,6 @@ import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.BoxFactory;
 import net.sourceforge.jaad.mp4.boxes.BoxImpl;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
-import net.sourceforge.jaad.mp4.boxes.ContainerBox;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.*;
 import java.io.IOException;

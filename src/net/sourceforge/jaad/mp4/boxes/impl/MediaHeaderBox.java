@@ -19,8 +19,6 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
-import java.util.Date;
-import net.sourceforge.jaad.mp4.boxes.Utils;
 
 /**
  * The media header declares overall information that is media-independent, and relevant to characteristics of
@@ -28,8 +26,7 @@ import net.sourceforge.jaad.mp4.boxes.Utils;
  */
 public class MediaHeaderBox extends FullBox {
 
-	private Date creationTime, modificationTime;
-	private long timeScale, duration;
+	private long creationTime, modificationTime, timeScale, duration;
 	private String language;
 
 	public MediaHeaderBox() {
@@ -40,14 +37,14 @@ public class MediaHeaderBox extends FullBox {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 		if(version==1) {
-			creationTime = Utils.getDate(in.readBytes(8));
-			modificationTime = Utils.getDate(in.readBytes(8));
+			creationTime = in.readBytes(8);
+			modificationTime = in.readBytes(8);
 			timeScale = in.readBytes(4);
 			duration = in.readBytes(8);
 		}
 		else {
-			creationTime = Utils.getDate(in.readBytes(4));
-			modificationTime = Utils.getDate(in.readBytes(4));
+			creationTime = in.readBytes(4);
+			modificationTime = in.readBytes(4);
 			timeScale = in.readBytes(4);
 			duration = in.readBytes(4);
 		}
@@ -70,7 +67,7 @@ public class MediaHeaderBox extends FullBox {
 	 * presentation in seconds since midnight, Jan. 1, 1904, in UTC time.
 	 * @return the creation time
 	 */
-	public Date getCreationTime() {
+	public long getCreationTime() {
 		return creationTime;
 	}
 
@@ -79,7 +76,7 @@ public class MediaHeaderBox extends FullBox {
 	 * the presentation was modified in seconds since midnight, Jan. 1, 1904,
 	 * in UTC time.
 	 */
-	public Date getModificationTime() {
+	public long getModificationTime() {
 		return modificationTime;
 	}
 

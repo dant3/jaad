@@ -77,7 +77,7 @@ public class MP4Reader implements BoxTypes {
 		while(true) {
 			box = BoxFactory.parseBox(null, in);
 			//DEBUG:
-			System.out.println(box.toTreeString(0));
+			//System.out.println(box.toTreeString(0));
 			type = box.getType();
 			if(type==MOVIE_BOX) {
 				moovFound = true;
@@ -161,9 +161,10 @@ public class MP4Reader implements BoxTypes {
 				if(e.getChildren().size()>0) {
 					children2 = e.getChildren();
 					for(EntryDescriptor e2 : children2) {
-						if(e2.getType()==EntryDescriptor.DECODER_SPECIFIC_INFO_DESCRIPTOR) {
-							decoderSpecificInfo = e2.getDSID();
-							return;
+						switch(e2.getType()) {
+							case EntryDescriptor.TYPE_DECODER_SPECIFIC_INFO_DESCRIPTOR:
+								decoderSpecificInfo = e2.getDSID();
+								break;
 						}
 					}
 				}

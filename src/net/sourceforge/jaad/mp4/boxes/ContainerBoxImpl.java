@@ -42,11 +42,11 @@ public class ContainerBoxImpl extends BoxImpl implements ContainerBox {
 		}
 	}
 
-	public Box getChild(int type) {
+	public Box getChild(long type) {
 		return getChild(type, 0);
 	}
 
-	public Box getChild(int type, int num) {
+	public Box getChild(long type, int num) {
 		Box box = null, b = null;
 		for(int i = 0; i<children.size(); i++) {
 			b = children.get(i);
@@ -61,7 +61,19 @@ public class ContainerBoxImpl extends BoxImpl implements ContainerBox {
 		return box;
 	}
 
-	public boolean containsChild(int type) {
+	public List<Box> getChildren() {
+		return children;
+	}
+
+	public List<Box> getChildren(long type) {
+		List<Box> l = new ArrayList<Box>();
+		for(Box box : children) {
+			if(box.getType()==type) l.add(box);
+		}
+		return l;
+	}
+
+	public boolean containsChild(long type) {
 		boolean b = false;
 		for(Box box : children) {
 			if(box.getType()==type) {

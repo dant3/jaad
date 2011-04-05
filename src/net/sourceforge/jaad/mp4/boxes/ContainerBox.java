@@ -16,11 +16,17 @@
  */
 package net.sourceforge.jaad.mp4.boxes;
 
+import java.util.List;
+
 public interface ContainerBox extends Box {
 
-	Box getChild(int type);
-	
-	Box getChild(int type,int num);
+	Box getChild(long type);
 
-	boolean containsChild(int type);
+	Box getChild(long type, int num);
+
+	List<Box> getChildren();
+
+	List<Box> getChildren(long type);
+
+	boolean containsChild(long type);
 }

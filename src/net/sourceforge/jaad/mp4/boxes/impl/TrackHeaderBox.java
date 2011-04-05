@@ -38,6 +38,7 @@ import net.sourceforge.jaad.mp4.boxes.FullBox;
  */
 public class TrackHeaderBox extends FullBox {
 
+	private boolean enabled, inMovie, inPreview;
 	private long creationTime, modificationTime, duration;
 	private int trackID, layer, alternateGroup;
 	private double volume, width, height;
@@ -51,6 +52,11 @@ public class TrackHeaderBox extends FullBox {
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
+
+		enabled = (flags&1)==1;
+		inMovie = (flags&2)==2;
+		inPreview = (flags&4)==4;
+
 		if(version==1) {
 			creationTime = in.readBytes(8);
 			modificationTime = in.readBytes(8);
@@ -93,7 +99,7 @@ public class TrackHeaderBox extends FullBox {
 	 * @return true if the track is enabled
 	 */
 	public boolean isTrackEnabled() {
-		return (flags&1)==1;
+		return enabled;
 	}
 
 	/**
@@ -101,7 +107,7 @@ public class TrackHeaderBox extends FullBox {
 	 * @return true if the track is used
 	 */
 	public boolean isTrackInMovie() {
-		return (flags&2)==2;
+		return inMovie;
 	}
 
 	/**
@@ -110,7 +116,7 @@ public class TrackHeaderBox extends FullBox {
 	 * @return true if the track is used in previews
 	 */
 	public boolean isTrackInPreview() {
-		return (flags&4)==4;
+		return inPreview;
 	}
 
 	/**

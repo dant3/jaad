@@ -18,15 +18,162 @@ package net.sourceforge.jaad.mp4.boxes;
 
 import java.util.logging.Level;
 import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.impl.*;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
+import net.sourceforge.jaad.mp4.boxes.impl.*;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.*;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.AudioSampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.TextMetadataSampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.XMLMetadataSampleEntry;
 
 public class BoxFactory implements BoxTypes {
 
 	private static final Logger LOGGER = Logger.getLogger("net.sourceforge.jaad.util.mp4.boxes.BoxFactory");
+	private static final Map<Long, Class<? extends BoxImpl>> BOX_CLASSES = new HashMap<Long, Class<? extends BoxImpl>>();
+	private static final Map<Long, String[]> PARAMETER = new HashMap<Long, String[]>();
+
+	static {
+		//classes
+		BOX_CLASSES.put(ADDITIONAL_METADATA_CONTAINER_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(BINARY_XML_BOX, BinaryXMLBox.class);
+		BOX_CLASSES.put(BIT_RATE_BOX, BitRateBox.class);
+		BOX_CLASSES.put(CHUNK_OFFSET_BOX, ChunkOffsetBox.class);
+		BOX_CLASSES.put(CHUNK_LARGE_OFFSET_BOX, ChunkOffsetBox.class);
+		BOX_CLASSES.put(CLEAN_APERTURE_BOX, CleanApertureBox.class);
+		BOX_CLASSES.put(COPYRIGHT_BOX, CopyrightBox.class);
+		BOX_CLASSES.put(DATA_ENTRY_URN_BOX, DataEntryUrnBox.class);
+		BOX_CLASSES.put(DATA_ENTRY_URL_BOX, DataEntryUrlBox.class);
+		BOX_CLASSES.put(DATA_INFORMATION_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(DATA_REFERENCE_BOX, DataReferenceBox.class);
+		BOX_CLASSES.put(DEGRADATION_PRIORITY_BOX, DegradationPriorityBox.class);
+		BOX_CLASSES.put(EDIT_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(EDIT_LIST_BOX, EditListBox.class);
+		BOX_CLASSES.put(ESD_BOX, ESDBox.class);
+		BOX_CLASSES.put(FILE_TYPE_BOX, FileTypeBox.class);
+		BOX_CLASSES.put(FREE_SPACE_BOX, FreeSpaceBox.class);
+		BOX_CLASSES.put(HANDLER_BOX, HandlerBox.class);
+		BOX_CLASSES.put(HINT_MEDIA_HEADER_BOX, HintMediaHeaderBox.class);
+		BOX_CLASSES.put(ITEM_INFORMATION_BOX, ItemInformationBox.class);
+		BOX_CLASSES.put(ITEM_INFORMATION_ENTRY, ItemInformationEntry.class);
+		BOX_CLASSES.put(ITEM_LOCATION_BOX, ItemLocationBox.class);
+		BOX_CLASSES.put(ITEM_PROTECTION_BOX, ItemProtectionBox.class);
+		BOX_CLASSES.put(MEDIA_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(MEDIA_DATA_BOX, MediaDataBox.class);
+		BOX_CLASSES.put(MEDIA_HEADER_BOX, MediaHeaderBox.class);
+		BOX_CLASSES.put(MEDIA_INFORMATION_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(META_BOX, FullContainerBox.class);
+		BOX_CLASSES.put(META_BOX_RELATION_BOX, MetaBoxRelationBox.class);
+		BOX_CLASSES.put(MOVIE_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(MOVIE_EXTENDS_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(MOVIE_EXTENDS_HEADER_BOX, MovieExtendsHeaderBox.class);
+		BOX_CLASSES.put(MOVIE_FRAGMENT_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(MOVIE_FRAGMENT_HEADER_BOX, MovieFragmentHeaderBox.class);
+		BOX_CLASSES.put(MOVIE_HEADER_BOX, MovieHeaderBox.class);
+		BOX_CLASSES.put(NULL_MEDIA_HEADER_BOX, FullBox.class);
+		BOX_CLASSES.put(PADDING_BIT_BOX, PaddingBitBox.class);
+		BOX_CLASSES.put(PIXEL_ASPECT_RATIO_BOX, PixelAspectRatioBox.class);
+		BOX_CLASSES.put(PRIMARY_ITEM_BOX, PrimaryItemBox.class);
+		BOX_CLASSES.put(PROGRESSIVE_DOWNLOAD_INFORMATION_BOX, ProgressiveDownloadInformationBox.class);
+		BOX_CLASSES.put(SAMPLE_DEPENDENCY_TYPE_BOX, SampleDependencyTypeBox.class);
+		BOX_CLASSES.put(SAMPLE_DESCRIPTION_BOX, SampleDescriptionBox.class);
+		BOX_CLASSES.put(SAMPLE_GROUP_DESCRIPTION_BOX, SampleGroupDescriptionBox.class);
+		BOX_CLASSES.put(SAMPLE_SCALE_BOX, SampleScaleBox.class);
+		BOX_CLASSES.put(SAMPLE_SIZE_BOX, SampleSizeBox.class);
+		BOX_CLASSES.put(SAMPLE_TABLE_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(SAMPLE_TO_CHUNK_BOX, SampleToChunkBox.class);
+		BOX_CLASSES.put(SAMPLE_TO_GROUP_BOX, SampleToGroupBox.class);
+		BOX_CLASSES.put(SHADOW_SYNC_SAMPLE_BOX, ShadowSyncSampleBox.class);
+		BOX_CLASSES.put(SKIP_BOX, SkipBox.class);
+		BOX_CLASSES.put(SOUND_MEDIA_HEADER_BOX, SoundMediaHeaderBox.class);
+		BOX_CLASSES.put(SUB_SAMPLE_INFORMATION_BOX, SubSampleInformationBox.class);
+		BOX_CLASSES.put(SYNC_SAMPLE_BOX, SyncSampleBox.class);
+		BOX_CLASSES.put(TIME_TO_SAMPLE_BOX, TimeToSampleBox.class);
+		BOX_CLASSES.put(TRACK_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(TRACK_EXTENDS_BOX, TrackExtendsBox.class);
+		BOX_CLASSES.put(TRACK_FRAGMENT_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(TRACK_HEADER_BOX, TrackHeaderBox.class);
+		BOX_CLASSES.put(TRACK_REFERENCE_BOX, TrackReferenceBox.class);
+		BOX_CLASSES.put(TRACK_SELECTION_BOX, TrackSelectionBox.class);
+		BOX_CLASSES.put(USER_DATA_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(VIDEO_MEDIA_HEADER_BOX, VideoMediaHeaderBox.class);
+		BOX_CLASSES.put(XML_BOX, XMLBox.class);
+		BOX_CLASSES.put(AUDIO_SAMPLE_ENTRY, AudioSampleEntry.class);
+		BOX_CLASSES.put(TEXT_METADATA_SAMPLE_ENTRY, TextMetadataSampleEntry.class);
+		BOX_CLASSES.put(XML_METADATA_SAMPLE_ENTRY, XMLMetadataSampleEntry.class);
+		BOX_CLASSES.put(ID3_TAG_BOX, ID3TagBox.class);
+		BOX_CLASSES.put(ITUNES_META_LIST_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(TRACK_NAME_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(ARTIST_NAME_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(ALBUM_ARTIST_NAME_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(ALBUM_NAME_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(GROUPING_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(PUBLICATION_DATE_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(TRACK_NUMBER_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(DISK_NUMBER_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(TEMPO_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(COMPOSER_NAME_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(COMMENTS_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(GENRE_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(GENRE_IDV3_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(COMPILATION_PART_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(TELEVISION_SHOW_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(TRACK_SORT_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(ARTIST_SORT_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(ALBUM_ARTIST_SORT_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(ALBUM_SORT_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(COMPOSER_SORT_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(TELEVISION_SHOW_SORT_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(LYRICS_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(COVER_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(SOFTWARE_INFORMATION_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(ITUNES_METADATA_BOX, ITunesMetadataBox.class);
+		//parameter
+		PARAMETER.put(ADDITIONAL_METADATA_CONTAINER_BOX, new String[]{"Additional Metadata Container Box"});
+		PARAMETER.put(DATA_INFORMATION_BOX, new String[]{"Data Information Box"});
+		PARAMETER.put(EDIT_BOX, new String[]{"Edit Box"});
+		PARAMETER.put(MEDIA_BOX, new String[]{"Media Box"});
+		PARAMETER.put(MEDIA_INFORMATION_BOX, new String[]{"Media Information Box"});
+		PARAMETER.put(META_BOX, new String[]{"Meta Box"});
+		PARAMETER.put(MOVIE_BOX, new String[]{"Movie Box"});
+		PARAMETER.put(MOVIE_EXTENDS_BOX, new String[]{"Movie Extends Box"});
+		PARAMETER.put(MOVIE_FRAGMENT_BOX, new String[]{"Movie Fragment Box"});
+		PARAMETER.put(NULL_MEDIA_HEADER_BOX, new String[]{"Null Media Header Box"});
+		PARAMETER.put(SAMPLE_TABLE_BOX, new String[]{"Sample Table Box"});
+		PARAMETER.put(TRACK_BOX, new String[]{"Track Box"});
+		PARAMETER.put(TRACK_FRAGMENT_BOX, new String[]{"Track Fragment Box"});
+		PARAMETER.put(USER_DATA_BOX, new String[]{"User Data Box"});
+		PARAMETER.put(ITUNES_META_LIST_BOX, new String[]{"iTunes Meta List Box"});
+		PARAMETER.put(TRACK_NAME_BOX, new String[]{"Track Name Box"});
+		PARAMETER.put(ARTIST_NAME_BOX, new String[]{"Artist Name BOx"});
+		PARAMETER.put(ALBUM_ARTIST_NAME_BOX, new String[]{"Album Artist Name Box"});
+		PARAMETER.put(ALBUM_NAME_BOX, new String[]{"Album Name Box"});
+		PARAMETER.put(GROUPING_BOX, new String[]{"Grouping Box"});
+		PARAMETER.put(PUBLICATION_DATE_BOX, new String[]{"Publication Date Box"});
+		PARAMETER.put(TRACK_NUMBER_BOX, new String[]{"Track Number Box"});
+		PARAMETER.put(DISK_NUMBER_BOX, new String[]{"Disk Number Box"});
+		PARAMETER.put(TEMPO_BOX, new String[]{"Tempo Box"});
+		PARAMETER.put(COMPOSER_NAME_BOX, new String[]{"Composer Name Box"});
+		PARAMETER.put(COMMENTS_BOX, new String[]{"Comments Box"});
+		PARAMETER.put(GENRE_BOX, new String[]{"Genre Box"});
+		PARAMETER.put(GENRE_IDV3_BOX, new String[]{"Genre IDv3 Box"});
+		PARAMETER.put(COMPILATION_PART_BOX, new String[]{"Compilation Part Box"});
+		PARAMETER.put(TELEVISION_SHOW_BOX, new String[]{"Television Show Box"});
+		PARAMETER.put(TRACK_SORT_BOX, new String[]{"Track Sort Box"});
+		PARAMETER.put(ARTIST_SORT_BOX, new String[]{"Artist Sort Box"});
+		PARAMETER.put(ALBUM_ARTIST_SORT_BOX, new String[]{"Album Artist Sort Box"});
+		PARAMETER.put(ALBUM_SORT_BOX, new String[]{"Album Sort Box"});
+		PARAMETER.put(COMPOSER_SORT_BOX, new String[]{"Composer Sort Box"});
+		PARAMETER.put(TELEVISION_SHOW_SORT_BOX, new String[]{"Television Show Sort Box"});
+		PARAMETER.put(LYRICS_BOX, new String[]{"Lyrics Box"});
+		PARAMETER.put(COVER_BOX, new String[]{"Cover Box"});
+		PARAMETER.put(SOFTWARE_INFORMATION_BOX, new String[]{"Software Information Box"});
+	}
 
 	public static Box parseBox(ContainerBox parent, MP4InputStream in) throws IOException {
+		final long x = in.getOffset();
 		long size = in.readBytes(4);
 		long left = size-4;
 		if(size==1) {
@@ -41,21 +188,19 @@ public class BoxFactory implements BoxTypes {
 		}
 
 		final BoxImpl box = forType(type);
-
-		//DEBUG
-		//System.out.println(box.getShortName());
-		//
-
 		box.setParams(size, type, parent, left);
 		box.decode(in);
+		//DEBUG:
+		//System.out.println(box.getShortName());
+		
 		//if mdat found, don't skip
+		//TODO: what if random access can be used??
 		left = box.getLeft();
-		if(left<0) LOGGER.log(Level.WARNING, "box: {0}, left: {1}", new String[]{box.getShortName(), Long.toString(left)});
+		if(left<0) LOGGER.log(Level.WARNING, "box: {0}, left: {1}, offset: {2}", new String[]{box.getShortName(), Long.toString(left), Long.toString(in.getOffset())});
 		if(box.getType()!=MEDIA_DATA_BOX) in.skipBytes(left);
 		return box;
 	}
 
-	//TODO: do this without reflection?!
 	public static Box parseBox(MP4InputStream in, Class<? extends BoxImpl> boxClass) throws IOException {
 		long size = in.readBytes(4);
 		long left = size-4;
@@ -80,226 +225,52 @@ public class BoxFactory implements BoxTypes {
 		}
 
 		if(box!=null) {
-			//DEBUG
-			//System.out.println(box.getShortName());
-			//
-
 			box.setParams(size, type, null, left);
 			box.decode(in);
 			in.skipBytes(box.getLeft());
+			//DEBUG:
+			//System.out.println(box.getShortName());
 		}
 		return box;
 	}
 
-	//TODO: this is ugly!
 	private static BoxImpl forType(long type) {
-		BoxImpl box;
-		switch((int) type) {
-			//file structure
-			case FILE_TYPE_BOX:
-				box = new FileTypeBox();
-				break;
-			case MEDIA_DATA_BOX:
-				box = new MediaDataBox();
-				break;
-			case FREE_SPACE_BOX:
-			case SKIP_BOX:
-				box = new FreeSpaceBox(type);
-				break;
-			case PROGRESSIVE_DOWNLOAD_INFORMATION_BOX:
-				box = new ProgressiveDownloadInformationBox();
-				break;
-			//movie structure
-			case MOVIE_BOX:
-				box = new ContainerBoxImpl("Movie Box", "moov");
-				break;
-			case MOVIE_HEADER_BOX:
-				box = new MovieHeaderBox();
-				break;
-			//track structure
-			case TRACK_BOX:
-				box = new ContainerBoxImpl("Track Box", "trak");
-				break;
-			case TRACK_HEADER_BOX:
-				box = new TrackHeaderBox();
-				break;
-			case TRACK_REFERENCE_BOX:
-				box = new TrackReferenceBox();
-				break;
-			//track media structure
-			case MEDIA_BOX:
-				box = new ContainerBoxImpl("Media Box", "mdia");
-				break;
-			case MEDIA_HEADER_BOX:
-				box = new MediaHeaderBox();
-				break;
-			case HANDLER_BOX:
-				box = new HandlerBox();
-				break;
-			case MEDIA_INFORMATION_BOX:
-				box = new ContainerBoxImpl("Media Information Box", "minf");
-				break;
-			case VIDEO_MEDIA_HEADER_BOX:
-				box = new VideoMediaHeaderBox();
-				break;
-			case SOUND_MEDIA_HEADER_BOX:
-				box = new SoundMediaHeaderBox();
-				break;
-			case HINT_MEDIA_HEADER_BOX:
-				box = new HintMediaHeaderBox();
-				break;
-			case NULL_MEDIA_HEADER_BOX:
-				box = new FullBox("Null Media Header Box", "nmhd");
-				break;
-			//sample tables
-			case SAMPLE_TABLE_BOX:
-				box = new ContainerBoxImpl("Sample Table", "stbl");
-				break;
-			case SAMPLE_DESCRIPTION_BOX:
-				box = new SampleDescriptionBox();
-				break;
-			case DEGRADATION_PRIORITY_BOX:
-				box = new DegradationPriorityBox();
-				break;
-			case SAMPLE_SCALE_BOX:
-				box = new SampleScaleBox();
-				break;
-			//track time structures
-			case TIME_TO_SAMPLE_BOX:
-				box = new TimeToSampleBox();
-				break;
-			case SYNC_SAMPLE_BOX:
-				box = new SyncSampleBox();
-				break;
-			case SHADOW_SYNC_SAMPLE_BOX:
-				box = new ShadowSyncSampleBox();
-				break;
-			case SAMPLE_DEPENDENCY_TYPE_BOX:
-				box = new SampleDependencyTypeBox();
-				break;
-			case EDIT_BOX:
-				box = new ContainerBoxImpl("Edit Box", "edts");
-				break;
-			case EDIT_LIST_BOX:
-				box = new EditListBox();
-				break;
-			//track data layout boxes
-			case DATA_INFORMATION_BOX:
-				box = new ContainerBoxImpl("Data Information Box", "dinf");
-				break;
-			case DATA_REFERENCE_BOX:
-				box = new DataReferenceBox();
-				break;
-			case DATA_ENTRY_URL_BOX:
-				box = new DataEntryUrlBox();
-				break;
-			case DATA_ENTRY_URN_BOX:
-				box = new DataEntryUrnBox();
-				break;
-			case SAMPLE_SIZE_BOX:
-				box = new SampleSizeBox();
-				break;
-			case SAMPLE_TO_CHUNK_BOX:
-				box = new SampleToChunkBox();
-				break;
-			case CHUNK_OFFSET_BOX:
-			case CHUNK_LARGE_OFFSET_BOX:
-				box = new ChunkOffsetBox();
-				break;
-			case PADDING_BIT_BOX:
-				box = new PaddingBitBox();
-				break;
-			case SUB_SAMPLE_INFORMATION_BOX:
-				box = new SubSampleInformationBox();
-				break;
-			//movie fragments
-			case MOVIE_EXTENDS_BOX:
-				box = new ContainerBoxImpl("Movie Extends Box", "mvex");
-				break;
-			case MOVIE_EXTENDS_HEADER_BOX:
-				box = new MovieExtendsHeaderBox();
-				break;
-			case TRACK_EXTENDS_BOX:
-				box = new TrackExtendsBox();
-				break;
-			case MOVIE_FRAGMENT_BOX:
-				box = new ContainerBoxImpl("Movie Fragment Box", "moof");
-				break;
-			case MOVIE_FRAGMENT_HEADER_BOX:
-				box = new MovieFragmentHeaderBox();
-				break;
-			case TRACK_FRAGMENT_BOX:
-				box = new ContainerBoxImpl("Track Fragment Box", "traf");
-				break;
-			//sample group structures
-			case SAMPLE_TO_GROUP_BOX:
-				box = new SampleToGroupBox();
-				break;
-			case SAMPLE_GROUP_DESCRIPTION_BOX:
-				box = new SampleGroupDescriptionBox();
-				break;
-			//user data
-			case USER_DATA_BOX:
-				box = new ContainerBoxImpl("User Data Box", "udta");
-				break;
-			case COPYRIGHT_BOX:
-				box = new CopyrightBox();
-				break;
-			case TRACK_SELECTION_BOX:
-				box = new TrackSelectionBox();
-				break;
-			//meta data support
-			case META_BOX:
-				box = new FullContainerBox("Meta Box", "meta");
-				break;
-			case XML_BOX:
-				box = new XMLBox();
-				break;
-			case BINARY_XML_BOX:
-				box = new BinaryXMLBox();
-				break;
-			case ITEM_LOCATION_BOX:
-				box = new ItemLocationBox();
-				break;
-			case PRIMARY_ITEM_BOX:
-				box = new PrimaryItemBox();
-				break;
-			case ITEM_PROTECTION_BOX:
-				box = new ItemProtectionBox();
-				break;
-			case ITEM_INFORMATION_BOX:
-				box = new ItemInformationBox();
-				break;
-			case ITEM_INFORMATION_ENTRY:
-				box = new ItemInformationEntry();
-				break;
-			case ADDITIONAL_METADATA_CONTAINER_BOX:
-				box = new ContainerBoxImpl("Additional Metadata Container Box", "meco");
-				break;
-			case META_BOX_RELATION_BOX:
-				box = new MetaBoxRelationBox();
-				break;
-			//
-			case BIT_RATE_BOX:
-				box = new BitRateBox();
-				break;
-			case ESD_BOX:
-				box = new ESDBox();
-				break;
-			default:
-				LOGGER.log(Level.INFO, "unknown box type: {0}", longToString(type));
-				box = new UnknownBox();
+		BoxImpl box = null;
+
+		Long l = Long.valueOf(type);
+		if(BOX_CLASSES.containsKey(l)) {
+			Class<? extends BoxImpl> cl = BOX_CLASSES.get(l);
+			if(PARAMETER.containsKey(l)) {
+				String[] s = PARAMETER.get(l);
+				try {
+					Constructor<? extends BoxImpl> con = cl.getConstructor(String.class, String.class);
+					box = con.newInstance(s[0], typeToString(type));
+				}
+				catch(Exception e) {
+					LOGGER.log(Level.WARNING, "could not call constructor for "+typeToString(type), e);
+					box = new UnknownBox();
+				}
+			}
+			else {
+				try {
+					box = cl.newInstance();
+				}
+				catch(Exception e) {
+					LOGGER.log(Level.WARNING, "could not instantiate box "+typeToString(type), e);
+				}
+			}
 		}
+
+		if(box==null) box = new UnknownBox();
 		return box;
 	}
 
-	//debugging method
-	private static String longToString(long l) {
-		StringBuilder sb = new StringBuilder();
-		sb.append((char) ((l>>24)&0xFF));
-		sb.append((char) ((l>>16)&0xFF));
-		sb.append((char) ((l>>8)&0xFF));
-		sb.append((char) (l&0xFF));
-		return sb.toString();
+	private static String typeToString(long l) {
+		byte[] b = new byte[4];
+		b[0] = (byte) ((l>>24)&0xFF);
+		b[1] = (byte) ((l>>16)&0xFF);
+		b[2] = (byte) ((l>>8)&0xFF);
+		b[3] = (byte) (l&0xFF);
+		return new String(b);
 	}
 }

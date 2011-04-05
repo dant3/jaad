@@ -6,6 +6,7 @@ import net.sourceforge.jaad.mp4.boxes.FullBox;
 
 public class DataEntryUrlBox extends FullBox {
 
+	private boolean inFile;
 	private String location;
 
 	public DataEntryUrlBox() {
@@ -16,10 +17,15 @@ public class DataEntryUrlBox extends FullBox {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 
-		if((flags&1)==0) {
+		inFile = (flags&1)==1;
+		if(!inFile) {
 			location = in.readUTFString((int) left, MP4InputStream.UTF8);
 			left -= location.length()+1;
 		}
+	}
+
+	public boolean isInFile() {
+		return inFile;
 	}
 
 	public String getLocation() {

@@ -21,8 +21,9 @@ import net.sourceforge.jaad.mp4.MP4InputStream;
 
 public abstract class BoxImpl implements Box {
 
-	private String name, shortName;
-	protected long size, type, left;
+	private final String name, shortName;
+	protected long size, left;
+	protected long type;
 	protected ContainerBox parent;
 
 	protected BoxImpl(String name, String shortName) {

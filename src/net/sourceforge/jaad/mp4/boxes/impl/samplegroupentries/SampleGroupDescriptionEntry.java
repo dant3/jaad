@@ -11,6 +11,5 @@ public abstract class SampleGroupDescriptionEntry extends BoxImpl {
 	}
 
 	@Override
-	public void decode(MP4InputStream in) throws IOException {
-	}
+	public abstract void decode(MP4InputStream in) throws IOException;
 }

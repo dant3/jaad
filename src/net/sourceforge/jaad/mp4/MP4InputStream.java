@@ -19,6 +19,7 @@ package net.sourceforge.jaad.mp4;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 
 public class MP4InputStream {
 
@@ -28,23 +29,43 @@ public class MP4InputStream {
 	public static final String UTF16 = "UTF-16";
 	private static final int BYTE_ORDER_MASK = 0xFEFF;
 	private final InputStream in;
-	private long offset = 0;
+	private final RandomAccessFile fin;
+	private long offset; //only used with InputStream
 
 	MP4InputStream(InputStream in) {
 		this.in = in;
+		fin = null;
+		offset = 0;
+	}
+
+	MP4InputStream(RandomAccessFile fin) {
+		this.fin = fin;
+		in = null;
 	}
 
 	public int read() throws IOException {
-		offset++;
-		return in.read();
+		int i = 0;
+		if(in!=null) i = in.read();
+		else if(fin!=null) i = fin.read();
+
+		if(in!=null&&i!=-1) offset++;
+		return i;
+	}
+
+	public int read(byte[] b, int off, int len) throws IOException {
+		int i = 0;
+		if(in!=null) i = in.read(b, off, len);
+		else if(fin!=null) i = fin.read(b, off, len);
+
+		if(in!=null&&i!=-1) offset += i;
+		return i;
 	}
 
 	public long readBytes(int n) throws IOException {
 		int i = -1;
 		long result = 0;
-		while(n>0&&(i = in.read())!=-1) {
+		while(n>0&&(i = read())!=-1) {
 			result = (result<<8)|(i&0xFF);
-			offset++;
 			n--;
 		}
 		if(i==-1) throw new EOFException();
@@ -55,12 +76,9 @@ public class MP4InputStream {
 		int read = 0;
 		int i;
 		while(read<b.length) {
-			i = in.read(b, read, b.length-read);
+			i = read(b, read, b.length-read);
 			if(i==-1) break;
-			else {
-				read += i;
-				offset += i;
-			}
+			else read += i;
 		}
 		return read==b.length;
 	}
@@ -69,9 +87,8 @@ public class MP4InputStream {
 		int i = -1;
 		int pos = 0;
 		char[] c = new char[n];
-		while(pos<n&&(i = in.read())!=-1) {
+		while(pos<n&&(i = read())!=-1) {
 			c[pos] = (char) i;
-			offset++;
 			pos++;
 		}
 		if(i==-1) throw new EOFException();
@@ -79,41 +96,46 @@ public class MP4InputStream {
 	}
 
 	public String readUTFString(int max, String encoding) throws IOException {
-		long x = offset;
 		byte[] b = new byte[max];
 		int pos = 0;
 		int i;
-		while((i = in.read())!=0) {
+		while((i = read())!=0) {
 			if(i==-1) break;
 			b[pos] = (byte) i;
-			offset++;
 			pos++;
 		}
-		offset++;
 
 		return new String(b, 0, pos, encoding);
 	}
 
 	public String readUTFString(int max) throws IOException {
-		int i = (int) readBytes(2);
-		String encoding = (i==BYTE_ORDER_MASK) ? UTF16 : UTF8;
-		return readUTFString(max, encoding);
+		final int i = (int) readBytes(2);
+		return readUTFString(max, (i==BYTE_ORDER_MASK) ? UTF16 : UTF8);
 	}
 
 	public double readFixedPoint(int len, int mask) throws IOException {
-		long l = readBytes(len);
-		long mantissa = (l&mask)<<52;
-		long exponent = l&mask;
+		final long l = readBytes(len);
+		final long mantissa = (l&mask)<<52;
+		final long exponent = l&mask;
 		return Double.longBitsToDouble(mantissa|exponent);
 	}
 
-	public void skipBytes(final long n) throws IOException {
-		offset += n;
-		in.skip(n);
+	public boolean skipBytes(final long n) throws IOException {
+		long l = 0;
+		if(in!=null) {
+			l = in.skip(n);
+			offset += n;
+		}
+		else if(fin!=null) l = fin.skipBytes((int) n);
+
+		return l==n;
 	}
 
-	public long getOffset() {
-		return offset;
+	public long getOffset() throws IOException {
+		long l = -1;
+		if(in!=null) l = offset;
+		else if(fin!=null) l = fin.getFilePointer();
+		return l;
 	}
 
 	void close() throws IOException {

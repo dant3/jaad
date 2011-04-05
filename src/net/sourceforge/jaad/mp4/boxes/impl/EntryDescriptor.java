@@ -24,9 +24,9 @@ import java.util.List;
 
 public class EntryDescriptor {
 
-	public final static int ES_DESCRIPTOR = 3;
-	public final static int DECODER_CONFIG_DESCRIPTOR = 4;
-	public final static int DECODER_SPECIFIC_INFO_DESCRIPTOR = 5;
+	public final static int TYPE_ES_DESCRIPTOR = 3;
+	public final static int TYPE_DECODER_CONFIG_DESCRIPTOR = 4;
+	public final static int TYPE_DECODER_SPECIFIC_INFO_DESCRIPTOR = 5;
 	//general
 	protected int type;
 	protected int size;
@@ -51,13 +51,13 @@ public class EntryDescriptor {
 		while((b&0x80)==0x80);
 		final EntryDescriptor desc = new EntryDescriptor(tag, size);
 		switch(tag) {
-			case ES_DESCRIPTOR:
+			case TYPE_ES_DESCRIPTOR:
 				desc.createESDescriptor(stream);
 				break;
-			case DECODER_CONFIG_DESCRIPTOR:
+			case TYPE_DECODER_CONFIG_DESCRIPTOR:
 				desc.createDecoderConfigDescriptor(stream);
 				break;
-			case DECODER_SPECIFIC_INFO_DESCRIPTOR:
+			case TYPE_DECODER_SPECIFIC_INFO_DESCRIPTOR:
 				desc.createDecoderSpecificInfoDescriptor(stream);
 				break;
 			default:
