@@ -41,7 +41,7 @@ public class TrackReferenceBox extends BoxImpl {
 	private List<Long> trackIDs;
 
 	public TrackReferenceBox() {
-		super("Track Reference Box", "tref");
+		super("Track Reference Box");
 		trackIDs = new ArrayList<Long>();
 	}
 

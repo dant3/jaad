@@ -30,7 +30,7 @@ public class MediaHeaderBox extends FullBox {
 	private String language;
 
 	public MediaHeaderBox() {
-		super("Media Header Box", "mdhd");
+		super("Media Header Box");
 	}
 
 	@Override

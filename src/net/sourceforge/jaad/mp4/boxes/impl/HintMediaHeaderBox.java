@@ -15,7 +15,7 @@ public class HintMediaHeaderBox extends FullBox {
 	private long maxPDUsize, avgPDUsize, maxBitrate, avgBitrate;
 
 	public HintMediaHeaderBox() {
-		super("Hint Media Header Box", "hmhd");
+		super("Hint Media Header Box");
 	}
 
 	@Override

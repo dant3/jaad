@@ -21,8 +21,8 @@ import net.sourceforge.jaad.mp4.MP4InputStream;
 
 public class UnknownBox extends BoxImpl {
 
-	public UnknownBox(String shortName) {
-		super("unknown", shortName);
+	public UnknownBox() {
+		super("unknown");
 	}
 
 	@Override

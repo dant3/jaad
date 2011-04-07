@@ -28,7 +28,7 @@ public class VideoSampleEntry extends SampleEntry {
 	private String compressorName;
 
 	public VideoSampleEntry() {
-		super("Video Sample Entry", "mp4v");
+		super("Video Sample Entry");
 	}
 
 	@Override

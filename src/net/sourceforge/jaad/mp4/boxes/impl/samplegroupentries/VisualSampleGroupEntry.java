@@ -6,7 +6,7 @@ import net.sourceforge.jaad.mp4.MP4InputStream;
 public class VisualSampleGroupEntry extends SampleGroupDescriptionEntry {
 
 	public VisualSampleGroupEntry() {
-		super("Video Sample Group Entry", "");
+		super("Video Sample Group Entry");
 	}
 
 	@Override

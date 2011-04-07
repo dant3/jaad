@@ -12,7 +12,7 @@ public class ItemInformationEntry extends FullBox {
 	private Extension extension;
 
 	public ItemInformationEntry() {
-		super("Item Information Entry", "infe");
+		super("Item Information Entry");
 	}
 
 	@Override
@@ -30,15 +30,13 @@ public class ItemInformationEntry extends FullBox {
 			contentEncoding = in.readUTFString((int) left, MP4InputStream.UTF8); //optional
 			left -= contentEncoding.length()+1;
 		}
-		if(version==1) {
+		if(version==1&&left>0) {
+			//optional
+			extensionType = in.readBytes(4);
+			left -= 4;
 			if(left>0) {
-				//optional
-				extensionType = in.readBytes(4);
-				left -= 4;
-				if(left>0) {
-					extension = Extension.forType((int) extensionType);
-					if(extension!=null) left -= extension.decode(in);
-				}
+				extension = Extension.forType((int) extensionType);
+				if(extension!=null) left -= extension.decode(in);
 			}
 		}
 	}

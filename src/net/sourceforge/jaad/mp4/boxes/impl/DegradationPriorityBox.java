@@ -2,9 +2,7 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
-import net.sourceforge.jaad.mp4.boxes.ContainerBox;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 
 /**
@@ -19,7 +17,7 @@ public class DegradationPriorityBox extends FullBox {
 	private int[] priorities;
 
 	public DegradationPriorityBox() {
-		super("Degradation Priority Box", "stdp");
+		super("Degradation Priority Box");
 	}
 
 	@Override
@@ -27,8 +25,7 @@ public class DegradationPriorityBox extends FullBox {
 		super.decode(in);
 
 		//get number of samples from SampleSizeBox
-		final Box box = ((ContainerBox) parent).getChild(BoxTypes.SAMPLE_SIZE_BOX);
-		final int sampleCount = ((SampleSizeBox) box).getSamples().size();
+		final int sampleCount = ((SampleSizeBox) parent.getChild(BoxTypes.SAMPLE_SIZE_BOX)).getSampleCount();
 
 		priorities = new int[sampleCount];
 		for(int i = 0; i<sampleCount; i++) {

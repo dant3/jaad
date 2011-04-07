@@ -18,7 +18,7 @@ public class BinaryXMLBox extends FullBox {
 	private byte[] data;
 
 	public BinaryXMLBox() {
-		super("Binary XML Box", "bxml");
+		super("Binary XML Box");
 	}
 
 	@Override

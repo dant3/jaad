@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
-import net.sourceforge.jaad.mp4.boxes.ContainerBox;
 import net.sourceforge.jaad.mp4.boxes.impl.HandlerBox;
 import net.sourceforge.jaad.mp4.boxes.impl.MovieHeaderBox;
 
@@ -16,7 +15,7 @@ public class Movie {
 	private final List<Track> tracks;
 	private MetaData metaData;
 
-	public Movie(ContainerBox cb) {
+	public Movie(Box cb) {
 		mvhd = (MovieHeaderBox) cb.getChild(BoxTypes.MOVIE_HEADER_BOX);
 		List<Box> trackBoxes = cb.getChildren(BoxTypes.TRACK_BOX);
 		tracks = new ArrayList<Track>(trackBoxes.size());
@@ -24,17 +23,16 @@ public class Movie {
 			tracks.add(createTrack(trackBoxes.get(i)));
 		}
 
-		if(cb.containsChild(BoxTypes.META_BOX)) metaData = new MetaData((ContainerBox) cb.getChild(BoxTypes.META_BOX));
+		if(cb.containsChild(BoxTypes.META_BOX)) metaData = new MetaData(cb.getChild(BoxTypes.META_BOX));
 		else if(cb.containsChild(BoxTypes.USER_DATA_BOX)) {
-			final ContainerBox udta = (ContainerBox) cb.getChild(BoxTypes.USER_DATA_BOX);
-			if(udta.containsChild(BoxTypes.META_BOX)) metaData = new MetaData((ContainerBox) udta.getChild(BoxTypes.META_BOX));
+			final Box udta = cb.getChild(BoxTypes.USER_DATA_BOX);
+			if(udta.containsChild(BoxTypes.META_BOX)) metaData = new MetaData(udta.getChild(BoxTypes.META_BOX));
 		}
 	}
 
 	//TODO: support hint and meta
 	private Track createTrack(Box trak) {
-		final ContainerBox mdia = (ContainerBox) ((ContainerBox) trak).getChild(BoxTypes.MEDIA_BOX);
-		final HandlerBox hdlr = (HandlerBox) mdia.getChild(BoxTypes.HANDLER_BOX);
+		final HandlerBox hdlr = (HandlerBox) trak.getChild(BoxTypes.MEDIA_BOX).getChild(BoxTypes.HANDLER_BOX);
 		final Track track;
 		switch((int) hdlr.getHandlerType()) {
 			case HandlerBox.TYPE_VIDEO:

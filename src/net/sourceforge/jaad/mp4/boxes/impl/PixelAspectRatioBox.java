@@ -10,7 +10,7 @@ public class PixelAspectRatioBox extends BoxImpl {
 	private long vSpacing;
 
 	public PixelAspectRatioBox() {
-		super("Pixel Aspect Ratio Box", "pasp");
+		super("Pixel Aspect Ratio Box");
 	}
 
 	@Override

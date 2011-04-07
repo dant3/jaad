@@ -7,8 +7,8 @@ abstract class MetadataSampleEntry extends SampleEntry {
 
 	private String contentEncoding;
 
-	MetadataSampleEntry(String name, String shortName) {
-		super(name, shortName);
+	MetadataSampleEntry(String name) {
+		super(name);
 	}
 
 	@Override

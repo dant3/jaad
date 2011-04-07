@@ -37,7 +37,7 @@ public class BoxFactory implements BoxTypes {
 
 	static {
 		//classes
-		BOX_CLASSES.put(ADDITIONAL_METADATA_CONTAINER_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(ADDITIONAL_METADATA_CONTAINER_BOX, BoxImpl.class);
 		BOX_CLASSES.put(BINARY_XML_BOX, BinaryXMLBox.class);
 		BOX_CLASSES.put(BIT_RATE_BOX, BitRateBox.class);
 		BOX_CLASSES.put(CHUNK_OFFSET_BOX, ChunkOffsetBox.class);
@@ -46,10 +46,10 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(COPYRIGHT_BOX, CopyrightBox.class);
 		BOX_CLASSES.put(DATA_ENTRY_URN_BOX, DataEntryUrnBox.class);
 		BOX_CLASSES.put(DATA_ENTRY_URL_BOX, DataEntryUrlBox.class);
-		BOX_CLASSES.put(DATA_INFORMATION_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(DATA_INFORMATION_BOX, BoxImpl.class);
 		BOX_CLASSES.put(DATA_REFERENCE_BOX, DataReferenceBox.class);
 		BOX_CLASSES.put(DEGRADATION_PRIORITY_BOX, DegradationPriorityBox.class);
-		BOX_CLASSES.put(EDIT_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(EDIT_BOX, BoxImpl.class);
 		BOX_CLASSES.put(EDIT_LIST_BOX, EditListBox.class);
 		BOX_CLASSES.put(ESD_BOX, ESDBox.class);
 		BOX_CLASSES.put(FILE_TYPE_BOX, FileTypeBox.class);
@@ -60,16 +60,16 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(ITEM_INFORMATION_ENTRY, ItemInformationEntry.class);
 		BOX_CLASSES.put(ITEM_LOCATION_BOX, ItemLocationBox.class);
 		BOX_CLASSES.put(ITEM_PROTECTION_BOX, ItemProtectionBox.class);
-		BOX_CLASSES.put(MEDIA_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(MEDIA_BOX, BoxImpl.class);
 		BOX_CLASSES.put(MEDIA_DATA_BOX, MediaDataBox.class);
 		BOX_CLASSES.put(MEDIA_HEADER_BOX, MediaHeaderBox.class);
-		BOX_CLASSES.put(MEDIA_INFORMATION_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(MEDIA_INFORMATION_BOX, BoxImpl.class);
 		BOX_CLASSES.put(META_BOX, MetaBox.class);
 		BOX_CLASSES.put(META_BOX_RELATION_BOX, MetaBoxRelationBox.class);
-		BOX_CLASSES.put(MOVIE_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(MOVIE_EXTENDS_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(MOVIE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(MOVIE_EXTENDS_BOX, BoxImpl.class);
 		BOX_CLASSES.put(MOVIE_EXTENDS_HEADER_BOX, MovieExtendsHeaderBox.class);
-		BOX_CLASSES.put(MOVIE_FRAGMENT_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(MOVIE_FRAGMENT_BOX, BoxImpl.class);
 		BOX_CLASSES.put(MOVIE_FRAGMENT_HEADER_BOX, MovieFragmentHeaderBox.class);
 		BOX_CLASSES.put(MOVIE_HEADER_BOX, MovieHeaderBox.class);
 		BOX_CLASSES.put(NULL_MEDIA_HEADER_BOX, FullBox.class);
@@ -82,7 +82,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(SAMPLE_GROUP_DESCRIPTION_BOX, SampleGroupDescriptionBox.class);
 		BOX_CLASSES.put(SAMPLE_SCALE_BOX, SampleScaleBox.class);
 		BOX_CLASSES.put(SAMPLE_SIZE_BOX, SampleSizeBox.class);
-		BOX_CLASSES.put(SAMPLE_TABLE_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(SAMPLE_TABLE_BOX, BoxImpl.class);
 		BOX_CLASSES.put(SAMPLE_TO_CHUNK_BOX, SampleToChunkBox.class);
 		BOX_CLASSES.put(SAMPLE_TO_GROUP_BOX, SampleToGroupBox.class);
 		BOX_CLASSES.put(SHADOW_SYNC_SAMPLE_BOX, ShadowSyncSampleBox.class);
@@ -91,45 +91,45 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(SUB_SAMPLE_INFORMATION_BOX, SubSampleInformationBox.class);
 		BOX_CLASSES.put(SYNC_SAMPLE_BOX, SyncSampleBox.class);
 		BOX_CLASSES.put(TIME_TO_SAMPLE_BOX, TimeToSampleBox.class);
-		BOX_CLASSES.put(TRACK_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(TRACK_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TRACK_EXTENDS_BOX, TrackExtendsBox.class);
-		BOX_CLASSES.put(TRACK_FRAGMENT_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(TRACK_FRAGMENT_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TRACK_HEADER_BOX, TrackHeaderBox.class);
 		BOX_CLASSES.put(TRACK_REFERENCE_BOX, TrackReferenceBox.class);
 		BOX_CLASSES.put(TRACK_SELECTION_BOX, TrackSelectionBox.class);
-		BOX_CLASSES.put(USER_DATA_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(USER_DATA_BOX, BoxImpl.class);
 		BOX_CLASSES.put(VIDEO_MEDIA_HEADER_BOX, VideoMediaHeaderBox.class);
 		BOX_CLASSES.put(XML_BOX, XMLBox.class);
 		BOX_CLASSES.put(AUDIO_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(TEXT_METADATA_SAMPLE_ENTRY, TextMetadataSampleEntry.class);
 		BOX_CLASSES.put(XML_METADATA_SAMPLE_ENTRY, XMLMetadataSampleEntry.class);
 		BOX_CLASSES.put(ID3_TAG_BOX, ID3TagBox.class);
-		BOX_CLASSES.put(ITUNES_META_LIST_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(TRACK_NAME_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(ARTIST_NAME_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(ALBUM_ARTIST_NAME_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(ALBUM_NAME_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(GROUPING_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(PUBLICATION_DATE_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(TRACK_NUMBER_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(DISK_NUMBER_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(TEMPO_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(COMPOSER_NAME_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(COMMENTS_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(GENRE_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(CUSTOM_GENRE_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(COMPILATION_PART_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(TELEVISION_SHOW_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(TRACK_SORT_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(ARTIST_SORT_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(ALBUM_ARTIST_SORT_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(ALBUM_SORT_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(COMPOSER_SORT_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(TELEVISION_SHOW_SORT_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(LYRICS_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(COVER_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(SOFTWARE_INFORMATION_BOX, ContainerBoxImpl.class);
-		BOX_CLASSES.put(CUSTOM_ITUNES_METADATA_BOX, ContainerBoxImpl.class);
+		BOX_CLASSES.put(ITUNES_META_LIST_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TRACK_NAME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ARTIST_NAME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ALBUM_ARTIST_NAME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ALBUM_NAME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(GROUPING_BOX, BoxImpl.class);
+		BOX_CLASSES.put(PUBLICATION_DATE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TRACK_NUMBER_BOX, BoxImpl.class);
+		BOX_CLASSES.put(DISK_NUMBER_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TEMPO_BOX, BoxImpl.class);
+		BOX_CLASSES.put(COMPOSER_NAME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(COMMENTS_BOX, BoxImpl.class);
+		BOX_CLASSES.put(GENRE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(CUSTOM_GENRE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(COMPILATION_PART_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TELEVISION_SHOW_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TRACK_SORT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ARTIST_SORT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ALBUM_ARTIST_SORT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ALBUM_SORT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(COMPOSER_SORT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TELEVISION_SHOW_SORT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(LYRICS_BOX, BoxImpl.class);
+		BOX_CLASSES.put(COVER_BOX, BoxImpl.class);
+		BOX_CLASSES.put(SOFTWARE_INFORMATION_BOX, BoxImpl.class);
+		BOX_CLASSES.put(CUSTOM_ITUNES_METADATA_BOX, BoxImpl.class);
 		BOX_CLASSES.put(ITUNES_METADATA_BOX, ITunesMetadataBox.class);
 		BOX_CLASSES.put(ITUNES_METADATA_NAME_BOX, ITunesMetadataNameBox.class);
 		//parameter
@@ -174,8 +174,7 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(CUSTOM_ITUNES_METADATA_BOX, new String[]{"Custom iTunes Metadata Box"});
 	}
 
-	public static Box parseBox(ContainerBox parent, MP4InputStream in) throws IOException {
-		final long x = in.getOffset();
+	public static Box parseBox(Box parent, MP4InputStream in) throws IOException {
 		long size = in.readBytes(4);
 		long left = size-4;
 		if(size==1) {
@@ -198,7 +197,7 @@ public class BoxFactory implements BoxTypes {
 		//if mdat found, don't skip
 		//TODO: what if random access can be used??
 		left = box.getLeft();
-		if(left<0) LOGGER.log(Level.WARNING, "box: {0}, left: {1}, offset: {2}", new String[]{box.getShortName(), Long.toString(left), Long.toString(in.getOffset())});
+		if(left<0) LOGGER.log(Level.WARNING, "box: {0}, left: {1}, offset: {2}", new String[]{typeToString(type), Long.toString(left), Long.toString(in.getOffset())});
 		if(box.getType()!=MEDIA_DATA_BOX) in.skipBytes(left);
 		return box;
 	}
@@ -243,15 +242,14 @@ public class BoxFactory implements BoxTypes {
 		if(BOX_CLASSES.containsKey(l)) {
 			Class<? extends BoxImpl> cl = BOX_CLASSES.get(l);
 			if(PARAMETER.containsKey(l)) {
-				final String t = typeToString(type);
 				final String[] s = PARAMETER.get(l);
 				try {
-					Constructor<? extends BoxImpl> con = cl.getConstructor(String.class, String.class);
-					box = con.newInstance(s[0], t);
+					Constructor<? extends BoxImpl> con = cl.getConstructor(String.class);
+					box = con.newInstance(s[0]);
 				}
 				catch(Exception e) {
-					LOGGER.log(Level.WARNING, "could not call constructor for "+t, e);
-					box = new UnknownBox(t);
+					LOGGER.log(Level.WARNING, "could not call constructor for "+typeToString(type), e);
+					box = new UnknownBox();
 				}
 			}
 			else {
@@ -264,11 +262,11 @@ public class BoxFactory implements BoxTypes {
 			}
 		}
 
-		if(box==null) box = new UnknownBox(typeToString(l));
+		if(box==null) box = new UnknownBox();
 		return box;
 	}
 
-	private static String typeToString(long l) {
+	public static String typeToString(long l) {
 		byte[] b = new byte[4];
 		b[0] = (byte) ((l>>24)&0xFF);
 		b[1] = (byte) ((l>>16)&0xFF);

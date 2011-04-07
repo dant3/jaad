@@ -17,7 +17,7 @@ public class PaddingBitBox extends FullBox {
 	private int[] pad1, pad2;
 
 	public PaddingBitBox() {
-		super("Padding Bit Box", "padp");
+		super("Padding Bit Box");
 	}
 
 	@Override

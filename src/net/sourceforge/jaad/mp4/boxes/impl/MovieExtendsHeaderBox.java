@@ -16,7 +16,7 @@ public class MovieExtendsHeaderBox extends FullBox {
 	private long fragmentDuration;
 
 	public MovieExtendsHeaderBox() {
-		super("Movie Extends Header Box", "mehd");
+		super("Movie Extends Header Box");
 	}
 
 	@Override

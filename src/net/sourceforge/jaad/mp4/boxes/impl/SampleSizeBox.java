@@ -19,40 +19,42 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SampleSizeBox extends FullBox {
 
-	private int sampleSize;
-	private final List<Integer> samples;
+	private long[] sampleSizes;
 
 	public SampleSizeBox() {
-		super("Sample Size Box", "stsz");
-		samples = new ArrayList<Integer>();
+		super("Sample Size Box");
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
-		sampleSize = (int) in.readBytes(4);
-		final int sampleCount = (int) in.readBytes(4);
+
+		final long sampleSize = in.readBytes(4);
+		final long sampleCount = in.readBytes(4);
+		sampleSizes = new long[(int) sampleCount];
 		left -= 8;
+
 		if(sampleSize==0) {
-			int x;
 			for(int i = 0; i<sampleCount; i++) {
-				x = (int) in.readBytes(4);
-				samples.add(Integer.valueOf(x));
-				left -= 4;
+				sampleSizes[i] = in.readBytes(4);
+			}
+			left -= sampleCount*4;
+		}
+		else {
+			for(int i = 0; i<sampleCount; i++) {
+				sampleSizes[i] = sampleSize;
 			}
 		}
 	}
 
-	public int getSampleSize() {
-		return sampleSize;
+	public int getSampleCount() {
+		return sampleSizes.length;
 	}
 
-	public List<Integer> getSamples() {
-		return samples;
+	public long[] getSampleSizes() {
+		return sampleSizes;
 	}
 }

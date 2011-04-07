@@ -16,7 +16,7 @@ public class SoundMediaHeaderBox extends FullBox {
 	private double balance;
 
 	public SoundMediaHeaderBox() {
-		super("Sound Media Header Box", "smhd");
+		super("Sound Media Header Box");
 	}
 
 	@Override

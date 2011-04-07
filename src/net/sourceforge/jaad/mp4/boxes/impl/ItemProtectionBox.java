@@ -2,7 +2,7 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.FullContainerBox;
+import net.sourceforge.jaad.mp4.boxes.FullBox;
 
 /**
  * The item protection box provides an array of item protection information, for
@@ -10,10 +10,10 @@ import net.sourceforge.jaad.mp4.boxes.FullContainerBox;
  *
  * @author in-somnia
  */
-public class ItemProtectionBox extends FullContainerBox {
+public class ItemProtectionBox extends FullBox {
 
 	public ItemProtectionBox() {
-		super("Item Protection Box", "ipro");
+		super("Item Protection Box");
 	}
 
 	@Override

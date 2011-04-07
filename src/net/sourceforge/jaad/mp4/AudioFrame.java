@@ -23,11 +23,11 @@ package net.sourceforge.jaad.mp4;
 public class AudioFrame implements Comparable<AudioFrame> {
 
 	private final long offset;
-	private final int size;
+	private final long size;
 	private final double time;
 	private byte[] data;
 
-	AudioFrame(long offset, int size, double time) {
+	AudioFrame(long offset, long size, double time) {
 		this.offset = offset;
 		this.size = size;
 		this.time = time;
@@ -37,7 +37,7 @@ public class AudioFrame implements Comparable<AudioFrame> {
 		return offset;
 	}
 
-	public int getSize() {
+	public long getSize() {
 		return size;
 	}
 

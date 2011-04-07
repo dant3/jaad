@@ -13,7 +13,7 @@ import net.sourceforge.jaad.mp4.boxes.FullBox;
 public class ITunesMetadataNameBox extends FullBox {
 
 	public ITunesMetadataNameBox() {
-		super("iTunes Metadata Name Box", "name");
+		super("iTunes Metadata Name Box");
 	}
 
 	@Override

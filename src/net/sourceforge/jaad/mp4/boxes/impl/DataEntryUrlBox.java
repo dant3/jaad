@@ -10,7 +10,7 @@ public class DataEntryUrlBox extends FullBox {
 	private String location;
 
 	public DataEntryUrlBox() {
-		super("Data Entry Url Box", "url ");
+		super("Data Entry Url Box");
 	}
 
 	@Override

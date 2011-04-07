@@ -24,7 +24,7 @@ public class XMLMetadataSampleEntry extends MetadataSampleEntry {
 	private String namespace, schemaLocation;
 
 	public XMLMetadataSampleEntry() {
-		super("XML Metadata Sample Entry", "metx");
+		super("XML Metadata Sample Entry");
 	}
 
 	@Override

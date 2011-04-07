@@ -34,7 +34,7 @@ public class SampleScaleBox extends FullBox {
 	private int scaleMethod, displayCenterX, displayCenterY;
 
 	public SampleScaleBox() {
-		super("Sample Scale Box", "stsl");
+		super("Sample Scale Box");
 	}
 
 	@Override

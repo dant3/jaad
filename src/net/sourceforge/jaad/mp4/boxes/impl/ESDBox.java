@@ -25,7 +25,7 @@ public class ESDBox extends FullBox {
 	private EntryDescriptor esd;
 
 	public ESDBox() {
-		super("ESD Box", "esds");
+		super("ESD Box");
 	}
 
 	@Override

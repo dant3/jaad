@@ -17,11 +17,12 @@
 package net.sourceforge.jaad.mp4.boxes;
 
 import java.io.IOException;
+import java.util.List;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
 public interface Box {
 
-	ContainerBox getParent();
+	Box getParent();
 
 	void decode(MP4InputStream in) throws IOException;
 
@@ -31,7 +32,17 @@ public interface Box {
 
 	String getName();
 
-	String getShortName();
-
+	//TODO: debugging method, remove
 	String toTreeString(int off);
+
+	//container methods
+	Box getChild(long type);
+
+	boolean hasChildren();
+
+	List<Box> getChildren();
+
+	List<Box> getChildren(long type);
+
+	boolean containsChild(long type);
 }

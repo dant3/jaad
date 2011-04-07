@@ -33,7 +33,7 @@ import java.io.IOException;
 public class MediaDataBox extends BoxImpl {
 
 	public MediaDataBox() {
-		super("Media Data Box", "mdat");
+		super("Media Data Box");
 	}
 
 	@Override

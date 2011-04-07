@@ -9,7 +9,7 @@ public class BitRateBox extends BoxImpl {
 	private long decodingBufferSize, maxBitrate, avgBitrate;
 
 	public BitRateBox() {
-		super("Bitrate Box", "btrt");
+		super("Bitrate Box");
 	}
 
 	@Override
@@ -17,6 +17,7 @@ public class BitRateBox extends BoxImpl {
 		decodingBufferSize = in.readBytes(4);
 		maxBitrate = in.readBytes(4);
 		avgBitrate = in.readBytes(4);
+		left -= 12;
 	}
 
 	/**

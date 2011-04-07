@@ -49,7 +49,7 @@ public class ItemLocationBox extends FullBox {
 	private long[][] extentOffset, extentLength;
 
 	public ItemLocationBox() {
-		super("Item Location Box", "iloc");
+		super("Item Location Box");
 	}
 
 	@Override

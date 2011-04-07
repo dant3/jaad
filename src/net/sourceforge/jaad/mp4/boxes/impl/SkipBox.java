@@ -7,7 +7,7 @@ import net.sourceforge.jaad.mp4.boxes.BoxImpl;
 public class SkipBox extends BoxImpl {
 
 	public SkipBox() {
-		super("Skip Box", "skip");
+		super("Skip Box");
 	}
 
 	@Override

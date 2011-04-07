@@ -19,7 +19,7 @@ public class TrackExtendsBox extends FullBox {
 	private boolean differenceSample;
 
 	public TrackExtendsBox() {
-		super("Track Extends Box", "trex");
+		super("Track Extends Box");
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public class TrackExtendsBox extends FullBox {
 		defaultSampleDescriptionIndex = in.readBytes(4);
 		defaultSampleDuration = in.readBytes(4);
 		defaultSampleSize = in.readBytes(4);
-		long l = in.readBytes(4);
+		final long l = in.readBytes(4);
 		/* 6 bits reserved
 		 * 2 bits sampleDependsOn
 		 * 2 bits sampleIsDependedOn
@@ -39,17 +39,12 @@ public class TrackExtendsBox extends FullBox {
 		 * 1 bit sampleIsDifferenceSample
 		 * 16 bits sampleDegradationPriority
 		 */
+		sampleDependsOn = (int) ((l>>24)&3);
+		sampleIsDependedOn = (int) ((l>>22)&3);
+		sampleHasRedundancy = (int) ((l>>20)&3);
+		samplePaddingValue = (int) ((l>>17)&7);
+		differenceSample = ((l>>16)&1)==1;
 		sampleDegradationPriority = (int) (l&0xFFFF);
-		l >>= 16;
-		differenceSample = (l&1)==1;
-		l >>= 1;
-		samplePaddingValue = (int) (l&7);
-		l >>= 3;
-		sampleHasRedundancy = (int) (l&3);
-		l >>= 2;
-		sampleIsDependedOn = (int) (l&3);
-		l >>= 2;
-		sampleDependsOn = (int) (l&3);
 
 		left -= 20;
 	}

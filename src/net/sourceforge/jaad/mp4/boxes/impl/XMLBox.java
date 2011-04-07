@@ -18,7 +18,7 @@ public class XMLBox extends FullBox {
 	private String content;
 
 	public XMLBox() {
-		super("XML Box", "xml ");
+		super("XML Box");
 	}
 
 	@Override

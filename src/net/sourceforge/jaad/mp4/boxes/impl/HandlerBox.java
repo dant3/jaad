@@ -30,7 +30,7 @@ public class HandlerBox extends FullBox {
 	private String handlerName;
 
 	public HandlerBox() {
-		super("Handler Box", "hdlr");
+		super("Handler Box");
 	}
 
 	@Override

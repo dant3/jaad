@@ -38,7 +38,7 @@ public class FileTypeBox extends BoxImpl {
 	protected String[] compatibleBrands;
 
 	public FileTypeBox() {
-		super("File Type Box", "ftyp");
+		super("File Type Box");
 	}
 
 	@Override

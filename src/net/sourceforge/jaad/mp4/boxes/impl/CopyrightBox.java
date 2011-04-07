@@ -15,7 +15,7 @@ public class CopyrightBox extends FullBox {
 	private String languageCode, notice;
 
 	public CopyrightBox() {
-		super("Copyright Box", "cprt");
+		super("Copyright Box");
 	}
 
 	@Override

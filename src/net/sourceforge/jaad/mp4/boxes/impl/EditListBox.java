@@ -30,7 +30,7 @@ public class EditListBox extends FullBox {
 	private double[] mediaRate;
 
 	public EditListBox() {
-		super("Edit List Box", "elst");
+		super("Edit List Box");
 	}
 
 	@Override

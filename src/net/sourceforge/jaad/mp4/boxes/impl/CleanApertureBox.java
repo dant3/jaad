@@ -16,7 +16,7 @@ public class CleanApertureBox extends BoxImpl {
 	private long vertOffD;
 
 	public CleanApertureBox() {
-		super("Clean Aperture Box", "clap");
+		super("Clean Aperture Box");
 	}
 
 	@Override
@@ -29,6 +29,7 @@ public class CleanApertureBox extends BoxImpl {
 		horizOffD = in.readBytes(4);
 		vertOffN = in.readBytes(4);
 		vertOffD = in.readBytes(4);
+		left -= 32;
 	}
 
 	public long getCleanApertureWidthN() {

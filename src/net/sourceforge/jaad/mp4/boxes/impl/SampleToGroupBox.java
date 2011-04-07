@@ -25,7 +25,7 @@ public class SampleToGroupBox extends FullBox {
 	private long[] sampleCount, groupDescriptionIndex;
 
 	public SampleToGroupBox() {
-		super("Sample To Group Box", "sbgp");
+		super("Sample To Group Box");
 	}
 
 	@Override

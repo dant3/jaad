@@ -24,7 +24,7 @@ public class TextMetadataSampleEntry extends MetadataSampleEntry {
 	private String mimeType;
 
 	public TextMetadataSampleEntry() {
-		super("Text Metadata Sample Entry", "mett");
+		super("Text Metadata Sample Entry");
 	}
 
 	@Override

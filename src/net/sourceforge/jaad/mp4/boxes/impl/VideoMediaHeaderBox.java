@@ -16,7 +16,7 @@ public class VideoMediaHeaderBox extends FullBox {
 	private Color color;
 
 	public VideoMediaHeaderBox() {
-		super("Video Media Header Box", "vmhd");
+		super("Video Media Header Box");
 	}
 
 	@Override

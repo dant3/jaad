@@ -24,7 +24,7 @@ public class AudioSampleEntry extends SampleEntry {
 	private int channelCount, sampleSize, sampleRate;
 
 	public AudioSampleEntry() {
-		super("Audio Sample Entry", "mp4a");
+		super("Audio Sample Entry");
 	}
 
 	@Override

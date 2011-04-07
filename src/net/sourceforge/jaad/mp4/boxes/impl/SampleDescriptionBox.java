@@ -34,7 +34,7 @@ public class SampleDescriptionBox extends FullBox implements BoxTypes {
 	private SampleEntry[] sampleEntries;
 
 	public SampleDescriptionBox() {
-		super("Sample Description Box", "stsd");
+		super("Sample Description Box");
 	}
 
 	@Override

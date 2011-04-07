@@ -22,18 +22,20 @@ public class ProgressiveDownloadInformationBox extends FullBox {
 	private Map<Long, Long> pairs;
 
 	public ProgressiveDownloadInformationBox() {
-		super("Progressive Download Information Box", "pdin");
+		super("Progressive Download Information Box");
 		pairs = new HashMap<Long, Long>();
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
+
 		long rate, initialDelay;
 		while(left>0) {
 			rate = in.readBytes(4);
 			initialDelay = in.readBytes(4);
 			pairs.put(rate, initialDelay);
+			left -= 8;
 		}
 	}
 

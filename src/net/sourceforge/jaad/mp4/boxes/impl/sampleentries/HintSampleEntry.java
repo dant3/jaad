@@ -8,7 +8,7 @@ public class HintSampleEntry extends SampleEntry {
 	private byte[] data;
 
 	public HintSampleEntry() {
-		super("Hint Sample Entry", "hint");
+		super("Hint Sample Entry");
 		data = new byte[0];
 	}
 

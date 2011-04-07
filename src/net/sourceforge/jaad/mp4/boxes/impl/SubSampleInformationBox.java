@@ -26,7 +26,7 @@ public class SubSampleInformationBox extends FullBox {
 	private boolean[][] discardable;
 
 	public SubSampleInformationBox() {
-		super("Sub Sample Information Box", "subs");
+		super("Sub Sample Information Box");
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package net.sourceforge.jaad.mp4.api;
 
 import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
-import net.sourceforge.jaad.mp4.boxes.ContainerBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SoundMediaHeaderBox;
 
 public class AudioTrack extends Track {
@@ -12,8 +11,8 @@ public class AudioTrack extends Track {
 	public AudioTrack(Box trak) {
 		super(trak);
 
-		final ContainerBox mdia = (ContainerBox) ((ContainerBox) trak).getChild(BoxTypes.MEDIA_BOX);
-		final ContainerBox minf = (ContainerBox) mdia.getChild(BoxTypes.MEDIA_INFORMATION_BOX);
+		final Box mdia = trak.getChild(BoxTypes.MEDIA_BOX);
+		final Box minf = mdia.getChild(BoxTypes.MEDIA_INFORMATION_BOX);
 		smhd = (SoundMediaHeaderBox) minf.getChild(BoxTypes.SOUND_MEDIA_HEADER_BOX);
 	}
 

@@ -17,7 +17,7 @@ public class SyncSampleBox extends FullBox {
 	private long[] sampleNumbers;
 
 	public SyncSampleBox() {
-		super("Sync Sample Box", "stss");
+		super("Sync Sample Box");
 	}
 
 	@Override

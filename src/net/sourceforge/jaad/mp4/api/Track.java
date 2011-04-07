@@ -2,17 +2,22 @@ package net.sourceforge.jaad.mp4.api;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
-import net.sourceforge.jaad.mp4.boxes.ContainerBox;
+import net.sourceforge.jaad.mp4.boxes.impl.ChunkOffsetBox;
 import net.sourceforge.jaad.mp4.boxes.impl.DataEntryUrlBox;
 import net.sourceforge.jaad.mp4.boxes.impl.DataReferenceBox;
 import net.sourceforge.jaad.mp4.boxes.impl.MediaHeaderBox;
-import net.sourceforge.jaad.mp4.boxes.impl.SampleDescriptionBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SampleSizeBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox.SampleToChunkEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.TimeToSampleBox;
 import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.SampleEntry;
 
 public abstract class Track {
 
@@ -21,24 +26,23 @@ public abstract class Track {
 		VIDEO,
 		AUDIO
 	}
-	private Type type;
 	private final TrackHeaderBox tkhd;
 	private final MediaHeaderBox mdhd;
 	private final boolean inFile;
+	private final List<Frame> frames;
 	private URL location;
+	private int currentFrame;
 
-	Track(Box trackBox) {
-		final ContainerBox cb = (ContainerBox) trackBox;
-
-		tkhd = (TrackHeaderBox) cb.getChild(BoxTypes.TRACK_HEADER_BOX);
+	Track(Box box) {
+		tkhd = (TrackHeaderBox) box.getChild(BoxTypes.TRACK_HEADER_BOX);
 
 		//mdia
-		final ContainerBox mdia = (ContainerBox) cb.getChild(BoxTypes.MEDIA_BOX);
+		final Box mdia = box.getChild(BoxTypes.MEDIA_BOX);
 		mdhd = (MediaHeaderBox) mdia.getChild(BoxTypes.MEDIA_HEADER_BOX);
-		final ContainerBox minf = (ContainerBox) mdia.getChild(BoxTypes.MEDIA_INFORMATION_BOX);
+		final Box minf = mdia.getChild(BoxTypes.MEDIA_INFORMATION_BOX);
 
 		//dinf
-		final ContainerBox dinf = (ContainerBox) minf.getChild(BoxTypes.DATA_INFORMATION_BOX);
+		final Box dinf = minf.getChild(BoxTypes.DATA_INFORMATION_BOX);
 		final DataReferenceBox dref = (DataReferenceBox) dinf.getChild(BoxTypes.DATA_REFERENCE_BOX);
 		//TODO: support URNs
 		if(dref.containsChild(BoxTypes.DATA_ENTRY_URL_BOX)) {
@@ -62,16 +66,70 @@ public abstract class Track {
 		}
 
 		//stbl
-		final ContainerBox stbl = (ContainerBox) minf.getChild(BoxTypes.SAMPLE_TABLE_BOX);
-		parseSampleTable(stbl);
+		final Box stbl = minf.getChild(BoxTypes.SAMPLE_TABLE_BOX);
+		final List<Box> children = stbl.getChildren();
+		if(children.size()>0) {
+			frames = new ArrayList<Frame>();
+			parseSampleTable(stbl);
+		}
+		else frames = Collections.emptyList();
+		currentFrame = 0;
 	}
 
-	private void parseSampleTable(ContainerBox stbl) {
-		final SampleDescriptionBox stsd = (SampleDescriptionBox) stbl.getChild(BoxTypes.SAMPLE_DESCRIPTION_BOX);
-		final SampleEntry[] entries = stsd.getSampleEntries();
-		/*switch(type) {
+	private void parseSampleTable(Box stbl) {
+		final double timeScale = mdhd.getTimeScale();
 
-		}*/
+		//get tables from boxes
+		final SampleToChunkEntry[] sampleToChunks = ((SampleToChunkBox) stbl.getChild(BoxTypes.SAMPLE_TO_CHUNK_BOX)).getEntries();
+		final long[] sampleSizes = ((SampleSizeBox) stbl.getChild(BoxTypes.SAMPLE_SIZE_BOX)).getSampleSizes();
+		final ChunkOffsetBox stco;
+		if(stbl.containsChild(BoxTypes.CHUNK_OFFSET_BOX)) stco = (ChunkOffsetBox) stbl.getChild(BoxTypes.CHUNK_OFFSET_BOX);
+		else stco = (ChunkOffsetBox) stbl.getChild(BoxTypes.CHUNK_LARGE_OFFSET_BOX);
+		final long[] chunkOffsets = stco.getChunks();
+
+		final TimeToSampleBox stts = (TimeToSampleBox) stbl.getChild(BoxTypes.TIME_TO_SAMPLE_BOX);
+		final long[] sampleCounts = stts.getSampleCounts();
+		final long[] sampleDeltas = stts.getSampleDeltas();
+
+		//decode sampleDurations
+		final long[] sampleDurations = new long[sampleSizes.length];
+		int off = 0;
+		for(int i = 0; i<sampleCounts.length; i++) {
+			for(int j = 0; j<sampleCounts[i]; j++) {
+				sampleDurations[off+j] = sampleDeltas[i];
+			}
+			off += sampleCounts[i];
+		}
+
+		SampleToChunkEntry entry;
+		int firstChunk, lastChunk;
+		long samples, pos, size;
+		double timeStamp;
+		int current = 0;
+
+		for(int i = 0; i<sampleToChunks.length; i++) {
+			entry = sampleToChunks[i];
+			firstChunk = (int) entry.getFirstChunk();
+			if(i<sampleToChunks.length-1) lastChunk = (int) sampleToChunks[i+1].getFirstChunk()-1;
+			else lastChunk = chunkOffsets.length;
+
+			for(int j = firstChunk; j<=lastChunk; j++) {
+				samples = entry.getSamplesPerChunk();
+				pos = chunkOffsets[j-1];
+				while(samples>0) {
+					timeStamp = (sampleDurations[j]*(current-1))/timeScale;
+					size = sampleSizes[current-1];
+					frames.add(new Frame(getType(), pos, size, timeStamp));
+
+					pos += size;
+					current++;
+					samples--;
+				}
+			}
+		}
+
+		//sort frames by timestamp
+		Collections.sort(frames);
 	}
 
 	public abstract Type getType();
@@ -145,5 +203,10 @@ public abstract class Track {
 	 */
 	public URL getLocation() {
 		return location;
+	}
+
+	//reading
+	public Frame getNextFrame() {
+		return frames.get(currentFrame++);
 	}
 }

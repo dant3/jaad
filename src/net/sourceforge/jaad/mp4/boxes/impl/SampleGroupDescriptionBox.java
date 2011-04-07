@@ -4,10 +4,10 @@ import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.BoxFactory;
 import net.sourceforge.jaad.mp4.boxes.BoxImpl;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
-import net.sourceforge.jaad.mp4.boxes.ContainerBox;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 import net.sourceforge.jaad.mp4.boxes.impl.samplegroupentries.*;
 import java.io.IOException;
+import net.sourceforge.jaad.mp4.boxes.Box;
 
 /**
  * This description table gives information about the characteristics of sample
@@ -35,7 +35,7 @@ public class SampleGroupDescriptionBox extends FullBox {
 	private SampleGroupDescriptionEntry[] entries;
 
 	public SampleGroupDescriptionBox() {
-		super("Sample Group Description Box", "sgpd");
+		super("Sample Group Description Box");
 	}
 
 	@Override
@@ -50,8 +50,7 @@ public class SampleGroupDescriptionBox extends FullBox {
 		final int entryCount = (int) in.readBytes(4);
 		left -= 8;
 
-		final ContainerBox minf = (ContainerBox) parent.getParent().getParent();
-		final HandlerBox hdlr = (HandlerBox) minf.getChild(BoxTypes.HANDLER_BOX);
+		final HandlerBox hdlr = (HandlerBox) parent.getParent().getParent().getChild(BoxTypes.HANDLER_BOX);
 		final int handlerType = (int) hdlr.getHandlerType();
 
 		final Class<? extends BoxImpl> boxClass;

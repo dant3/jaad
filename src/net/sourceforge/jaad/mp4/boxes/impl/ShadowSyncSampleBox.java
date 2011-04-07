@@ -41,12 +41,13 @@ public class ShadowSyncSampleBox extends FullBox {
 	private long[][] sampleNumbers;
 
 	public ShadowSyncSampleBox() {
-		super("Shadow Sync Sample Box", "stsh");
+		super("Shadow Sync Sample Box");
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
+		
 		final int entryCount = (int) in.readBytes(4);
 		sampleNumbers = new long[entryCount][2];
 		left -= 4;

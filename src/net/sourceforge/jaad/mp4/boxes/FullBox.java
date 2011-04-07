@@ -23,8 +23,8 @@ public class FullBox extends BoxImpl {
 
 	protected int version, flags;
 
-	public FullBox(String name, String shortName) {
-		super(name, shortName);
+	public FullBox(String name) {
+		super(name);
 	}
 
 	@Override

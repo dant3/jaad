@@ -33,7 +33,7 @@ public class MovieHeaderBox extends FullBox {
 	private long nextTrackID;
 
 	public MovieHeaderBox() {
-		super("Movie Header Box", "mvhd");
+		super("Movie Header Box");
 		matrix = new double[9];
 	}
 

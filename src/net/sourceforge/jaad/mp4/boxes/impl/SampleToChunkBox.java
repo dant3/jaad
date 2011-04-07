@@ -19,56 +19,56 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SampleToChunkBox extends FullBox {
 
 	public static class SampleToChunkEntry {
 
-		private final int firstChunk, samplesPerChunk, sampleDescriptionIndex;
+		private final long firstChunk, samplesPerChunk, sampleDescriptionIndex;
 
-		SampleToChunkEntry(int firstChunk, int samplesPerChunk, int sampleDescriptionIndex) {
+		SampleToChunkEntry(long firstChunk, long samplesPerChunk, long sampleDescriptionIndex) {
 			this.firstChunk = firstChunk;
 			this.samplesPerChunk = samplesPerChunk;
 			this.sampleDescriptionIndex = sampleDescriptionIndex;
 		}
 
-		public int getFirstChunk() {
+		public long getFirstChunk() {
 			return firstChunk;
 		}
 
-		public int getSampleDescriptionIndex() {
+		public long getSampleDescriptionIndex() {
 			return sampleDescriptionIndex;
 		}
 
-		public int getSamplesPerChunk() {
+		public long getSamplesPerChunk() {
 			return samplesPerChunk;
 		}
 	}
-	private final List<SampleToChunkEntry> entries;
+	private SampleToChunkEntry[] entries;
 
 	public SampleToChunkBox() {
-		super("Sample To Chunk Box", "stsc");
-		entries = new ArrayList<SampleToChunkEntry>();
+		super("Sample To Chunk Box");
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
+		
 		final int entryCount = (int) in.readBytes(4);
+		entries = new SampleToChunkEntry[entryCount];
 		left -= 4;
-		int firstChunk, samplesPerChunk, sampleDescriptionIndex;
+
+		long firstChunk, samplesPerChunk, sampleDescriptionIndex;
 		for(int i = 0; i<entryCount; i++) {
-			firstChunk = (int) in.readBytes(4);
-			samplesPerChunk = (int) in.readBytes(4);
-			sampleDescriptionIndex = (int) in.readBytes(4);
-			entries.add(new SampleToChunkEntry(firstChunk, samplesPerChunk, sampleDescriptionIndex));
+			firstChunk = in.readBytes(4);
+			samplesPerChunk = in.readBytes(4);
+			sampleDescriptionIndex = in.readBytes(4);
+			entries[i] = new SampleToChunkEntry(firstChunk, samplesPerChunk, sampleDescriptionIndex);
 			left -= 12;
 		}
 	}
 
-	public List<SampleToChunkEntry> getEntries() {
+	public SampleToChunkEntry[] getEntries() {
 		return entries;
 	}
 }

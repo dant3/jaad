@@ -16,7 +16,7 @@ public class MovieFragmentHeaderBox extends FullBox {
 	private long sequenceNumber;
 
 	public MovieFragmentHeaderBox() {
-		super("Movie Fragment Header Box", "mfhd");
+		super("Movie Fragment Header Box");
 	}
 
 	@Override

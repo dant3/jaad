@@ -2,8 +2,7 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.BoxFactory;
-import net.sourceforge.jaad.mp4.boxes.FullContainerBox;
+import net.sourceforge.jaad.mp4.boxes.FullBox;
 
 /**
  * The item information box provides extra information about selected items,
@@ -29,10 +28,10 @@ import net.sourceforge.jaad.mp4.boxes.FullContainerBox;
  *
  * @author in-somnia
  */
-public class ItemInformationBox extends FullContainerBox {
+public class ItemInformationBox extends FullBox {
 
 	public ItemInformationBox() {
-		super("Item Information Box", "iinf");
+		super("Item Information Box");
 	}
 
 	@Override

@@ -19,7 +19,7 @@ public class MetaBoxRelationBox extends FullBox {
 	private int metaboxRelation;
 
 	public MetaBoxRelationBox() {
-		super("Meta Box Relation Box", "mere");
+		super("Meta Box Relation Box");
 	}
 
 	@Override
@@ -29,6 +29,7 @@ public class MetaBoxRelationBox extends FullBox {
 		firstMetaboxHandlerType = in.readBytes(4);
 		secondMetaboxHandlerType = in.readBytes(4);
 		metaboxRelation = in.read();
+		left -= 9;
 	}
 
 	/**

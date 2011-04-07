@@ -7,7 +7,7 @@ import net.sourceforge.jaad.mp4.boxes.BoxImpl;
 public class FreeSpaceBox extends BoxImpl {
 
 	public FreeSpaceBox() {
-		super("Free Space Box", "free");
+		super("Free Space Box");
 	}
 
 	@Override

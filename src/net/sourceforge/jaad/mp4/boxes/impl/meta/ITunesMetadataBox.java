@@ -2,8 +2,6 @@ package net.sourceforge.jaad.mp4.boxes.impl.meta;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 
@@ -19,7 +17,7 @@ public class ITunesMetadataBox extends FullBox {
 	private byte[] data;
 
 	public ITunesMetadataBox() {
-		super("iTunes Metadata Box", "data");
+		super("iTunes Metadata Box");
 	}
 
 	@Override

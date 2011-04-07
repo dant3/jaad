@@ -7,7 +7,7 @@ import net.sourceforge.jaad.mp4.boxes.FullBox;
 public class ID3TagBox extends FullBox {
 
 	public ID3TagBox() {
-		super("ID3 Tag Box", "id32");
+		super("ID3 Tag Box");
 	}
 
 	@Override

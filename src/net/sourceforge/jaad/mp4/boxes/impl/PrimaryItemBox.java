@@ -20,7 +20,7 @@ public class PrimaryItemBox extends FullBox {
 	private int itemID;
 
 	public PrimaryItemBox() {
-		super("Primary Item Box", "pitm");
+		super("Primary Item Box");
 	}
 
 	@Override

@@ -46,7 +46,7 @@ public class TrackSelectionBox extends FullBox {
 	private final List<Long> attributes;
 
 	public TrackSelectionBox() {
-		super("Track Selection Box", "tsel");
+		super("Track Selection Box");
 		attributes = new ArrayList<Long>();
 	}
 

@@ -10,7 +10,7 @@ public class DataEntryUrnBox extends FullBox {
 	private String referenceName, location;
 
 	public DataEntryUrnBox() {
-		super("Data Entry Urn Box", "urn ");
+		super("Data Entry Urn Box");
 	}
 
 	@Override

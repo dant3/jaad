@@ -45,7 +45,7 @@ public class TrackHeaderBox extends FullBox {
 	private double[] matrix;
 
 	public TrackHeaderBox() {
-		super("Track Header Box", "tkhd");
+		super("Track Header Box");
 		matrix = new double[9];
 	}
 

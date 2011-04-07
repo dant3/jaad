@@ -17,21 +17,25 @@
 package net.sourceforge.jaad.mp4.boxes;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
-public abstract class BoxImpl implements Box {
+public class BoxImpl implements Box {
 
-	private final String name, shortName;
+	private final String name;
 	protected long size, left;
 	protected long type;
-	protected ContainerBox parent;
+	protected Box parent;
+	protected final List<Box> children;
 
-	protected BoxImpl(String name, String shortName) {
+	public BoxImpl(String name) {
 		this.name = name;
-		this.shortName = shortName;
+
+		children = new ArrayList<Box>(4);
 	}
 
-	public void setParams(long size, long type, ContainerBox parent, long left) {
+	public void setParams(long size, long type, Box parent, long left) {
 		this.size = size;
 		this.type = type;
 		this.parent = parent;
@@ -49,7 +53,9 @@ public abstract class BoxImpl implements Box {
 	 * @param in an input stream
 	 * @throws IOException if an reading error occurs
 	 */
-	public abstract void decode(MP4InputStream in) throws IOException;
+	public void decode(MP4InputStream in) throws IOException {
+		readChildren(in);
+	}
 
 	public long getType() {
 		return type;
@@ -59,7 +65,7 @@ public abstract class BoxImpl implements Box {
 		return size;
 	}
 
-	public ContainerBox getParent() {
+	public Box getParent() {
 		return parent;
 	}
 
@@ -67,21 +73,75 @@ public abstract class BoxImpl implements Box {
 		return name;
 	}
 
-	public String getShortName() {
-		return shortName;
-	}
-
 	@Override
 	public String toString() {
-		return name+" ["+shortName+"]";
+		return name+" ["+BoxFactory.typeToString(type)+"]";
 	}
 
+	//TODO: debugging method, remove
 	public String toTreeString(int off) {
 		StringBuilder sb = new StringBuilder();
 		for(int i = 0; i<off; i++) {
 			sb.append(" ");
 		}
-		sb.append(getShortName()+" ("+getName()+")");
+		sb.append(BoxFactory.typeToString(type)+" ("+getName()+")");
 		return sb.toString();
+	}
+
+	//container methods
+	public boolean hasChildren() {
+		return children.size()>0;
+	}
+
+	public Box getChild(long type) {
+		Box box = null, b = null;
+		int i = 0;
+		while(box==null&&i<children.size()) {
+			b = children.get(i);
+			if(b.getType()==type) box = b;
+			i++;
+		}
+		return box;
+	}
+
+	public List<Box> getChildren() {
+		return children;
+	}
+
+	public List<Box> getChildren(long type) {
+		List<Box> l = new ArrayList<Box>();
+		for(Box box : children) {
+			if(box.getType()==type) l.add(box);
+		}
+		return l;
+	}
+
+	public boolean containsChild(long type) {
+		boolean b = false;
+		for(Box box : children) {
+			if(box.getType()==type) {
+				b = true;
+				break;
+			}
+		}
+		return b;
+	}
+
+	protected void readChildren(MP4InputStream in) throws IOException {
+		Box box;
+		while(left>0) {
+			box = BoxFactory.parseBox(this, in);
+			left -= box.getSize();
+			children.add(box);
+		}
+	}
+
+	protected void readChildren(MP4InputStream in, int len) throws IOException {
+		Box box;
+		for(int i = 0; i<len; i++) {
+			box = BoxFactory.parseBox(this, in);
+			left -= box.getSize();
+			children.add(box);
+		}
 	}
 }

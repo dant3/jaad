@@ -45,11 +45,11 @@ public class MP4Reader implements BoxTypes {
 	private final MP4InputStream in;
 	private final List<AudioFrame> frames;
 	private int currentFrame;
-	private List<Integer> samples;
-	private List<SampleToChunkEntry> sampleToChunkEntries;
-	private List<Long> chunks;
+	private long[] samples;
+	private SampleToChunkEntry[] sampleToChunkEntries;
+	private long[] chunks;
 	private byte[] decoderSpecificInfo;
-	private long sampleDuration;
+	private long[] sampleDuration;
 	private double sampleRate;
 	private long duration, channels;
 
@@ -61,7 +61,7 @@ public class MP4Reader implements BoxTypes {
 	 */
 	public MP4Reader(InputStream in) throws IOException {
 		this.in = new MP4InputStream(in);
-		sampleDuration = 1024;
+		sampleDuration = new long[]{1024};
 		frames = new ArrayList<AudioFrame>();
 		currentFrame = 0;
 
@@ -81,7 +81,7 @@ public class MP4Reader implements BoxTypes {
 			type = box.getType();
 			if(type==MOVIE_BOX) {
 				moovFound = true;
-				parseMoov((ContainerBox) box);
+				parseMoov(box);
 			}
 			else if(type==MEDIA_DATA_BOX) {
 				if(moovFound) break;
@@ -90,37 +90,36 @@ public class MP4Reader implements BoxTypes {
 		}
 	}
 
-	private void parseMoov(ContainerBox moov) throws IOException {
-		Box trak = null, minf = null, mdhd = null;
-		ContainerBox mdia = null;
+	private void parseMoov(Box moov) throws IOException {
+		Box minf = null, mdhd = null, mdia = null;
 
 		final MovieHeaderBox mvhd = (MovieHeaderBox) moov.getChild(MOVIE_HEADER_BOX);
-		if(mvhd!=null) {
-			duration = mvhd.getDuration();
-		}
+		if(mvhd!=null) duration = mvhd.getDuration();
 
-		for(int i = 0; (trak = moov.getChild(TRACK_BOX, i))!=null; i++) {
-			mdia = (ContainerBox) ((ContainerBox) trak).getChild(MEDIA_BOX);
+		final List<Box> tracks = moov.getChildren(TRACK_BOX);
+
+		for(Box trak : tracks) {
+			mdia = trak.getChild(MEDIA_BOX);
 			if(mdia!=null) {
 				mdhd = mdia.getChild(MEDIA_HEADER_BOX);
 				minf = mdia.getChild(MEDIA_INFORMATION_BOX);
 				if(mdhd!=null&&minf!=null) {
-					parseMedia((ContainerBox) minf, (MediaHeaderBox) mdhd);
+					parseMedia(minf, (MediaHeaderBox) mdhd);
 				}
 			}
 		}
 	}
 
-	private void parseMedia(ContainerBox minf, MediaHeaderBox mdhd) throws IOException {
+	private void parseMedia(Box minf, MediaHeaderBox mdhd) throws IOException {
 		final Box smhd = minf.getChild(SOUND_MEDIA_HEADER_BOX);
 		if(smhd!=null) {
-			final ContainerBox stbl = (ContainerBox) minf.getChild(SAMPLE_TABLE_BOX);
+			final Box stbl = minf.getChild(SAMPLE_TABLE_BOX);
 			if(stbl!=null) parseSampleTable(stbl);
 			sampleRate = mdhd.getTimeScale();
 		}
 	}
 
-	private void parseSampleTable(ContainerBox stbl) throws IOException {
+	private void parseSampleTable(Box stbl) throws IOException {
 		final SampleDescriptionBox stsd = (SampleDescriptionBox) stbl.getChild(SAMPLE_DESCRIPTION_BOX);
 		if(stsd!=null) {
 			final SampleEntry[] sampleEntries = stsd.getSampleEntries();
@@ -131,10 +130,10 @@ public class MP4Reader implements BoxTypes {
 		}
 
 		final TimeToSampleBox stts = (TimeToSampleBox) stbl.getChild(TIME_TO_SAMPLE_BOX);
-		if(stts!=null) sampleDuration = stts.getSampleDuration();
+		if(stts!=null) sampleDuration = stts.getSampleDeltas();
 
 		final SampleSizeBox stsz = (SampleSizeBox) stbl.getChild(SAMPLE_SIZE_BOX);
-		if(stsz!=null) samples = stsz.getSamples();
+		if(stsz!=null) samples = stsz.getSampleSizes();
 
 		final SampleToChunkBox stsc = (SampleToChunkBox) stbl.getChild(SAMPLE_TO_CHUNK_BOX);
 		if(stsc!=null) sampleToChunkEntries = stsc.getEntries();
@@ -142,13 +141,25 @@ public class MP4Reader implements BoxTypes {
 		final ChunkOffsetBox stco = (ChunkOffsetBox) stbl.getChild(CHUNK_OFFSET_BOX);
 		if(stco!=null) {
 			if(chunks==null) chunks = stco.getChunks();
-			else chunks.addAll(stco.getChunks());
+			else {
+				final long[] stcoC = stco.getChunks();
+				long[] tmp = new long[chunks.length+stcoC.length];
+				System.arraycopy(chunks, 0, tmp, 0, chunks.length);
+				System.arraycopy(stcoC, 0, tmp, chunks.length, stcoC.length);
+				chunks = tmp;
+			}
 		}
 
 		final ChunkOffsetBox co64 = (ChunkOffsetBox) stbl.getChild(CHUNK_LARGE_OFFSET_BOX);
 		if(co64!=null) {
 			if(chunks==null) chunks = co64.getChunks();
-			else chunks.addAll(co64.getChunks());
+			else {
+				final long[] co64C = stco.getChunks();
+				long[] tmp = new long[chunks.length+co64C.length];
+				System.arraycopy(chunks, 0, tmp, 0, chunks.length);
+				System.arraycopy(co64C, 0, tmp, chunks.length, co64C.length);
+				chunks = tmp;
+			}
 		}
 	}
 
@@ -176,24 +187,24 @@ public class MP4Reader implements BoxTypes {
 		int sample = 1;
 		long pos;
 
-		//add the audio frames / samples / chunks
+		//add the audio frames
 		SampleToChunkEntry record, nextRecord;
-		int firstChunk, lastChunk, sampleCount, size;
+		long firstChunk, lastChunk, sampleCount, size;
 		double ts;
-		for(int i = 0; i<sampleToChunkEntries.size(); i++) {
-			record = sampleToChunkEntries.get(i);
+		for(int i = 0; i<sampleToChunkEntries.length; i++) {
+			record = sampleToChunkEntries[i];
 			firstChunk = record.getFirstChunk();
-			lastChunk = chunks.size();
-			if(i<sampleToChunkEntries.size()-1) {
-				nextRecord = sampleToChunkEntries.get(i+1);
+			lastChunk = chunks.length;
+			if(i<sampleToChunkEntries.length-1) {
+				nextRecord = sampleToChunkEntries[i+1];
 				lastChunk = nextRecord.getFirstChunk()-1;
 			}
-			for(int chunk = firstChunk; chunk<=lastChunk; chunk++) {
+			for(long chunk = firstChunk; chunk<=lastChunk; chunk++) {
 				sampleCount = record.getSamplesPerChunk();
-				pos = chunks.get(chunk-1).longValue();
+				pos = chunks[(int) chunk-1];
 				while(sampleCount>0) {
-					ts = (sampleDuration*(sample-1))/sampleRate;
-					size = samples.get(sample-1).intValue();
+					ts = (sampleDuration[0]*(sample-1))/sampleRate;
+					size = samples[sample-1];
 					/* TODO: instantiating all frames is not necessary;
 					 * perhaps save the values and don't instantiate until
 					 * requested by readNextFrame()
@@ -210,8 +221,8 @@ public class MP4Reader implements BoxTypes {
 
 		Collections.sort(frames);
 
-		chunks.clear();
-		sampleToChunkEntries.clear();
+		chunks = null;
+		sampleToChunkEntries = null;
 	}
 
 	/* ========= properties ========== */
@@ -304,7 +315,7 @@ public class MP4Reader implements BoxTypes {
 			final long diff = frame.getOffset()-in.getOffset();
 			if(diff>0) in.skipBytes(diff);
 			else if(diff<0) throw new IOException("invalid data: frame already skipped");
-			final byte[] b = new byte[frame.getSize()];
+			final byte[] b = new byte[(int) frame.getSize()];
 			if(!in.readBytes(b)) throw new IOException("unexpected end of stream");
 			frame.setData(b);
 			currentFrame++;

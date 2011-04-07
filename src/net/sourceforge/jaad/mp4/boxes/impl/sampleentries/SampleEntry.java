@@ -2,14 +2,14 @@ package net.sourceforge.jaad.mp4.boxes.impl.sampleentries;
 
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
-import net.sourceforge.jaad.mp4.boxes.ContainerBoxImpl;
+import net.sourceforge.jaad.mp4.boxes.BoxImpl;
 
-public abstract class SampleEntry extends ContainerBoxImpl {
+public abstract class SampleEntry extends BoxImpl {
 
 	private long dataReferenceIndex;
 
-	protected SampleEntry(String name, String shortName) {
-		super(name, shortName);
+	protected SampleEntry(String name) {
+		super(name);
 	}
 
 	@Override
@@ -18,10 +18,6 @@ public abstract class SampleEntry extends ContainerBoxImpl {
 		in.skipBytes(6);
 		dataReferenceIndex = in.readBytes(2);
 		left -= 8;
-	}
-
-	protected void readChildren(MP4InputStream in) throws IOException {
-		super.decode(in);
 	}
 
 	/**

@@ -2,7 +2,7 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.FullContainerBox;
+import net.sourceforge.jaad.mp4.boxes.FullBox;
 
 /**
  * The data reference object contains a table of data references (normally URLs)
@@ -14,17 +14,17 @@ import net.sourceforge.jaad.mp4.boxes.FullContainerBox;
  * 
  * @author in-somnia
  */
-public class DataReferenceBox extends FullContainerBox {
+public class DataReferenceBox extends FullBox {
 
 	public DataReferenceBox() {
-		super("Data Reference Box", "dref");
+		super("Data Reference Box");
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 
-		final long entryCount = in.readBytes(4);
+		final int entryCount = (int) in.readBytes(4);
 		left -= 4;
 
 		readChildren(in, entryCount); //DataEntryUrlBox, DataEntryUrnBox
