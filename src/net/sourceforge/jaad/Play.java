@@ -16,8 +16,8 @@
  */
 package net.sourceforge.jaad;
 
-import net.sourceforge.jaad.mp4.AudioFrame;
-import net.sourceforge.jaad.mp4.MP4Reader;
+import net.sourceforge.jaad.mp4.MP4Container;
+import net.sourceforge.jaad.mp4.api.*;
 import java.io.FileInputStream;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -54,22 +54,24 @@ public class Play {
 		SourceDataLine line = null;
 		byte[] b;
 		try {
-			final MP4Reader mp4 = new MP4Reader(new FileInputStream(in));
-			final DecoderConfig conf = DecoderConfig.parseMP4DecoderSpecificInfo(mp4.getDecoderSpecificInfo());
+			final MP4Container cont = new MP4Container(new FileInputStream(in));
+			final Movie movie = cont.getMovie();
+			final AudioTrack track = (AudioTrack) movie.getTracks(Track.Type.AUDIO).get(0);
+			System.out.println(track.getSampleRate()+", "+track.getSampleSize()+", "+track.getChannelCount());
+			final AudioFormat aufmt = new AudioFormat(track.getSampleRate(), track.getSampleSize(), track.getChannelCount(), true, true);
+			line = AudioSystem.getSourceDataLine(aufmt);
+			line.open();
+			line.start();
+
+			final DecoderConfig conf = DecoderConfig.parseMP4DecoderSpecificInfo(track.getDSID());
+			System.out.println(conf.getProfile()+", "+conf.getSampleFrequency()+", "+conf.getChannelConfiguration());
 			final Decoder dec = new Decoder(conf);
 
-			AudioFrame frame;
+			Frame frame;
 			final SampleBuffer buf = new SampleBuffer();
-			while(mp4.hasMoreFrames()) {
-				frame = mp4.readNextFrame();
+			while(track.hasMoreFrames()) {
+				frame = track.readNextFrame();
 				dec.decodeFrame(frame.getData(), buf);
-
-				if(line==null) {
-					final AudioFormat aufmt = new AudioFormat(buf.getSampleRate(), buf.getBitsPerSample(), buf.getChannels(), true, true);
-					line = AudioSystem.getSourceDataLine(aufmt);
-					line.open();
-					line.start();
-				}
 				b = buf.getData();
 				line.write(b, 0, b.length);
 			}

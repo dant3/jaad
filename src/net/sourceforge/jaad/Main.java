@@ -16,12 +16,15 @@
  */
 package net.sourceforge.jaad;
 
-import net.sourceforge.jaad.mp4.AudioFrame;
-import net.sourceforge.jaad.mp4.MP4Reader;
 import net.sourceforge.jaad.util.wav.WaveFileWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import net.sourceforge.jaad.mp4.MP4Container;
+import net.sourceforge.jaad.mp4.api.AudioTrack;
+import net.sourceforge.jaad.mp4.api.Frame;
+import net.sourceforge.jaad.mp4.api.Movie;
+import net.sourceforge.jaad.mp4.api.Track;
 
 /**
  * Command line example, that can decode an AAC file to a WAVE file.
@@ -53,17 +56,19 @@ public class Main {
 	private static void decodeMP4(String in, String out) throws IOException {
 		WaveFileWriter wav = null;
 		try {
-			final MP4Reader mp4 = new MP4Reader(new FileInputStream(in));
-			final DecoderConfig conf = DecoderConfig.parseMP4DecoderSpecificInfo(mp4.getDecoderSpecificInfo());
+			final MP4Container cont = new MP4Container(new FileInputStream(in));
+			final Movie movie = cont.getMovie();
+			final AudioTrack track = (AudioTrack) movie.getTracks(Track.Type.AUDIO).get(0);
+			wav = new WaveFileWriter(new File(out), track.getSampleRate(), track.getChannelCount(), track.getSampleSize());
+
+			final DecoderConfig conf = DecoderConfig.parseMP4DecoderSpecificInfo(track.getDSID());
 			final Decoder dec = new Decoder(conf);
 
-			AudioFrame frame;
+			Frame frame;
 			final SampleBuffer buf = new SampleBuffer();
-			while(mp4.hasMoreFrames()) {
-				frame = mp4.readNextFrame();
+			while(track.hasMoreFrames()) {
+				frame = track.readNextFrame();
 				dec.decodeFrame(frame.getData(), buf);
-
-				if(wav==null) wav = new WaveFileWriter(new File(out), buf.getSampleRate(), buf.getChannels(), buf.getBitsPerSample());
 				wav.write(buf.getData());
 			}
 		}

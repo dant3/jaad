@@ -36,7 +36,7 @@ public class AudioSampleEntry extends SampleEntry {
 		sampleSize = (int) in.readBytes(2);
 		in.skipBytes(2); //pre-defined: 0
 		in.skipBytes(2); //reserved
-		sampleRate = ((int) in.readBytes(4))>>16;
+		sampleRate = (int) ((in.readBytes(4)>>16)&0xFFFF);
 		left -= 20;
 
 		readChildren(in);

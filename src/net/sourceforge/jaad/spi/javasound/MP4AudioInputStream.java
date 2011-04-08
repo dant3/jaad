@@ -19,15 +19,18 @@ package net.sourceforge.jaad.spi.javasound;
 import net.sourceforge.jaad.Decoder;
 import net.sourceforge.jaad.DecoderConfig;
 import net.sourceforge.jaad.SampleBuffer;
-import net.sourceforge.jaad.mp4.AudioFrame;
-import net.sourceforge.jaad.mp4.MP4Reader;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.sound.sampled.AudioFormat;
+import net.sourceforge.jaad.mp4.MP4Container;
+import net.sourceforge.jaad.mp4.api.AudioTrack;
+import net.sourceforge.jaad.mp4.api.Frame;
+import net.sourceforge.jaad.mp4.api.Movie;
+import net.sourceforge.jaad.mp4.api.Track;
 
 class MP4AudioInputStream extends AsynchronousAudioInputStream {
 
-	private final MP4Reader mp4;
+	private final AudioTrack track;
 	private final Decoder decoder;
 	private final SampleBuffer sampleBuffer;
 	private AudioFormat audioFormat;
@@ -35,8 +38,11 @@ class MP4AudioInputStream extends AsynchronousAudioInputStream {
 
 	MP4AudioInputStream(InputStream in, AudioFormat format, long length) throws IOException {
 		super(in, format, length);
-		mp4 = new MP4Reader(in);
-		final DecoderConfig conf = DecoderConfig.parseMP4DecoderSpecificInfo(mp4.getDecoderSpecificInfo());
+		final MP4Container cont = new MP4Container(in);
+		final Movie movie = cont.getMovie();
+		track = (AudioTrack) movie.getTracks(Track.Type.AUDIO).get(0);
+
+		final DecoderConfig conf = DecoderConfig.parseMP4DecoderSpecificInfo(track.getDSID());
 		decoder = new Decoder(conf);
 		sampleBuffer = new SampleBuffer();
 	}
@@ -64,12 +70,12 @@ class MP4AudioInputStream extends AsynchronousAudioInputStream {
 	}
 
 	private void decodeFrame() {
-		if(!mp4.hasMoreFrames()) {
+		if(!track.hasMoreFrames()) {
 			buffer.close();
 			return;
 		}
 		try {
-			final AudioFrame frame = mp4.readNextFrame();
+			final Frame frame = track.readNextFrame();
 			if(frame==null) {
 				buffer.close();
 				return;

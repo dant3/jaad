@@ -11,14 +11,18 @@ public class MetaData<T> {
 	private String artist, title, albumArtist, album, composer;
 	private String comments;
 
-	MetaData(Box meta) {
+	MetaData() {
 		artist = "";
 		title = "";
 		albumArtist = "";
 		album = "";
 		composer = "";
 		comments = "";
+	}
 
+	MetaData(Box meta) {
+		this();
+		
 		//hdlr = (HandlerBox) meta.getChild(BoxTypes.HANDLER_BOX);
 		//standard boxes
 		//if(meta.containsChild(BoxTypes.PRIMARY_ITEM_BOX)) pitm = (PrimaryItemBox) meta.getChild(BoxTypes.PRIMARY_ITEM_BOX);

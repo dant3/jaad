@@ -17,6 +17,6 @@
 package net.sourceforge.jaad.mp4;
 
 /**
- * Utility package for parsing an MP4 file.
- * The MP4Reader extracts the DecoderSpecificInfo and all audio data.
+ * Package for demultiplexing MP4 containers.
+ * See the {@link MP4Container} class for details.
  */

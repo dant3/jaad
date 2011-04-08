@@ -1,5 +1,6 @@
 package net.sourceforge.jaad.mp4.api;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -7,17 +8,22 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
 import net.sourceforge.jaad.mp4.boxes.impl.ChunkOffsetBox;
 import net.sourceforge.jaad.mp4.boxes.impl.DataEntryUrlBox;
 import net.sourceforge.jaad.mp4.boxes.impl.DataReferenceBox;
+import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
 import net.sourceforge.jaad.mp4.boxes.impl.MediaHeaderBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SampleDescriptionBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleSizeBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox.SampleToChunkEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.TimeToSampleBox;
 import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.AudioSampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.SampleEntry;
 
 public abstract class Track {
 
@@ -26,6 +32,7 @@ public abstract class Track {
 		VIDEO,
 		AUDIO
 	}
+	private final MP4InputStream in;
 	private final TrackHeaderBox tkhd;
 	private final MediaHeaderBox mdhd;
 	private final boolean inFile;
@@ -33,15 +40,15 @@ public abstract class Track {
 	private URL location;
 	private int currentFrame;
 
-	Track(Box box) {
+	Track(Box box, MP4InputStream in) {
+		this.in = in;
+
 		tkhd = (TrackHeaderBox) box.getChild(BoxTypes.TRACK_HEADER_BOX);
 
-		//mdia
 		final Box mdia = box.getChild(BoxTypes.MEDIA_BOX);
 		mdhd = (MediaHeaderBox) mdia.getChild(BoxTypes.MEDIA_HEADER_BOX);
 		final Box minf = mdia.getChild(BoxTypes.MEDIA_INFORMATION_BOX);
 
-		//dinf
 		final Box dinf = minf.getChild(BoxTypes.DATA_INFORMATION_BOX);
 		final DataReferenceBox dref = (DataReferenceBox) dinf.getChild(BoxTypes.DATA_REFERENCE_BOX);
 		//TODO: support URNs
@@ -65,7 +72,7 @@ public abstract class Track {
 			location = null;
 		}
 
-		//stbl
+		//sample table
 		final Box stbl = minf.getChild(BoxTypes.SAMPLE_TABLE_BOX);
 		final List<Box> children = stbl.getChildren();
 		if(children.size()>0) {
@@ -101,6 +108,7 @@ public abstract class Track {
 			off += sampleCounts[i];
 		}
 
+		//create frames
 		SampleToChunkEntry entry;
 		int firstChunk, lastChunk;
 		long samples, pos, size;
@@ -117,8 +125,9 @@ public abstract class Track {
 				samples = entry.getSamplesPerChunk();
 				pos = chunkOffsets[j-1];
 				while(samples>0) {
-					timeStamp = (sampleDurations[j]*(current-1))/timeScale;
-					size = sampleSizes[current-1];
+					timeStamp = (sampleDurations[j]*current)/timeScale;
+					size = sampleSizes[current];
+					//System.out.println(pos+"\t"+size+"\t"+timeStamp);
 					frames.add(new Frame(getType(), pos, size, timeStamp));
 
 					pos += size;
@@ -206,7 +215,36 @@ public abstract class Track {
 	}
 
 	//reading
-	public Frame getNextFrame() {
-		return frames.get(currentFrame++);
+	/**
+	 * Indicates if there are more frames to be read.
+	 * @return true if there is at least one more frame
+	 */
+	public boolean hasMoreFrames() {
+		return currentFrame<frames.size();
+	}
+
+	/**
+	 * Reads the next frame from the container.
+	 * @return the next frame
+	 * @throws IOException if reading fails
+	 */
+	public Frame readNextFrame() throws IOException {
+		Frame frame = null;
+		if(hasMoreFrames()) {
+			frame = frames.get(currentFrame);
+
+			final long diff = frame.getOffset()-in.getOffset();
+			if(diff>0) in.skipBytes(diff);
+			else if(diff<0) {
+				if(in.hasRandomAccess()) in.seek(frame.getOffset());
+				else throw new IOException("frame already skipped and no random access");
+			}
+
+			final byte[] b = new byte[(int) frame.getSize()];
+			if(!in.readBytes(b)) throw new IOException("unexpected end of stream");
+			frame.setData(b);
+			currentFrame++;
+		}
+		return frame;
 	}
 }

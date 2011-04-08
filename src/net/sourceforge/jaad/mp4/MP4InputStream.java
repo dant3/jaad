@@ -139,6 +139,15 @@ public class MP4InputStream {
 		return l;
 	}
 
+	public void seek(long l) throws IOException {
+		if(fin!=null) fin.seek(l);
+		else throw new IOException("could not seek: no random access");
+	}
+
+	public boolean hasRandomAccess() {
+		return fin!=null;
+	}
+
 	void close() throws IOException {
 		in.close();
 	}
