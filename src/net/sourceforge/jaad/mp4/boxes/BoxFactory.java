@@ -110,7 +110,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(ALBUM_ARTIST_NAME_BOX, BoxImpl.class);
 		BOX_CLASSES.put(ALBUM_NAME_BOX, BoxImpl.class);
 		BOX_CLASSES.put(GROUPING_BOX, BoxImpl.class);
-		BOX_CLASSES.put(PUBLICATION_DATE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(PUBLICATION_YEAR_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TRACK_NUMBER_BOX, BoxImpl.class);
 		BOX_CLASSES.put(DISK_NUMBER_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TEMPO_BOX, BoxImpl.class);
@@ -128,7 +128,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(TELEVISION_SHOW_SORT_BOX, BoxImpl.class);
 		BOX_CLASSES.put(LYRICS_BOX, BoxImpl.class);
 		BOX_CLASSES.put(COVER_BOX, BoxImpl.class);
-		BOX_CLASSES.put(SOFTWARE_INFORMATION_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ENCODER_TOOL_BOX, BoxImpl.class);
 		BOX_CLASSES.put(CUSTOM_ITUNES_METADATA_BOX, BoxImpl.class);
 		BOX_CLASSES.put(ITUNES_METADATA_BOX, ITunesMetadataBox.class);
 		BOX_CLASSES.put(ITUNES_METADATA_NAME_BOX, ITunesMetadataNameBox.class);
@@ -152,7 +152,7 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(ALBUM_ARTIST_NAME_BOX, new String[]{"Album Artist Name Box"});
 		PARAMETER.put(ALBUM_NAME_BOX, new String[]{"Album Name Box"});
 		PARAMETER.put(GROUPING_BOX, new String[]{"Grouping Box"});
-		PARAMETER.put(PUBLICATION_DATE_BOX, new String[]{"Publication Date Box"});
+		PARAMETER.put(PUBLICATION_YEAR_BOX, new String[]{"Publication Date Box"});
 		PARAMETER.put(TRACK_NUMBER_BOX, new String[]{"Track Number Box"});
 		PARAMETER.put(DISK_NUMBER_BOX, new String[]{"Disk Number Box"});
 		PARAMETER.put(TEMPO_BOX, new String[]{"Tempo Box"});
@@ -170,7 +170,7 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(TELEVISION_SHOW_SORT_BOX, new String[]{"Television Show Sort Box"});
 		PARAMETER.put(LYRICS_BOX, new String[]{"Lyrics Box"});
 		PARAMETER.put(COVER_BOX, new String[]{"Cover Box"});
-		PARAMETER.put(SOFTWARE_INFORMATION_BOX, new String[]{"Software Information Box"});
+		PARAMETER.put(ENCODER_TOOL_BOX, new String[]{"Software Information Box"});
 		PARAMETER.put(CUSTOM_ITUNES_METADATA_BOX, new String[]{"Custom iTunes Metadata Box"});
 	}
 

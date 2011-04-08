@@ -57,14 +57,12 @@ public class Play {
 			final MP4Container cont = new MP4Container(new FileInputStream(in));
 			final Movie movie = cont.getMovie();
 			final AudioTrack track = (AudioTrack) movie.getTracks(Track.Type.AUDIO).get(0);
-			System.out.println(track.getSampleRate()+", "+track.getSampleSize()+", "+track.getChannelCount());
 			final AudioFormat aufmt = new AudioFormat(track.getSampleRate(), track.getSampleSize(), track.getChannelCount(), true, true);
 			line = AudioSystem.getSourceDataLine(aufmt);
 			line.open();
 			line.start();
 
 			final DecoderConfig conf = DecoderConfig.parseMP4DecoderSpecificInfo(track.getDSID());
-			System.out.println(conf.getProfile()+", "+conf.getSampleFrequency()+", "+conf.getChannelConfiguration());
 			final Decoder dec = new Decoder(conf);
 
 			Frame frame;

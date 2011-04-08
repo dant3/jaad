@@ -28,6 +28,10 @@ public class ITunesMetadataBox extends FullBox {
 		left = 0;
 	}
 
+	public int getFlags() {
+		return flags;
+	}
+
 	/**
 	 * Returns the raw content, that can be present in different formats.
 	 * @return the raw metadata

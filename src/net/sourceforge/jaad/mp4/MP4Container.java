@@ -86,10 +86,7 @@ public class MP4Container {
 				if(pdin==null) pdin = (ProgressiveDownloadInformationBox) box;
 			}
 			else if(type==BoxTypes.MEDIA_DATA_BOX) {
-				if(moovFound) {
-					System.out.println("mdat nach moov");
-					break;
-				}
+				if(moovFound) break;
 				else if(!in.hasRandomAccess()) throw new MP4Exception("movie box at end of file, need random access");
 			}
 		}
