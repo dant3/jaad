@@ -61,8 +61,7 @@ public class Main {
 			final AudioTrack track = (AudioTrack) movie.getTracks(Track.Type.AUDIO).get(0);
 			wav = new WaveFileWriter(new File(out), track.getSampleRate(), track.getChannelCount(), track.getSampleSize());
 
-			final DecoderConfig conf = DecoderConfig.parseMP4DecoderSpecificInfo(track.getDSID());
-			final Decoder dec = new Decoder(conf);
+			final Decoder dec = new Decoder(track.getDSID());
 
 			Frame frame;
 			final SampleBuffer buf = new SampleBuffer();
@@ -80,8 +79,7 @@ public class Main {
 	private static void decodeAAC(String in, String out) throws IOException {
 		WaveFileWriter wav = null;
 		try {
-			final DecoderConfig conf = DecoderConfig.parseTransportHeader(new FileInputStream(in), 0);
-			final Decoder dec = new Decoder(conf);
+			final Decoder dec = new Decoder(new FileInputStream(in));
 
 			final SampleBuffer buf = new SampleBuffer();
 			while(true) {

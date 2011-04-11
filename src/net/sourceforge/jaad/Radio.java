@@ -53,8 +53,7 @@ public class Radio {
 		try {
 			final URL url = new URL(arg);
 			final InputStream in = url.openStream();
-			final DecoderConfig conf = DecoderConfig.parseTransportHeader(in, DecoderConfig.MAXIMUM_FRAME_SIZE);
-			final Decoder dec = new Decoder(conf);
+			final Decoder dec = new Decoder(in);
 			while(true) {
 				if(!dec.decodeFrame(buf)) break;
 

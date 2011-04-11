@@ -28,30 +28,29 @@ class AACAudioInputStream extends AsynchronousAudioInputStream {
 
 	private final Decoder decoder;
 	private final SampleBuffer sampleBuffer;
-	private AudioFormat format = null;
+	private AudioFormat audioFormat = null;
 	private byte[] saved;
 
 	AACAudioInputStream(InputStream in, AudioFormat format, long length) throws IOException {
 		super(in, format, length);
-		final DecoderConfig conf = DecoderConfig.parseTransportHeader(in, DecoderConfig.MAXIMUM_FRAME_SIZE);
-		decoder = new Decoder(conf);
+		decoder = new Decoder(in);
 		sampleBuffer = new SampleBuffer();
 	}
 
 	@Override
 	public AudioFormat getFormat() {
-		if(format==null) {
+		if(audioFormat==null) {
 			//read first frame
 			try {
 				if(!decoder.decodeFrame(sampleBuffer)) return null;
-				format = new AudioFormat(sampleBuffer.getSampleRate(), sampleBuffer.getBitsPerSample(), sampleBuffer.getChannels(), true, true);
+				audioFormat = new AudioFormat(sampleBuffer.getSampleRate(), sampleBuffer.getBitsPerSample(), sampleBuffer.getChannels(), true, true);
 				saved = sampleBuffer.getData();
 			}
 			catch(AACException ex) {
 				return null;
 			}
 		}
-		return format;
+		return audioFormat;
 	}
 
 	public void execute() {

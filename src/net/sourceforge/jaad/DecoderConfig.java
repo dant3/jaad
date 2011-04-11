@@ -31,8 +31,7 @@ import java.io.InputStream;
  */
 public class DecoderConfig implements Constants {
 
-	public static final int MAXIMUM_FRAME_SIZE = 6144;
-	private final BitStream in;
+	private static final int MAXIMUM_FRAME_SIZE = 6144;
 	private Profile profile;
 	private SampleFrequency sampleFrequency;
 	private ChannelConfiguration channelConfiguration;
@@ -46,12 +45,7 @@ public class DecoderConfig implements Constants {
 	//extension: error resilience
 	private boolean sectionDataResilience, scalefactorResilience, spectralDataResilience;
 
-	DecoderConfig(BitStream in) {
-		this.in = in;
-	}
-
-	public DecoderConfig() {
-		in = null;
+	private DecoderConfig() {
 		profile = Profile.AAC_MAIN;
 		sampleFrequency = SampleFrequency.SAMPLE_FREQUENCY_NONE;
 		channelConfiguration = ChannelConfiguration.CHANNEL_CONFIG_UNSUPPORTED;
@@ -147,23 +141,14 @@ public class DecoderConfig implements Constants {
 	public boolean isSpectralDataResilienceUsed() {
 		return spectralDataResilience;
 	}
-
-	//=========== ADIF/ADTS header =============
-	boolean isBitStreamStored() {
-		return in!=null;
-	}
-
-	BitStream getBitStream() {
-		return in;
-	}
-
 	/* ======== static builder ========= */
+
 	/**
 	 * Parses the input arrays as a DecoderSpecificInfo, as used in MP4
 	 * containers.
 	 * @return a DecoderConfig
 	 */
-	public static DecoderConfig parseMP4DecoderSpecificInfo(byte[] data) throws AACException {
+	static DecoderConfig parseMP4DecoderSpecificInfo(byte[] data) throws AACException {
 		final BitStream in = new BitStream(data);
 		final DecoderConfig config = new DecoderConfig();
 
@@ -253,10 +238,10 @@ public class DecoderConfig implements Constants {
 	 * @param maxSkip the maximum number of bytes to skip while searching for a header.
 	 * @return a DecoderConfig or null if no header was found
 	 */
-	public static DecoderConfig parseTransportHeader(InputStream input, int maxSkip) throws AACException {
+	static DecoderConfig parseTransportHeader(InputStream input) throws AACException {
 		final InputBitStream in = new InputBitStream(input);
-		final DecoderConfig config = new DecoderConfig(in);
-		int left = maxSkip;
+		final DecoderConfig config = new DecoderConfig();
+		int left = MAXIMUM_FRAME_SIZE;
 		do {
 			if(ADIFHeader.isPresent(in)) {
 				final ADIFHeader adif = ADIFHeader.readHeader(in);

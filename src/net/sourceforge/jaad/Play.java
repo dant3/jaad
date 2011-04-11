@@ -62,8 +62,7 @@ public class Play {
 			line.open();
 			line.start();
 
-			final DecoderConfig conf = DecoderConfig.parseMP4DecoderSpecificInfo(track.getDSID());
-			final Decoder dec = new Decoder(conf);
+			final Decoder dec = new Decoder(track.getDSID());
 
 			Frame frame;
 			final SampleBuffer buf = new SampleBuffer();
@@ -86,8 +85,7 @@ public class Play {
 		SourceDataLine line = null;
 		byte[] b;
 		try {
-			final DecoderConfig conf = DecoderConfig.parseTransportHeader(new FileInputStream(in), 0);
-			final Decoder dec = new Decoder(conf);
+			final Decoder dec = new Decoder(new FileInputStream(in));
 			final SampleBuffer buf = new SampleBuffer();
 			while(true) {
 				if(!dec.decodeFrame(buf)) break;

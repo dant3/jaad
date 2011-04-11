@@ -16,6 +16,7 @@
  */
 package net.sourceforge.jaad;
 
+import java.io.InputStream;
 import net.sourceforge.jaad.impl.BitStream;
 import net.sourceforge.jaad.impl.Constants;
 import net.sourceforge.jaad.impl.PCE;
@@ -25,6 +26,7 @@ import net.sourceforge.jaad.impl.transport.ADIFHeader;
 import net.sourceforge.jaad.impl.transport.ADTSFrame;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
+import net.sourceforge.jaad.impl.InputBitStream;
 
 /**
  * Main AAC decoder class
@@ -56,24 +58,62 @@ public class Decoder implements Constants {
 	}
 
 	/**
-	 * Initializes the decoder with a specific configuration.
-	 * @param config A previously created decoder configuration.
-	 * @throws AACException if the profile, specified by the DecoderConfig, is not supported
+	 * Initializes the decoder with an InputStream to read from. This
+	 * constructor can only be used with a stream containing an ADTS or ADIF
+	 * header. This constructor may skip up to the maximum framelength (6144
+	 * bytes) to find the next transport header in the stream.
+	 * 
+	 * After this the <code>decodeFrame(SampleBuffer)</code> method can be used
+	 * to decode the frames.
+	 * 
+	 * @param in an InputStream to read from
+	 * @throws AACException if the specified profile is not supported
 	 */
-	public Decoder(DecoderConfig config) throws AACException {
-		if(config==null) throw new IllegalArgumentException("decoder config must not be null");
+	public Decoder(InputStream in) throws AACException {
+		config = DecoderConfig.parseTransportHeader(in);
+		if(config==null) throw new IllegalArgumentException("no transport header could be found in the stream");
+
 		if(!canDecode(config.getProfile())) throw new AACException("unsupported profile: "+config.getProfile().getDescription());
-
-		if(config.isBitStreamStored()) in = config.getBitStream();
-		else in = new BitStream();
-
-		this.config = config;
-		LOGGER.log(Level.FINE, "profile: {0}", config.getProfile());
-		LOGGER.log(Level.FINE, "sf: {0}", config.getSampleFrequency().getFrequency());
-		LOGGER.log(Level.FINE, "channels: {0}", config.getChannelConfiguration().getDescription());
 
 		syntacticElements = new SyntacticElements(config);
 		filterBank = new FilterBank(config.isSmallFrameUsed(), config.getChannelConfiguration().getChannelCount());
+
+		this.in = new InputBitStream(in);
+
+		printLog();
+	}
+
+	/**
+	 * Initializes the decoder with a MP4 decoder specific info.
+	 *
+	 * After this the MP4 frames can be passed to the
+	 * <code>decodeFrame(byte[], SampleBuffer)</code> method to decode them.
+	 * 
+	 * @param decoderSpecificInfo a byte array containing the decoder specific info from an MP4 container
+	 * @throws AACException if the specified profile is not supported
+	 */
+	public Decoder(byte[] decoderSpecificInfo) throws AACException {
+		config = DecoderConfig.parseMP4DecoderSpecificInfo(decoderSpecificInfo);
+		if(config==null) throw new IllegalArgumentException("illegal MP4 decoder specific info");
+
+		if(!canDecode(config.getProfile())) throw new AACException("unsupported profile: "+config.getProfile().getDescription());
+
+		syntacticElements = new SyntacticElements(config);
+		filterBank = new FilterBank(config.isSmallFrameUsed(), config.getChannelConfiguration().getChannelCount());
+
+		in = new BitStream();
+
+		printLog();
+	}
+
+	private void printLog() {
+		LOGGER.log(Level.FINE, "profile: {0}", config.getProfile());
+		LOGGER.log(Level.FINE, "sf: {0}", config.getSampleFrequency().getFrequency());
+		LOGGER.log(Level.FINE, "channels: {0}", config.getChannelConfiguration().getDescription());
+	}
+
+	public DecoderConfig getConfig() {
+		return config;
 	}
 
 	/**
