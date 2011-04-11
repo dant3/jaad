@@ -48,4 +48,22 @@ public class ITunesMetadataBox extends FullBox {
 		//first four bytes are padding (zero)
 		return new String(data, 4, data.length-4, Charset.forName("UTF-8"));
 	}
+
+	/**
+	 * Returns the content as an unsigned 8-bit integer.
+	 * @return the metadata as an integer
+	 */
+	public int getInteger() {
+		//first four bytes are padding (zero)
+		return data[5];
+	}
+
+	/**
+	 * Returns the content as a boolean (flag) value.
+	 * @return the metadata as a boolean
+	 */
+	public boolean getBoolean() {
+		//first four bytes are padding (zero)
+		return data[5]!=0;
+	}
 }

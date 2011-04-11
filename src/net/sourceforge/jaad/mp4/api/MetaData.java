@@ -2,7 +2,6 @@ package net.sourceforge.jaad.mp4.api;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.sourceforge.jaad.mp4.boxes.Box;
@@ -163,7 +162,20 @@ public class MetaData<T> {
 		COVER_ARTWORK(List.class),
 		GROUPING(String.class),
 		LYRICS(String.class),
-		TELEVISION_SHOW(String.class);
+		TELEVISION_SHOW(String.class),
+		RATING(Integer.class),
+		PODCAST(Integer.class),
+		PODCAST_URL(Integer.class),
+		CATEGORY(String.class),
+		KEYWORDS(String.class),
+		EPISODE_GLOBAL_UNIQUE_ID(Integer.class),
+		DESCRIPTION(String.class),
+		TV_NETWORK_NAME(String.class),
+		TV_EPISODE_NAME(String.class),
+		TV_EPISODE_NUMBER(Integer.class),
+		TV_SEASON(Integer.class),
+		PURCHASE_DATE(String.class),
+		GAPLESS_PLAYBACK(String.class);
 		private Class<?> type;
 
 		private Field(Class<?> type) {
@@ -200,7 +212,7 @@ public class MetaData<T> {
 	//TODO: rating (rtng), podcast (pcst), category (catg), keyword (keyw), episode id (egid),
 	//description (desc), tv network name (tvnn), tv episode number (tven), tv season (tvsn),
 	//tv episode (tves), purchase date (purd), gapless playback (pgap)
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "unchecked"})
 	private void parseITunesMetaData(Box ilst) {
 		final List<Box> boxes = ilst.getChildren();
 		long l;
@@ -217,7 +229,7 @@ public class MetaData<T> {
 				contents.put(Field.TRACK_NUMBER, b[7]);
 				contents.put(Field.TOTAL_TRACKS, b[9]);
 			}
-			else if(l==BoxTypes.DISK_NUMBER_BOX) contents.put(Field.DISK_NUMBER, data.getData()[5]);
+			else if(l==BoxTypes.DISK_NUMBER_BOX) contents.put(Field.DISK_NUMBER, data.getInteger());
 			else if(l==BoxTypes.COMPOSER_NAME_BOX) contents.put(Field.COMPOSER, data.getText());
 			else if(l==BoxTypes.COMMENTS_BOX) contents.put(Field.COMMENTS, data.getText());
 			else if(l==BoxTypes.TEMPO_BOX) contents.put(Field.TEMPO, data.getData()[5]);
@@ -225,12 +237,12 @@ public class MetaData<T> {
 			else if(l==BoxTypes.GENRE_BOX||l==BoxTypes.CUSTOM_GENRE_BOX) {
 				final String s;
 				if(data.getFlags()==1) s = data.getText();
-				else s = STANDARD_GENRES[data.getData()[5]];
+				else s = STANDARD_GENRES[data.getInteger()];
 				contents.put(Field.GENRE, s);
 			}
 			else if(l==BoxTypes.ENCODER_TOOL_BOX) contents.put(Field.ENCODER_TOOL, data.getText());
 			else if(l==BoxTypes.COPYRIGHT_BOX) contents.put(Field.COPYRIGHT, data.getText());
-			else if(l==BoxTypes.COMPILATION_PART_BOX) contents.put(Field.COMPILATION, data.getData()[1]!=0);
+			else if(l==BoxTypes.COMPILATION_PART_BOX) contents.put(Field.COMPILATION, data.getBoolean());
 			else if(l==BoxTypes.COVER_BOX) {
 				if(contents.containsKey(Field.COVER_ARTWORK)) ((List<Artwork>) get(Field.COVER_ARTWORK)).add(new Artwork(Artwork.Type.forInt(data.getFlags()), data.getData()));
 				else contents.put(Field.COVER_ARTWORK, new ArrayList<Artwork>());
@@ -238,6 +250,18 @@ public class MetaData<T> {
 			else if(l==BoxTypes.GROUPING_BOX) contents.put(Field.GROUPING, data.getText());
 			else if(l==BoxTypes.LYRICS_BOX) contents.put(Field.LYRICS, data.getText());
 			else if(l==BoxTypes.TELEVISION_SHOW_BOX) contents.put(Field.TELEVISION_SHOW, data.getText());
+			else if(l==BoxTypes.RATING_BOX) contents.put(Field.RATING, data.getInteger());
+			else if(l==BoxTypes.PODCAST_BOX) contents.put(Field.PODCAST, data.getInteger());
+			else if(l==BoxTypes.PODCAST_URL_BOX) contents.put(Field.PODCAST_URL, data.getInteger());
+			else if(l==BoxTypes.CATEGORY_BOX) contents.put(Field.CATEGORY, data.getText());
+			else if(l==BoxTypes.KEYWORD_BOX) contents.put(Field.KEYWORDS, data.getText());
+			else if(l==BoxTypes.DESCRIPTION_BOX) contents.put(Field.DESCRIPTION, data.getText());
+			else if(l==BoxTypes.TV_NETWORK_NAME_BOX) contents.put(Field.TV_NETWORK_NAME, data.getText());
+			else if(l==BoxTypes.TV_EPISODE_BOX) contents.put(Field.TV_EPISODE_NAME, data.getText());
+			else if(l==BoxTypes.TV_EPISODE_NUMBER_BOX) contents.put(Field.TV_EPISODE_NUMBER, data.getInteger());
+			else if(l==BoxTypes.TV_SEASON_BOX) contents.put(Field.TV_SEASON, data.getInteger());
+			else if(l==BoxTypes.PURCHASE_DATE_BOX) contents.put(Field.PURCHASE_DATE, data.getText());
+			else if(l==BoxTypes.GAPLESS_PLAYBACK_BOX) contents.put(Field.GAPLESS_PLAYBACK, data.getText());
 		}
 	}
 

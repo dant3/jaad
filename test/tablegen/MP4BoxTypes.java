@@ -84,7 +84,7 @@ public class MP4BoxTypes {
 		{"ALBUM_ARTIST_NAME_BOX", "aART", "BoxImpl.class", "Album Artist Name Box"},
 		{"ALBUM_NAME_BOX", "©alb", "BoxImpl.class", "Album Name Box"},
 		{"GROUPING_BOX", "©grp", "BoxImpl.class", "Grouping Box"},
-		{"PUBLICATION_DATE_BOX", "©day", "BoxImpl.class", "Publication Date Box"},
+		{"PUBLICATION_YEAR_BOX", "©day", "BoxImpl.class", "Publication Year Box"},
 		{"TRACK_NUMBER_BOX", "trkn", "BoxImpl.class", "Track Number Box"},
 		{"DISK_NUMBER_BOX", "disk", "BoxImpl.class", "Disk Number Box"},
 		{"TEMPO_BOX", "tmpo", "BoxImpl.class", "Tempo Box"},
@@ -102,11 +102,23 @@ public class MP4BoxTypes {
 		{"TELEVISION_SHOW_SORT_BOX", "sosn", "BoxImpl.class", "Television Show Sort Box"},
 		{"LYRICS_BOX", "©lyr", "BoxImpl.class", "Lyrics Box"},
 		{"COVER_BOX", "covr", "BoxImpl.class", "Cover Box"},
-		{"SOFTWARE_INFORMATION_BOX", "©too", "BoxImpl.class", "Software Information Box"},
+		{"ENCODER_TOOL_BOX", "©too", "BoxImpl.class", "Encoder Tool Box"},
+		{"RATING_BOX", "rtng", "BoxImpl.class", "Rating Box"},
+		{"PODCAST_BOX", "pcst", "BoxImpl.class", "Podcast Box"},
+		{"PODCAST_URL_BOX", "purl", "BoxImpl.class", "Podcast URL Box"},
+		{"CATEGORY_BOX", "catg", "BoxImpl.class", "Category Box"},
+		{"KEYWORD_BOX", "keyw", "BoxImpl.class", "Keyword Box"},
+		{"EPISODE_GLOBAL_UNIQUE_ID_BOX", "egid", "BoxImpl.class", "Episode Global Unique ID Box"},
+		{"DESCRIPTION_BOX", "desc", "BoxImpl.class", "Description Cover Box"},
+		{"TV_NETWORK_NAME_BOX", "tvnn", "BoxImpl.class", "TV Network Name Box"},
+		{"TV_EPISODE_NUMBER_BOX", "tven", "BoxImpl.class", "TV Episode Number Box"},
+		{"TV_SEASON_BOX", "tvsn", "BoxImpl.class", "TV Season Box"},
+		{"TV_EPISODE_BOX", "tves", "BoxImpl.class", "TV Episode Box"},
+		{"PURCHASE_DATE_BOX", "purd", "BoxImpl.class", "Purchase Date Box"},
+		{"GAPLESS_PLAYBACK_BOX", "pgap", "BoxImpl.class", "Gapless Playback Box"},
 		{"CUSTOM_ITUNES_METADATA_BOX", "----", "BoxImpl.class", "Custom iTunes Metadata Box"},
 		{"ITUNES_METADATA_BOX", "data", "ITunesMetadataBox.class"},
-		{"ITUNES_METADATA_NAME_BOX", "name", "ITunesMetadataNameBox.class"}
-	};
+		{"ITUNES_METADATA_NAME_BOX", "name", "ITunesMetadataNameBox.class"},};
 
 	public static void main(String[] args) {
 		System.out.println("long EXTENDED_TYPE = "+toLong("uuid")+";");

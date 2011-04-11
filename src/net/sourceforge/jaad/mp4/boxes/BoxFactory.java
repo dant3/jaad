@@ -129,6 +129,19 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(LYRICS_BOX, BoxImpl.class);
 		BOX_CLASSES.put(COVER_BOX, BoxImpl.class);
 		BOX_CLASSES.put(ENCODER_TOOL_BOX, BoxImpl.class);
+		BOX_CLASSES.put(RATING_BOX, BoxImpl.class);
+		BOX_CLASSES.put(PODCAST_BOX, BoxImpl.class);
+		BOX_CLASSES.put(PODCAST_URL_BOX, BoxImpl.class);
+		BOX_CLASSES.put(CATEGORY_BOX, BoxImpl.class);
+		BOX_CLASSES.put(KEYWORD_BOX, BoxImpl.class);
+		BOX_CLASSES.put(EPISODE_GLOBAL_UNIQUE_ID_BOX, BoxImpl.class);
+		BOX_CLASSES.put(DESCRIPTION_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TV_NETWORK_NAME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TV_EPISODE_NUMBER_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TV_SEASON_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TV_EPISODE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(PURCHASE_DATE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(GAPLESS_PLAYBACK_BOX, BoxImpl.class);
 		BOX_CLASSES.put(CUSTOM_ITUNES_METADATA_BOX, BoxImpl.class);
 		BOX_CLASSES.put(ITUNES_METADATA_BOX, ITunesMetadataBox.class);
 		BOX_CLASSES.put(ITUNES_METADATA_NAME_BOX, ITunesMetadataNameBox.class);
@@ -152,7 +165,7 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(ALBUM_ARTIST_NAME_BOX, new String[]{"Album Artist Name Box"});
 		PARAMETER.put(ALBUM_NAME_BOX, new String[]{"Album Name Box"});
 		PARAMETER.put(GROUPING_BOX, new String[]{"Grouping Box"});
-		PARAMETER.put(PUBLICATION_YEAR_BOX, new String[]{"Publication Date Box"});
+		PARAMETER.put(PUBLICATION_YEAR_BOX, new String[]{"Publication Year Box"});
 		PARAMETER.put(TRACK_NUMBER_BOX, new String[]{"Track Number Box"});
 		PARAMETER.put(DISK_NUMBER_BOX, new String[]{"Disk Number Box"});
 		PARAMETER.put(TEMPO_BOX, new String[]{"Tempo Box"});
@@ -170,7 +183,20 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(TELEVISION_SHOW_SORT_BOX, new String[]{"Television Show Sort Box"});
 		PARAMETER.put(LYRICS_BOX, new String[]{"Lyrics Box"});
 		PARAMETER.put(COVER_BOX, new String[]{"Cover Box"});
-		PARAMETER.put(ENCODER_TOOL_BOX, new String[]{"Software Information Box"});
+		PARAMETER.put(ENCODER_TOOL_BOX, new String[]{"Encoder Tool Box"});
+		PARAMETER.put(RATING_BOX, new String[]{"Rating Box"});
+		PARAMETER.put(PODCAST_BOX, new String[]{"Podcast Box"});
+		PARAMETER.put(PODCAST_URL_BOX, new String[]{"Podcast URL Box"});
+		PARAMETER.put(CATEGORY_BOX, new String[]{"Category Box"});
+		PARAMETER.put(KEYWORD_BOX, new String[]{"Keyword Box"});
+		PARAMETER.put(EPISODE_GLOBAL_UNIQUE_ID_BOX, new String[]{"Episode Global Unique ID Box"});
+		PARAMETER.put(DESCRIPTION_BOX, new String[]{"Description Cover Box"});
+		PARAMETER.put(TV_NETWORK_NAME_BOX, new String[]{"TV Network Name Box"});
+		PARAMETER.put(TV_EPISODE_NUMBER_BOX, new String[]{"TV Episode Number Box"});
+		PARAMETER.put(TV_SEASON_BOX, new String[]{"TV Season Box"});
+		PARAMETER.put(TV_EPISODE_BOX, new String[]{"TV Episode Box"});
+		PARAMETER.put(PURCHASE_DATE_BOX, new String[]{"Purchase Date Box"});
+		PARAMETER.put(GAPLESS_PLAYBACK_BOX, new String[]{"Gapless Playback Box"});
 		PARAMETER.put(CUSTOM_ITUNES_METADATA_BOX, new String[]{"Custom iTunes Metadata Box"});
 	}
 
