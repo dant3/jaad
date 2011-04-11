@@ -21,7 +21,6 @@ public class MP4BoxTypes {
 		{"DEGRADATION_PRIORITY_BOX", "stdp", "DegradationPriorityBox.class"},
 		{"EDIT_BOX", "edts", "BoxImpl.class", "Edit Box"},
 		{"EDIT_LIST_BOX", "elst", "EditListBox.class"},
-		{"ESD_BOX", "esds", "ESDBox.class"},
 		{"FILE_TYPE_BOX", "ftyp", "FileTypeBox.class"},
 		{"FREE_SPACE_BOX", "free", "FreeSpaceBox.class"},
 		{"HANDLER_BOX", "hdlr", "HandlerBox.class"},
@@ -70,10 +69,6 @@ public class MP4BoxTypes {
 		{"USER_DATA_BOX", "udta", "BoxImpl.class", "User Data Box"},
 		{"VIDEO_MEDIA_HEADER_BOX", "vmhd", "VideoMediaHeaderBox.class"},
 		{"XML_BOX", "xml ", "XMLBox.class"},
-		{"sample entries"},
-		{"AUDIO_SAMPLE_ENTRY", "mp4a", "AudioSampleEntry.class"},
-		{"TEXT_METADATA_SAMPLE_ENTRY", "mett", "TextMetadataSampleEntry.class"},
-		{"XML_METADATA_SAMPLE_ENTRY", "metx", "XMLMetadataSampleEntry.class"},
 		{"metadata extensions"},
 		{"id3"},
 		{"ID3_TAG_BOX", "id32", "ID3TagBox.class"},
@@ -118,7 +113,17 @@ public class MP4BoxTypes {
 		{"GAPLESS_PLAYBACK_BOX", "pgap", "BoxImpl.class", "Gapless Playback Box"},
 		{"CUSTOM_ITUNES_METADATA_BOX", "----", "BoxImpl.class", "Custom iTunes Metadata Box"},
 		{"ITUNES_METADATA_BOX", "data", "ITunesMetadataBox.class"},
-		{"ITUNES_METADATA_NAME_BOX", "name", "ITunesMetadataNameBox.class"},};
+		{"ITUNES_METADATA_NAME_BOX", "name", "ITunesMetadataNameBox.class"},
+		{"sample entries"},
+		{"VIDEO_SAMPLE_ENTRY", "mp4v", "VideoSampleEntry.class"},
+		{"AUDIO_SAMPLE_ENTRY", "mp4a", "AudioSampleEntry.class"},
+		{"TEXT_METADATA_SAMPLE_ENTRY", "mett", "TextMetadataSampleEntry.class"},
+		{"XML_METADATA_SAMPLE_ENTRY", "metx", "XMLMetadataSampleEntry.class"},
+		{"codec infos"},
+		{"ESD_BOX", "esds", "ESDBox.class"},
+		{"H263_SPECIFIC_BOX", "d263", "CodecSpecificBox.class"},
+		{"..."}
+	};
 
 	public static void main(String[] args) {
 		System.out.println("long EXTENDED_TYPE = "+toLong("uuid")+";");

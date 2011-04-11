@@ -42,7 +42,7 @@ class MP4AudioInputStream extends AsynchronousAudioInputStream {
 		final Movie movie = cont.getMovie();
 		track = (AudioTrack) movie.getTracks(Track.Type.AUDIO).get(0);
 
-		decoder = new Decoder(track.getDSID());
+		decoder = new Decoder(track.getDecoderSpecificInfo());
 		sampleBuffer = new SampleBuffer();
 	}
 

@@ -218,4 +218,8 @@ public class TrackHeaderBox extends FullBox {
 	public double getHeight() {
 		return height;
 	}
+
+	public double[] getMatrix() {
+		return matrix;
+	}
 }

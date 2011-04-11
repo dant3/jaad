@@ -16,6 +16,7 @@
  */
 package net.sourceforge.jaad.mp4.boxes;
 
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.entrydescriptors.ESDBox;
 import java.util.logging.Level;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
@@ -27,7 +28,9 @@ import net.sourceforge.jaad.mp4.boxes.impl.*;
 import net.sourceforge.jaad.mp4.boxes.impl.meta.*;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.AudioSampleEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.TextMetadataSampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.VideoSampleEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.XMLMetadataSampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
 
 public class BoxFactory implements BoxTypes {
 
@@ -51,7 +54,6 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(DEGRADATION_PRIORITY_BOX, DegradationPriorityBox.class);
 		BOX_CLASSES.put(EDIT_BOX, BoxImpl.class);
 		BOX_CLASSES.put(EDIT_LIST_BOX, EditListBox.class);
-		BOX_CLASSES.put(ESD_BOX, ESDBox.class);
 		BOX_CLASSES.put(FILE_TYPE_BOX, FileTypeBox.class);
 		BOX_CLASSES.put(FREE_SPACE_BOX, FreeSpaceBox.class);
 		BOX_CLASSES.put(HANDLER_BOX, HandlerBox.class);
@@ -100,9 +102,6 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(USER_DATA_BOX, BoxImpl.class);
 		BOX_CLASSES.put(VIDEO_MEDIA_HEADER_BOX, VideoMediaHeaderBox.class);
 		BOX_CLASSES.put(XML_BOX, XMLBox.class);
-		BOX_CLASSES.put(AUDIO_SAMPLE_ENTRY, AudioSampleEntry.class);
-		BOX_CLASSES.put(TEXT_METADATA_SAMPLE_ENTRY, TextMetadataSampleEntry.class);
-		BOX_CLASSES.put(XML_METADATA_SAMPLE_ENTRY, XMLMetadataSampleEntry.class);
 		BOX_CLASSES.put(ID3_TAG_BOX, ID3TagBox.class);
 		BOX_CLASSES.put(ITUNES_META_LIST_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TRACK_NAME_BOX, BoxImpl.class);
@@ -145,6 +144,12 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(CUSTOM_ITUNES_METADATA_BOX, BoxImpl.class);
 		BOX_CLASSES.put(ITUNES_METADATA_BOX, ITunesMetadataBox.class);
 		BOX_CLASSES.put(ITUNES_METADATA_NAME_BOX, ITunesMetadataNameBox.class);
+		BOX_CLASSES.put(VIDEO_SAMPLE_ENTRY, VideoSampleEntry.class);
+		BOX_CLASSES.put(AUDIO_SAMPLE_ENTRY, AudioSampleEntry.class);
+		BOX_CLASSES.put(TEXT_METADATA_SAMPLE_ENTRY, TextMetadataSampleEntry.class);
+		BOX_CLASSES.put(XML_METADATA_SAMPLE_ENTRY, XMLMetadataSampleEntry.class);
+		BOX_CLASSES.put(ESD_BOX, ESDBox.class);
+		BOX_CLASSES.put(H263_SPECIFIC_BOX, CodecSpecificBox.class);
 		//parameter
 		PARAMETER.put(ADDITIONAL_METADATA_CONTAINER_BOX, new String[]{"Additional Metadata Container Box"});
 		PARAMETER.put(DATA_INFORMATION_BOX, new String[]{"Data Information Box"});

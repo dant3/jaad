@@ -21,7 +21,8 @@ import java.io.IOException;
 
 public class VideoSampleEntry extends SampleEntry {
 
-	public static final int DEFAULT_DEPTH = 0x18;
+	public static final long TYPE_MP4V = 1836070006; //mp4v
+	public static final long TYPE_H263 = 1932670515; //s263
 	private int width, height;
 	private double horizontalResolution, verticalResolution;
 	private int frameCount, depth;

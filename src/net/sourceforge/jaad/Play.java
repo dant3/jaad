@@ -41,6 +41,7 @@ public class Play {
 			else decodeAAC(args[0]);
 		}
 		catch(Exception e) {
+			e.printStackTrace();
 			System.err.println("error while decoding: "+e.toString());
 		}
 	}
@@ -62,7 +63,7 @@ public class Play {
 			line.open();
 			line.start();
 
-			final Decoder dec = new Decoder(track.getDSID());
+			final Decoder dec = new Decoder(track.getDecoderSpecificInfo());
 
 			Frame frame;
 			final SampleBuffer buf = new SampleBuffer();

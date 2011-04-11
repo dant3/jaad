@@ -61,7 +61,7 @@ public class Main {
 			final AudioTrack track = (AudioTrack) movie.getTracks(Track.Type.AUDIO).get(0);
 			wav = new WaveFileWriter(new File(out), track.getSampleRate(), track.getChannelCount(), track.getSampleSize());
 
-			final Decoder dec = new Decoder(track.getDSID());
+			final Decoder dec = new Decoder(track.getDecoderSpecificInfo());
 
 			Frame frame;
 			final SampleBuffer buf = new SampleBuffer();

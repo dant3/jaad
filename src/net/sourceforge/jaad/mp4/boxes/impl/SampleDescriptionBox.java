@@ -17,11 +17,7 @@
 package net.sourceforge.jaad.mp4.boxes.impl;
 
 import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.BoxFactory;
-import net.sourceforge.jaad.mp4.boxes.BoxImpl;
-import net.sourceforge.jaad.mp4.boxes.BoxTypes;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.*;
 import java.io.IOException;
 
 /**
@@ -29,9 +25,7 @@ import java.io.IOException;
  * used, and any initialization information needed for that coding.
  * @author in-somnia
  */
-public class SampleDescriptionBox extends FullBox implements BoxTypes {
-
-	private SampleEntry[] sampleEntries;
+public class SampleDescriptionBox extends FullBox {
 
 	public SampleDescriptionBox() {
 		super("Sample Description Box");
@@ -43,40 +37,6 @@ public class SampleDescriptionBox extends FullBox implements BoxTypes {
 
 		final int entryCount = (int) in.readBytes(4);
 		left -= 4;
-		sampleEntries = new SampleEntry[entryCount];
-
-		final HandlerBox handler = (HandlerBox) (parent.getParent().getParent()).getChild(BoxTypes.HANDLER_BOX);
-		final long handlerType = handler.getHandlerType();
-
-		final Class<? extends BoxImpl> boxClass;
-		switch((int) handlerType) {
-			case HandlerBox.TYPE_VIDEO:
-				boxClass = VideoSampleEntry.class;
-				break;
-			case HandlerBox.TYPE_SOUND:
-				boxClass = AudioSampleEntry.class;
-				break;
-			case HandlerBox.TYPE_HINT:
-				boxClass = HintSampleEntry.class;
-				break;
-			case HandlerBox.TYPE_META:
-				if(type==TEXT_METADATA_SAMPLE_ENTRY) boxClass = TextMetadataSampleEntry.class;
-				else if(type==XML_METADATA_SAMPLE_ENTRY) boxClass = XMLMetadataSampleEntry.class;
-				else boxClass = null;
-				break;
-			default:
-				boxClass = null;
-		}
-
-		if(boxClass!=null) {
-			for(int i = 0; i<entryCount; i++) {
-				sampleEntries[i] = (SampleEntry) BoxFactory.parseBox(in, boxClass);
-				if(sampleEntries[i]!=null) left -= sampleEntries[i].getSize();
-			}
-		}
-	}
-
-	public SampleEntry[] getSampleEntries() {
-		return sampleEntries;
+		readChildren(in, entryCount);
 	}
 }

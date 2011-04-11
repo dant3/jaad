@@ -14,17 +14,27 @@ import net.sourceforge.jaad.mp4.boxes.BoxTypes;
 import net.sourceforge.jaad.mp4.boxes.impl.ChunkOffsetBox;
 import net.sourceforge.jaad.mp4.boxes.impl.DataEntryUrlBox;
 import net.sourceforge.jaad.mp4.boxes.impl.DataReferenceBox;
-import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
 import net.sourceforge.jaad.mp4.boxes.impl.MediaHeaderBox;
-import net.sourceforge.jaad.mp4.boxes.impl.SampleDescriptionBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleSizeBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox.SampleToChunkEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.TimeToSampleBox;
 import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.AudioSampleEntry;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.SampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificStructure;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.entrydescriptors.DecoderSpecificInfoDescriptor;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.entrydescriptors.ESDBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.entrydescriptors.ObjectDescriptor;
 
+/**
+ * This class represents a track in a movie.
+ *
+ * Each track contains either a <code>DecoderSpecificInfo</code> or a
+ * <code>CodecSpecificStructure</code> that contai necessary information for the
+ * decoder.
+ *
+ * @author in-somnia
+ */
+//TODO: expand javadoc
 public abstract class Track {
 
 	public static enum Type {
@@ -33,12 +43,15 @@ public abstract class Track {
 		AUDIO
 	}
 	private final MP4InputStream in;
-	private final TrackHeaderBox tkhd;
+	protected final TrackHeaderBox tkhd;
 	private final MediaHeaderBox mdhd;
 	private final boolean inFile;
 	private final List<Frame> frames;
 	private URL location;
 	private int currentFrame;
+	//info structures
+	protected DecoderSpecificInfoDescriptor decoderSpecificInfo;
+	protected CodecSpecificStructure codecSpecificStructure;
 
 	Track(Box box, MP4InputStream in) {
 		this.in = in;
@@ -140,6 +153,24 @@ public abstract class Track {
 		//sort frames by timestamp
 		Collections.sort(frames);
 	}
+	//TODO: implement other entry descriptors
+
+	protected void findDecoderSpecificInfo(ESDBox esds) {
+		final ObjectDescriptor ed = esds.getEntryDescriptor();
+		final List<ObjectDescriptor> children = ed.getChildren();
+		List<ObjectDescriptor> children2;
+
+		for(ObjectDescriptor e : children) {
+			children2 = e.getChildren();
+			for(ObjectDescriptor e2 : children2) {
+				switch(e2.getType()) {
+					case ObjectDescriptor.TYPE_DECODER_SPECIFIC_INFO_DESCRIPTOR:
+						decoderSpecificInfo = (DecoderSpecificInfoDescriptor) e2;
+						break;
+				}
+			}
+		}
+	}
 
 	public abstract Type getType();
 
@@ -212,6 +243,33 @@ public abstract class Track {
 	 */
 	public URL getLocation() {
 		return location;
+	}
+
+	//info structures
+	/**
+	 * Returns the <code>DecoderSpecificInfoDescriptor</code>, if present.
+	 * It contains configuration data for the decoder.
+	 * If the decoder specific info is not present, the track contains a
+	 * <code>CodecSpecificStructure</code>.
+	 *
+	 * @see #getCodecSpecificStructure()
+	 * @return the decoder specific info
+	 */
+	public byte[] getDecoderSpecificInfo() {
+		return decoderSpecificInfo.getData();
+	}
+
+	/**
+	 * Returns the <code>CodecSpecificStructure</code>, if present. It contains
+	 * configuration information for the decoder.
+	 * If the structure is not present, the track contains a
+	 * <code>DecoderSpecificInfoDescriptor</code>.
+	 *
+	 * @see #getDecoderSpecificInfo()
+	 * @return the codec specific structure
+	 */
+	public CodecSpecificStructure getCodecSpecificStructure() {
+		return codecSpecificStructure;
 	}
 
 	//reading

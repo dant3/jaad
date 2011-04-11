@@ -21,6 +21,12 @@ import java.io.IOException;
 
 public class AudioSampleEntry extends SampleEntry {
 
+	public static final long TYPE_MP4A = 1836069985; //mp4a
+	public static final long TYPE_AMR = 1935764850; //samr
+	public static final long TYPE_AMR_WB = 1935767394; //sawb
+	public static final long TYPE_EVCR = 1936029283; //sevc
+	public static final long TYPE_QCELP = 1936810864; //sqcp
+	public static final long TYPE_SMV = 1936944502; //ssmv
 	private int channelCount, sampleSize, sampleRate;
 
 	public AudioSampleEntry() {

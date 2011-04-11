@@ -114,6 +114,7 @@ public class MP4InputStream {
 		return readUTFString(max, (i==BYTE_ORDER_MASK) ? UTF16 : UTF8);
 	}
 
+	//TODO: test this!
 	public double readFixedPoint(int len, int mask) throws IOException {
 		final long l = readBytes(len);
 		final long mantissa = (l&mask)<<52;

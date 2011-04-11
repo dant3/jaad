@@ -20,6 +20,7 @@ import net.sourceforge.jaad.mp4.boxes.BoxImpl;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
 
+//TODO: 3gpp brands
 public class FileTypeBox extends BoxImpl {
 
 	public static final String BRAND_ISO_BASE_MEDIA = "isom";

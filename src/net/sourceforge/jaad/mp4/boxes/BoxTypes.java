@@ -34,7 +34,6 @@ public interface BoxTypes {
 	long DEGRADATION_PRIORITY_BOX = 1937007728l; //stdp
 	long EDIT_BOX = 1701082227l; //edts
 	long EDIT_LIST_BOX = 1701606260l; //elst
-	long ESD_BOX = 1702061171l; //esds
 	long FILE_TYPE_BOX = 1718909296l; //ftyp
 	long FREE_SPACE_BOX = 1718773093l; //free
 	long HANDLER_BOX = 1751411826l; //hdlr
@@ -83,10 +82,6 @@ public interface BoxTypes {
 	long USER_DATA_BOX = 1969517665l; //udta
 	long VIDEO_MEDIA_HEADER_BOX = 1986881636l; //vmhd
 	long XML_BOX = 2020437024l; //xml
-	//sample entries
-	long AUDIO_SAMPLE_ENTRY = 1836069985l; //mp4a
-	long TEXT_METADATA_SAMPLE_ENTRY = 1835365492l; //mett
-	long XML_METADATA_SAMPLE_ENTRY = 1835365496l; //metx
 	//metadata extensions
 	//id3
 	long ID3_TAG_BOX = 1768174386l; //id32
@@ -132,4 +127,13 @@ public interface BoxTypes {
 	long CUSTOM_ITUNES_METADATA_BOX = 757935405l; //----
 	long ITUNES_METADATA_BOX = 1684108385l; //data
 	long ITUNES_METADATA_NAME_BOX = 1851878757l; //name
+	//sample entries
+	long VIDEO_SAMPLE_ENTRY = 1836070006l; //mp4v
+	long AUDIO_SAMPLE_ENTRY = 1836069985l; //mp4a
+	long TEXT_METADATA_SAMPLE_ENTRY = 1835365492l; //mett
+	long XML_METADATA_SAMPLE_ENTRY = 1835365496l; //metx
+	//codec infos
+	long ESD_BOX = 1702061171l; //esds
+	long H263_SPECIFIC_BOX = 1681012275l; //d263
+	//...
 }

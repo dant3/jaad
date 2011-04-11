@@ -32,12 +32,9 @@ public class XMLMetadataSampleEntry extends MetadataSampleEntry {
 		super.decode(in);
 
 		namespace = in.readUTFString((int) left, MP4InputStream.UTF8);
-		left -= namespace.length()+1;
-
 		schemaLocation = in.readUTFString((int) left, MP4InputStream.UTF8);
-		left -= schemaLocation.length()+1;
 
-		readChildren(in);
+		left = 0;
 	}
 
 	/**
