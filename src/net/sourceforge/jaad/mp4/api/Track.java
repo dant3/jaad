@@ -21,9 +21,9 @@ import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox.SampleToChunkEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.TimeToSampleBox;
 import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificStructure;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.entrydescriptors.DecoderSpecificInfoDescriptor;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.entrydescriptors.ESDBox;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.entrydescriptors.ObjectDescriptor;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.descriptors.DecoderSpecificInfoDescriptor;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.descriptors.ESDBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.descriptors.ObjectDescriptor;
 
 /**
  * This class represents a track in a movie.
