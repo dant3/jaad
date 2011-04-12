@@ -16,7 +16,7 @@
  */
 package net.sourceforge.jaad.mp4.boxes;
 
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.descriptors.ESDBox;
+import net.sourceforge.jaad.mp4.boxes.impl.od.ESDBox;
 import java.util.logging.Level;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
@@ -26,10 +26,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import net.sourceforge.jaad.mp4.boxes.impl.*;
 import net.sourceforge.jaad.mp4.boxes.impl.meta.*;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.AudioSampleEntry;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.TextMetadataSampleEntry;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.VideoSampleEntry;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.XMLMetadataSampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.*;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
 
 public class BoxFactory implements BoxTypes {
@@ -39,7 +36,7 @@ public class BoxFactory implements BoxTypes {
 	private static final Map<Long, String[]> PARAMETER = new HashMap<Long, String[]>();
 
 	static {
-		//classes
+//classes
 		BOX_CLASSES.put(ADDITIONAL_METADATA_CONTAINER_BOX, BoxImpl.class);
 		BOX_CLASSES.put(BINARY_XML_BOX, BinaryXMLBox.class);
 		BOX_CLASSES.put(BIT_RATE_BOX, BitRateBox.class);
@@ -102,6 +99,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(USER_DATA_BOX, BoxImpl.class);
 		BOX_CLASSES.put(VIDEO_MEDIA_HEADER_BOX, VideoMediaHeaderBox.class);
 		BOX_CLASSES.put(XML_BOX, XMLBox.class);
+		BOX_CLASSES.put(OBJECT_DESCRIPTOR_BOX, ObjectDescriptorBox.class);
 		BOX_CLASSES.put(ID3_TAG_BOX, ID3TagBox.class);
 		BOX_CLASSES.put(ITUNES_META_LIST_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TRACK_NAME_BOX, BoxImpl.class);
@@ -145,12 +143,23 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(ITUNES_METADATA_BOX, ITunesMetadataBox.class);
 		BOX_CLASSES.put(ITUNES_METADATA_NAME_BOX, ITunesMetadataNameBox.class);
 		BOX_CLASSES.put(VIDEO_SAMPLE_ENTRY, VideoSampleEntry.class);
+		BOX_CLASSES.put(H263_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(AUDIO_SAMPLE_ENTRY, AudioSampleEntry.class);
+		BOX_CLASSES.put(AMR_SAMPLE_ENTRY, AudioSampleEntry.class);
+		BOX_CLASSES.put(AMR_WB_SAMPLE_ENTRY, AudioSampleEntry.class);
+		BOX_CLASSES.put(EVRC_SAMPLE_ENTRY, AudioSampleEntry.class);
+		BOX_CLASSES.put(QCELP_SAMPLE_ENTRY, AudioSampleEntry.class);
+		BOX_CLASSES.put(SMV_SAMPLE_ENTRY, AudioSampleEntry.class);
+		BOX_CLASSES.put(MPEG_SAMPLE_ENTRY, MPEGSampleEntry.class);
 		BOX_CLASSES.put(TEXT_METADATA_SAMPLE_ENTRY, TextMetadataSampleEntry.class);
 		BOX_CLASSES.put(XML_METADATA_SAMPLE_ENTRY, XMLMetadataSampleEntry.class);
 		BOX_CLASSES.put(ESD_BOX, ESDBox.class);
 		BOX_CLASSES.put(H263_SPECIFIC_BOX, CodecSpecificBox.class);
-		//parameter
+		BOX_CLASSES.put(AMR_SPECIFIC_BOX, CodecSpecificBox.class);
+		BOX_CLASSES.put(EVRC_SPECIFIC_BOX, CodecSpecificBox.class);
+		BOX_CLASSES.put(QCELP_SPECIFIC_BOX, CodecSpecificBox.class);
+		BOX_CLASSES.put(SMV_SPECIFIC_BOX, CodecSpecificBox.class);
+//parameter
 		PARAMETER.put(ADDITIONAL_METADATA_CONTAINER_BOX, new String[]{"Additional Metadata Container Box"});
 		PARAMETER.put(DATA_INFORMATION_BOX, new String[]{"Data Information Box"});
 		PARAMETER.put(EDIT_BOX, new String[]{"Edit Box"});

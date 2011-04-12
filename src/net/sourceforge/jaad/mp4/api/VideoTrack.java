@@ -7,7 +7,7 @@ import net.sourceforge.jaad.mp4.boxes.impl.SampleDescriptionBox;
 import net.sourceforge.jaad.mp4.boxes.impl.VideoMediaHeaderBox;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.VideoSampleEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.descriptors.ESDBox;
+import net.sourceforge.jaad.mp4.boxes.impl.od.ESDBox;
 
 public class VideoTrack extends Track {
 
@@ -28,10 +28,7 @@ public class VideoTrack extends Track {
 		if(sampleEntry.getType()==VideoSampleEntry.TYPE_MP4V) {
 			findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
 		}
-		else {
-			final CodecSpecificBox csb = (CodecSpecificBox) sampleEntry.getChildren().get(0);
-			codecSpecificStructure = csb.getCodecSpecificStructure();
-		}
+		else decoderInfo = new DecoderInfo((CodecSpecificBox) sampleEntry.getChildren().get(0));
 	}
 
 	@Override

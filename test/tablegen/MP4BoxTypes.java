@@ -6,7 +6,7 @@ import java.util.List;
 public class MP4BoxTypes {
 
 	private static final String[][] NAMES = {
-		{"standard boxes"},
+		{"standard boxes (ISO BMFF)"},
 		{"ADDITIONAL_METADATA_CONTAINER_BOX", "meco", "BoxImpl.class", "Additional Metadata Container Box"},
 		{"BINARY_XML_BOX", "bxml", "BinaryXMLBox.class"},
 		{"BIT_RATE_BOX", "btrt", "BitRateBox.class"},
@@ -69,6 +69,8 @@ public class MP4BoxTypes {
 		{"USER_DATA_BOX", "udta", "BoxImpl.class", "User Data Box"},
 		{"VIDEO_MEDIA_HEADER_BOX", "vmhd", "VideoMediaHeaderBox.class"},
 		{"XML_BOX", "xml ", "XMLBox.class"},
+		{"mp4 extension"},
+		{"OBJECT_DESCRIPTOR_BOX", "iods", "ObjectDescriptorBox.class"},
 		{"metadata extensions"},
 		{"id3"},
 		{"ID3_TAG_BOX", "id32", "ID3TagBox.class"},
@@ -116,12 +118,25 @@ public class MP4BoxTypes {
 		{"ITUNES_METADATA_NAME_BOX", "name", "ITunesMetadataNameBox.class"},
 		{"sample entries"},
 		{"VIDEO_SAMPLE_ENTRY", "mp4v", "VideoSampleEntry.class"},
+		{"H263_SAMPLE_ENTRY", "s263", "VideoSampleEntry.class"},
 		{"AUDIO_SAMPLE_ENTRY", "mp4a", "AudioSampleEntry.class"},
+		{"AMR_SAMPLE_ENTRY", "samr", "AudioSampleEntry.class"},
+		{"AMR_WB_SAMPLE_ENTRY", "sawb", "AudioSampleEntry.class"},
+		{"EVRC_SAMPLE_ENTRY", "sevc", "AudioSampleEntry.class"},
+		{"QCELP_SAMPLE_ENTRY", "sqcp", "AudioSampleEntry.class"},
+		{"SMV_SAMPLE_ENTRY", "ssmv", "AudioSampleEntry.class"},
+		{"MPEG_SAMPLE_ENTRY", "mp4s", "MPEGSampleEntry.class"},
 		{"TEXT_METADATA_SAMPLE_ENTRY", "mett", "TextMetadataSampleEntry.class"},
 		{"XML_METADATA_SAMPLE_ENTRY", "metx", "XMLMetadataSampleEntry.class"},
 		{"codec infos"},
 		{"ESD_BOX", "esds", "ESDBox.class"},
+		{"video codecs"},
 		{"H263_SPECIFIC_BOX", "d263", "CodecSpecificBox.class"},
+		{"audio codecs"},
+		{"AMR_SPECIFIC_BOX", "damr", "CodecSpecificBox.class"},
+		{"EVRC_SPECIFIC_BOX", "devc", "CodecSpecificBox.class"},
+		{"QCELP_SPECIFIC_BOX", "dqcp", "CodecSpecificBox.class"},
+		{"SMV_SPECIFIC_BOX", "dsmv", "CodecSpecificBox.class"},
 		{"..."}
 	};
 

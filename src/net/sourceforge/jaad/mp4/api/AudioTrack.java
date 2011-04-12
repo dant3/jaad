@@ -3,10 +3,9 @@ package net.sourceforge.jaad.mp4.api;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.descriptors.ESDBox;
+import net.sourceforge.jaad.mp4.boxes.impl.od.ESDBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleDescriptionBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SoundMediaHeaderBox;
-import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.AudioSampleEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
 
@@ -30,10 +29,7 @@ public class AudioTrack extends Track {
 		if(sampleEntry.getType()==AudioSampleEntry.TYPE_MP4A) {
 			findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
 		}
-		else {
-			final CodecSpecificBox csb = (CodecSpecificBox) sampleEntry.getChildren().get(0);
-			codecSpecificStructure = csb.getCodecSpecificStructure();
-		}
+		else decoderInfo = new DecoderInfo((CodecSpecificBox) sampleEntry.getChildren().get(0));
 	}
 
 	@Override

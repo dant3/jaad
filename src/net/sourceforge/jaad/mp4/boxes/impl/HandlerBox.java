@@ -21,11 +21,39 @@ import net.sourceforge.jaad.mp4.boxes.FullBox;
  */
 public class HandlerBox extends FullBox {
 
+	//ISO BMFF types
 	public static final int TYPE_VIDEO = 1986618469; //vide
 	public static final int TYPE_SOUND = 1936684398; //soun
 	public static final int TYPE_HINT = 1751740020; //hint
 	public static final int TYPE_META = 1835365473; //meta
 	public static final int TYPE_NULL = 1853189228; //null
+	//MP4 types
+	public static final int TYPE_ODSM = 1868854125; //odsm
+	public static final int TYPE_CRSM = 1668445037; //crsm
+	public static final int TYPE_SDSM = 1935962989; //sdsm
+	public static final int TYPE_M7SM = 1832350573; //m7sm
+	public static final int TYPE_OCSM = 1868788589; //ocsm
+	public static final int TYPE_IPSM = 1768977261; //ipsm
+	public static final int TYPE_MJSM = 1835692909; //mjsm
+
+	public static void main(String[] args) {
+		System.out.println("odsm: "+toLong("odsm"));
+		System.out.println("crsm: "+toLong("crsm"));
+		System.out.println("sdsm: "+toLong("sdsm"));
+		System.out.println("m7sm: "+toLong("m7sm"));
+		System.out.println("ocsm: "+toLong("ocsm"));
+		System.out.println("ipsm: "+toLong("ipsm"));
+		System.out.println("mjsm: "+toLong("mjsm"));
+	}
+
+	private static long toLong(String s) {
+		long l = 0;
+		for(int i = 0; i<4; i++) {
+			l <<= 8;
+			l |= s.charAt(i);
+		}
+		return l;
+	}
 	private long handlerType;
 	private String handlerName;
 

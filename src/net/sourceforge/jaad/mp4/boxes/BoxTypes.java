@@ -19,7 +19,7 @@ package net.sourceforge.jaad.mp4.boxes;
 public interface BoxTypes {
 
 	long EXTENDED_TYPE = 1970628964;
-	//standard boxes
+	//standard boxes (ISO BMFF)
 	long ADDITIONAL_METADATA_CONTAINER_BOX = 1835361135l; //meco
 	long BINARY_XML_BOX = 1652059500l; //bxml
 	long BIT_RATE_BOX = 1651798644l; //btrt
@@ -82,6 +82,8 @@ public interface BoxTypes {
 	long USER_DATA_BOX = 1969517665l; //udta
 	long VIDEO_MEDIA_HEADER_BOX = 1986881636l; //vmhd
 	long XML_BOX = 2020437024l; //xml
+	//mp4 extension
+	long OBJECT_DESCRIPTOR_BOX = 1768907891l; //iods
 	//metadata extensions
 	//id3
 	long ID3_TAG_BOX = 1768174386l; //id32
@@ -129,11 +131,24 @@ public interface BoxTypes {
 	long ITUNES_METADATA_NAME_BOX = 1851878757l; //name
 	//sample entries
 	long VIDEO_SAMPLE_ENTRY = 1836070006l; //mp4v
+	long H263_SAMPLE_ENTRY = 1932670515l; //s263
 	long AUDIO_SAMPLE_ENTRY = 1836069985l; //mp4a
+	long AMR_SAMPLE_ENTRY = 1935764850l; //samr
+	long AMR_WB_SAMPLE_ENTRY = 1935767394l; //sawb
+	long EVRC_SAMPLE_ENTRY = 1936029283l; //sevc
+	long QCELP_SAMPLE_ENTRY = 1936810864l; //sqcp
+	long SMV_SAMPLE_ENTRY = 1936944502l; //ssmv
+	long MPEG_SAMPLE_ENTRY = 1836070003l; //mp4s
 	long TEXT_METADATA_SAMPLE_ENTRY = 1835365492l; //mett
 	long XML_METADATA_SAMPLE_ENTRY = 1835365496l; //metx
 	//codec infos
 	long ESD_BOX = 1702061171l; //esds
+	//video codecs
 	long H263_SPECIFIC_BOX = 1681012275l; //d263
+	//audio codecs
+	long AMR_SPECIFIC_BOX = 1684106610l; //damr
+	long EVRC_SPECIFIC_BOX = 1684371043l; //devc
+	long QCELP_SPECIFIC_BOX = 1685152624l; //dqcp
+	long SMV_SPECIFIC_BOX = 1685286262l; //dsmv
 	//...
 }

@@ -16,28 +16,26 @@
  */
 package net.sourceforge.jaad.mp4.boxes.impl;
 
+import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
-import java.io.IOException;
+import net.sourceforge.jaad.mp4.boxes.impl.od.ObjectDescriptor;
 
-/**
- * The sample description table gives detailed information about the coding type
- * used, and any initialization information needed for that coding.
- * @author in-somnia
- */
-public class SampleDescriptionBox extends FullBox {
+public class ObjectDescriptorBox extends FullBox {
 
-	public SampleDescriptionBox() {
-		super("Sample Description Box");
+	private ObjectDescriptor objectDescriptor;
+
+	public ObjectDescriptorBox() {
+		super("Object Descriptor Box");
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
+		objectDescriptor = ObjectDescriptor.createDescriptor(in);
+	}
 
-		final int entryCount = (int) in.readBytes(4);
-		left -= 4;
-
-		readChildren(in, entryCount);
+	public ObjectDescriptor getObjectDescriptor() {
+		return objectDescriptor;
 	}
 }

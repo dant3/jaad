@@ -14,30 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.mp4.boxes.impl;
+package net.sourceforge.jaad.mp4.boxes.impl.sampleentries;
 
-import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.FullBox;
 import java.io.IOException;
+import net.sourceforge.jaad.mp4.MP4InputStream;
 
 /**
- * The sample description table gives detailed information about the coding type
- * used, and any initialization information needed for that coding.
+ * The MPEG sample entry is used in MP4 streams other than video, audio and
+ * hint. It contains only one <code>ESDBox</code>.
+ * 
  * @author in-somnia
  */
-public class SampleDescriptionBox extends FullBox {
+public class MPEGSampleEntry extends SampleEntry {
 
-	public SampleDescriptionBox() {
-		super("Sample Description Box");
+	public MPEGSampleEntry() {
+		super("MPEG Sample Entry");
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 
-		final int entryCount = (int) in.readBytes(4);
-		left -= 4;
-
-		readChildren(in, entryCount);
+		readChildren(in);
 	}
 }

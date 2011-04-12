@@ -11,5 +11,27 @@ import net.sourceforge.jaad.mp4.MP4InputStream;
  */
 public abstract class CodecSpecificStructure {
 
-	abstract void decode(MP4InputStream in) throws IOException;
+	private int size, decoderVersion;
+	private long vendor;
+
+	protected CodecSpecificStructure(int size) {
+		this.size = size;
+	}
+
+	public int getSize() {
+		return size;
+	}
+
+	void decode(MP4InputStream in) throws IOException {
+		vendor = in.readBytes(4);
+		decoderVersion = in.read();
+	}
+
+	public long getVendor() {
+		return vendor;
+	}
+
+	public int getDecoderVersion() {
+		return decoderVersion;
+	}
 }

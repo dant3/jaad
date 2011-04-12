@@ -21,15 +21,15 @@ import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox.SampleToChunkEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.TimeToSampleBox;
 import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificStructure;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.descriptors.DecoderSpecificInfoDescriptor;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.descriptors.ESDBox;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.descriptors.ObjectDescriptor;
+import net.sourceforge.jaad.mp4.boxes.impl.od.DecoderSpecificInfoDescriptor;
+import net.sourceforge.jaad.mp4.boxes.impl.od.ESDBox;
+import net.sourceforge.jaad.mp4.boxes.impl.od.ObjectDescriptor;
 
 /**
  * This class represents a track in a movie.
  *
- * Each track contains either a <code>DecoderSpecificInfo</code> or a
- * <code>CodecSpecificStructure</code> that contai necessary information for the
+ * Each track contains either a decoder specific info as a byte array or a
+ * <code>DecoderInfo</code> object that contain necessary information for the
  * decoder.
  *
  * @author in-somnia
@@ -51,7 +51,7 @@ public abstract class Track {
 	private int currentFrame;
 	//info structures
 	protected DecoderSpecificInfoDescriptor decoderSpecificInfo;
-	protected CodecSpecificStructure codecSpecificStructure;
+	protected DecoderInfo decoderInfo;
 
 	Track(Box box, MP4InputStream in) {
 		this.in = in;
@@ -268,8 +268,8 @@ public abstract class Track {
 	 * @see #getDecoderSpecificInfo()
 	 * @return the codec specific structure
 	 */
-	public CodecSpecificStructure getCodecSpecificStructure() {
-		return codecSpecificStructure;
+	public DecoderInfo getDecoderInfo() {
+		return decoderInfo;
 	}
 
 	//reading

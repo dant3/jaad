@@ -14,30 +14,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.mp4.boxes.impl;
+package net.sourceforge.jaad.mp4.boxes.impl.od;
 
-import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
+import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
 
 /**
- * The sample description table gives detailed information about the coding type
- * used, and any initialization information needed for that coding.
+ * The entry sample descriptor (ESD) box is a container for entry descriptors.
+ * If used, it is located in a sample entry. Instead of an <code>ESDBox</code> a
+ * <code>CodecSpecificBox</code> may be present.
+ * 
  * @author in-somnia
  */
-public class SampleDescriptionBox extends FullBox {
+public class ESDBox extends FullBox {
 
-	public SampleDescriptionBox() {
-		super("Sample Description Box");
+	private ObjectDescriptor esd;
+
+	public ESDBox() {
+		super("ESD Box");
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
+		esd = ObjectDescriptor.createDescriptor(in);
+		left -= esd.getBytesRead();
+	}
 
-		final int entryCount = (int) in.readBytes(4);
-		left -= 4;
-
-		readChildren(in, entryCount);
+	public ObjectDescriptor getEntryDescriptor() {
+		return esd;
 	}
 }

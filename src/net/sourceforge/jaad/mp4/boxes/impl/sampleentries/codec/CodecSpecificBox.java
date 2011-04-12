@@ -22,10 +22,15 @@ public class CodecSpecificBox extends BoxImpl {
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		if(type==BoxTypes.H263_SPECIFIC_BOX) struc = new H263SpecificStructure();
+		else if(type==BoxTypes.AMR_SPECIFIC_BOX) struc = new AMRSpecificStructure();
+		else if(type==BoxTypes.EVRC_SPECIFIC_BOX) struc = new EVCRSpecificStructure();
+		else if(type==BoxTypes.QCELP_SPECIFIC_BOX) struc = new QCELPSpecificStructure();
+		else if(type==BoxTypes.SMV_SPECIFIC_BOX) struc = new SMVSpecificStructure();
 		//else if...
 		else struc = new UnknownCodecSpecificStructure();
 
 		struc.decode(in);
+		left-=struc.getSize();
 	}
 
 	public CodecSpecificStructure getCodecSpecificStructure() {
