@@ -26,11 +26,11 @@ public class CodecSpecificBox extends BoxImpl {
 		else if(type==BoxTypes.EVRC_SPECIFIC_BOX) struc = new EVCRSpecificStructure();
 		else if(type==BoxTypes.QCELP_SPECIFIC_BOX) struc = new QCELPSpecificStructure();
 		else if(type==BoxTypes.SMV_SPECIFIC_BOX) struc = new SMVSpecificStructure();
-		//else if...
+		else if(type==BoxTypes.AVC_SPECIFIC_BOX) struc = new AVCSpecificStructure();
 		else struc = new UnknownCodecSpecificStructure();
 
 		struc.decode(in);
-		left-=struc.getSize();
+		left -= struc.getSize();
 	}
 
 	public CodecSpecificStructure getCodecSpecificStructure() {

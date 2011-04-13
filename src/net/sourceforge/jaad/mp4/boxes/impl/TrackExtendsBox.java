@@ -13,10 +13,9 @@ import net.sourceforge.jaad.mp4.boxes.FullBox;
  */
 public class TrackExtendsBox extends FullBox {
 
-	private long trackID, defaultSampleDescriptionIndex, defaultSampleDuration, defaultSampleSize;
-	private int sampleDegradationPriority, samplePaddingValue;
-	private int sampleDependsOn, sampleIsDependedOn, sampleHasRedundancy;
-	private boolean differenceSample;
+	private long trackID;
+	private long defaultSampleDescriptionIndex, defaultSampleDuration, defaultSampleSize;
+	private long defaultSampleFlags;
 
 	public TrackExtendsBox() {
 		super("Track Extends Box");
@@ -30,7 +29,6 @@ public class TrackExtendsBox extends FullBox {
 		defaultSampleDescriptionIndex = in.readBytes(4);
 		defaultSampleDuration = in.readBytes(4);
 		defaultSampleSize = in.readBytes(4);
-		final long l = in.readBytes(4);
 		/* 6 bits reserved
 		 * 2 bits sampleDependsOn
 		 * 2 bits sampleIsDependedOn
@@ -39,12 +37,7 @@ public class TrackExtendsBox extends FullBox {
 		 * 1 bit sampleIsDifferenceSample
 		 * 16 bits sampleDegradationPriority
 		 */
-		sampleDependsOn = (int) ((l>>24)&3);
-		sampleIsDependedOn = (int) ((l>>22)&3);
-		sampleHasRedundancy = (int) ((l>>20)&3);
-		samplePaddingValue = (int) ((l>>17)&7);
-		differenceSample = ((l>>16)&1)==1;
-		sampleDegradationPriority = (int) (l&0xFFFF);
+		defaultSampleFlags = in.readBytes(4);
 
 		left -= 20;
 	}
@@ -94,7 +87,7 @@ public class TrackExtendsBox extends FullBox {
 	 * @return the default 'sample depends on' value
 	 */
 	public int getSampleDependsOn() {
-		return sampleDependsOn;
+		return (int) ((defaultSampleFlags>>24)&3);
 	}
 
 	/**
@@ -105,7 +98,7 @@ public class TrackExtendsBox extends FullBox {
 	 * @return the default 'sample is depended on' value
 	 */
 	public int getSampleIsDependedOn() {
-		return sampleIsDependedOn;
+		return (int) ((defaultSampleFlags>>22)&3);
 	}
 
 	/**
@@ -116,7 +109,7 @@ public class TrackExtendsBox extends FullBox {
 	 * @return the default 'sample has redundancy' value
 	 */
 	public int getSampleHasRedundancy() {
-		return sampleHasRedundancy;
+		return (int) ((defaultSampleFlags>>20)&3);
 	}
 
 	/**
@@ -126,11 +119,11 @@ public class TrackExtendsBox extends FullBox {
 	 * @return the default padding value
 	 */
 	public int getSamplePaddingValue() {
-		return samplePaddingValue;
+		return (int) ((defaultSampleFlags>>17)&7);
 	}
 
 	public boolean isSampleDifferenceSample() {
-		return differenceSample;
+		return ((defaultSampleFlags>>16)&1)==1;
 	}
 
 	/**
@@ -138,6 +131,6 @@ public class TrackExtendsBox extends FullBox {
 	 * @return
 	 */
 	public int getSampleDegradationPriority() {
-		return sampleDegradationPriority;
+		return (int) (defaultSampleFlags&0xFFFF);
 	}
 }

@@ -18,7 +18,7 @@ import net.sourceforge.jaad.mp4.boxes.impl.MediaHeaderBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleSizeBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox.SampleToChunkEntry;
-import net.sourceforge.jaad.mp4.boxes.impl.TimeToSampleBox;
+import net.sourceforge.jaad.mp4.boxes.impl.DecodingTimeToSampleBox;
 import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificStructure;
 import net.sourceforge.jaad.mp4.boxes.impl.od.DecoderSpecificInfoDescriptor;
@@ -107,7 +107,7 @@ public abstract class Track {
 		else stco = (ChunkOffsetBox) stbl.getChild(BoxTypes.CHUNK_LARGE_OFFSET_BOX);
 		final long[] chunkOffsets = stco.getChunks();
 
-		final TimeToSampleBox stts = (TimeToSampleBox) stbl.getChild(BoxTypes.TIME_TO_SAMPLE_BOX);
+		final DecodingTimeToSampleBox stts = (DecodingTimeToSampleBox) stbl.getChild(BoxTypes.DECODING_TIME_TO_SAMPLE_BOX);
 		final long[] sampleCounts = stts.getSampleCounts();
 		final long[] sampleDeltas = stts.getSampleDeltas();
 

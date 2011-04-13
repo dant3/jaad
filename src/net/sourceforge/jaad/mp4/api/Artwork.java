@@ -1,19 +1,28 @@
 package net.sourceforge.jaad.mp4.api;
 
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ITunesMetadataBox.DataType;
+
 public class Artwork {
 
+	//TODO: need this enum? it just copies the DataType
 	public enum Type {
 
-		JPEG, PNG;
+		GIF, JPEG, PNG, BMP;
 
-		static Type forInt(int i) {
+		static Type forDataType(DataType dataType) {
 			Type type;
-			switch(i) {
-				case 13:
+			switch(dataType) {
+				case GIF:
+					type = GIF;
+					break;
+				case JPEG:
 					type = JPEG;
 					break;
-				case 14:
+				case PNG:
 					type = PNG;
+					break;
+				case BMP:
+					type = BMP;
 					break;
 				default:
 					type = null;

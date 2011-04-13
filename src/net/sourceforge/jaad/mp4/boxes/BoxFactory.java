@@ -36,18 +36,21 @@ public class BoxFactory implements BoxTypes {
 	private static final Map<Long, String[]> PARAMETER = new HashMap<Long, String[]>();
 
 	static {
-//classes
+		//classes
 		BOX_CLASSES.put(ADDITIONAL_METADATA_CONTAINER_BOX, BoxImpl.class);
 		BOX_CLASSES.put(BINARY_XML_BOX, BinaryXMLBox.class);
 		BOX_CLASSES.put(BIT_RATE_BOX, BitRateBox.class);
 		BOX_CLASSES.put(CHUNK_OFFSET_BOX, ChunkOffsetBox.class);
 		BOX_CLASSES.put(CHUNK_LARGE_OFFSET_BOX, ChunkOffsetBox.class);
 		BOX_CLASSES.put(CLEAN_APERTURE_BOX, CleanApertureBox.class);
+		BOX_CLASSES.put(COMPACT_SAMPLE_SIZE_BOX, SampleSizeBox.class);
+		BOX_CLASSES.put(COMPOSITION_TIME_TO_SAMPLE_BOX, CompositionTimeToSampleBox.class);
 		BOX_CLASSES.put(COPYRIGHT_BOX, CopyrightBox.class);
 		BOX_CLASSES.put(DATA_ENTRY_URN_BOX, DataEntryUrnBox.class);
 		BOX_CLASSES.put(DATA_ENTRY_URL_BOX, DataEntryUrlBox.class);
 		BOX_CLASSES.put(DATA_INFORMATION_BOX, BoxImpl.class);
 		BOX_CLASSES.put(DATA_REFERENCE_BOX, DataReferenceBox.class);
+		BOX_CLASSES.put(DECODING_TIME_TO_SAMPLE_BOX, DecodingTimeToSampleBox.class);
 		BOX_CLASSES.put(DEGRADATION_PRIORITY_BOX, DegradationPriorityBox.class);
 		BOX_CLASSES.put(EDIT_BOX, BoxImpl.class);
 		BOX_CLASSES.put(EDIT_LIST_BOX, EditListBox.class);
@@ -55,6 +58,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(FREE_SPACE_BOX, FreeSpaceBox.class);
 		BOX_CLASSES.put(HANDLER_BOX, HandlerBox.class);
 		BOX_CLASSES.put(HINT_MEDIA_HEADER_BOX, HintMediaHeaderBox.class);
+		BOX_CLASSES.put(IPMP_CONTROL_BOX, IPMPControlBox.class);
 		BOX_CLASSES.put(ITEM_INFORMATION_BOX, ItemInformationBox.class);
 		BOX_CLASSES.put(ITEM_INFORMATION_ENTRY, ItemInformationEntry.class);
 		BOX_CLASSES.put(ITEM_LOCATION_BOX, ItemLocationBox.class);
@@ -84,15 +88,18 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(SAMPLE_TABLE_BOX, BoxImpl.class);
 		BOX_CLASSES.put(SAMPLE_TO_CHUNK_BOX, SampleToChunkBox.class);
 		BOX_CLASSES.put(SAMPLE_TO_GROUP_BOX, SampleToGroupBox.class);
+		BOX_CLASSES.put(SCHEME_TYPE_BOX, SchemeTypeBox.class);
+		BOX_CLASSES.put(SCHEME_INFORMATION_BOX, BoxImpl.class);
 		BOX_CLASSES.put(SHADOW_SYNC_SAMPLE_BOX, ShadowSyncSampleBox.class);
 		BOX_CLASSES.put(SKIP_BOX, SkipBox.class);
 		BOX_CLASSES.put(SOUND_MEDIA_HEADER_BOX, SoundMediaHeaderBox.class);
 		BOX_CLASSES.put(SUB_SAMPLE_INFORMATION_BOX, SubSampleInformationBox.class);
 		BOX_CLASSES.put(SYNC_SAMPLE_BOX, SyncSampleBox.class);
-		BOX_CLASSES.put(TIME_TO_SAMPLE_BOX, TimeToSampleBox.class);
 		BOX_CLASSES.put(TRACK_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TRACK_EXTENDS_BOX, TrackExtendsBox.class);
 		BOX_CLASSES.put(TRACK_FRAGMENT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TRACK_FRAGMENT_HEADER_BOX, TrackFragmentHeaderBox.class);
+		BOX_CLASSES.put(TRACK_FRAGMENT_RUN_BOX, TrackFragmentRunBox.class);
 		BOX_CLASSES.put(TRACK_HEADER_BOX, TrackHeaderBox.class);
 		BOX_CLASSES.put(TRACK_REFERENCE_BOX, TrackReferenceBox.class);
 		BOX_CLASSES.put(TRACK_SELECTION_BOX, TrackSelectionBox.class);
@@ -144,6 +151,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(ITUNES_METADATA_NAME_BOX, ITunesMetadataNameBox.class);
 		BOX_CLASSES.put(VIDEO_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(H263_SAMPLE_ENTRY, VideoSampleEntry.class);
+		BOX_CLASSES.put(AVC_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(AUDIO_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(AMR_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(AMR_WB_SAMPLE_ENTRY, AudioSampleEntry.class);
@@ -155,11 +163,12 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(XML_METADATA_SAMPLE_ENTRY, XMLMetadataSampleEntry.class);
 		BOX_CLASSES.put(ESD_BOX, ESDBox.class);
 		BOX_CLASSES.put(H263_SPECIFIC_BOX, CodecSpecificBox.class);
+		BOX_CLASSES.put(AVC_SPECIFIC_BOX, CodecSpecificBox.class);
 		BOX_CLASSES.put(AMR_SPECIFIC_BOX, CodecSpecificBox.class);
 		BOX_CLASSES.put(EVRC_SPECIFIC_BOX, CodecSpecificBox.class);
 		BOX_CLASSES.put(QCELP_SPECIFIC_BOX, CodecSpecificBox.class);
 		BOX_CLASSES.put(SMV_SPECIFIC_BOX, CodecSpecificBox.class);
-//parameter
+		//parameter
 		PARAMETER.put(ADDITIONAL_METADATA_CONTAINER_BOX, new String[]{"Additional Metadata Container Box"});
 		PARAMETER.put(DATA_INFORMATION_BOX, new String[]{"Data Information Box"});
 		PARAMETER.put(EDIT_BOX, new String[]{"Edit Box"});
@@ -170,6 +179,7 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(MOVIE_FRAGMENT_BOX, new String[]{"Movie Fragment Box"});
 		PARAMETER.put(NULL_MEDIA_HEADER_BOX, new String[]{"Null Media Header Box"});
 		PARAMETER.put(SAMPLE_TABLE_BOX, new String[]{"Sample Table Box"});
+		PARAMETER.put(SCHEME_INFORMATION_BOX, new String[]{"Scheme Information Box"});
 		PARAMETER.put(TRACK_BOX, new String[]{"Track Box"});
 		PARAMETER.put(TRACK_FRAGMENT_BOX, new String[]{"Track Fragment Box"});
 		PARAMETER.put(USER_DATA_BOX, new String[]{"User Data Box"});

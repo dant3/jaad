@@ -39,12 +39,11 @@ import java.io.IOException;
  * 
  * @author in-somnia
  */
-//decoding time to sample box
-public class TimeToSampleBox extends FullBox {
+public class DecodingTimeToSampleBox extends FullBox {
 
 	private long[] sampleCounts, sampleDeltas;
 
-	public TimeToSampleBox() {
+	public DecodingTimeToSampleBox() {
 		super("Time To Sample Box");
 	}
 

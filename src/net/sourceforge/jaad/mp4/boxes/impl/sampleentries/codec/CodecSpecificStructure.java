@@ -11,8 +11,9 @@ import net.sourceforge.jaad.mp4.MP4InputStream;
  */
 public abstract class CodecSpecificStructure {
 
-	private int size, decoderVersion;
+	protected int size;
 	private long vendor;
+	private int decoderVersion;
 
 	protected CodecSpecificStructure(int size) {
 		this.size = size;
