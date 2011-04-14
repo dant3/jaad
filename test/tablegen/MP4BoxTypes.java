@@ -78,6 +78,7 @@ public class MP4BoxTypes {
 		{"XML_BOX", "xml ", "XMLBox"},
 		{"mp4 extension"},
 		{"OBJECT_DESCRIPTOR_BOX", "iods", "ObjectDescriptorBox"},
+		{"SAMPLE_DEPENDENCY_BOX", "sdep", "SampleDependencyBox"},
 		{"metadata extensions"},
 		{"id3"},
 		{"ID3_TAG_BOX", "id32", "ID3TagBox"},

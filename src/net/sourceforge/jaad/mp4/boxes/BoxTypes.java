@@ -91,6 +91,7 @@ public interface BoxTypes {
 	long XML_BOX = 2020437024l; //xml
 	//mp4 extension
 	long OBJECT_DESCRIPTOR_BOX = 1768907891l; //iods
+	long SAMPLE_DEPENDENCY_BOX = 1935959408l; //sdep
 	//metadata extensions
 	//id3
 	long ID3_TAG_BOX = 1768174386l; //id32

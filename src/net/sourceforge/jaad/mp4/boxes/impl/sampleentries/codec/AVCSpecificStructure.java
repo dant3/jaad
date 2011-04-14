@@ -60,6 +60,10 @@ public class AVCSpecificStructure extends CodecSpecificStructure {
 		return profileCompatibility;
 	}
 
+	public int getLevel() {
+		return level;
+	}
+
 	/**
 	 * The length in bytes of the NALUnitLength field in an AVC video sample or
 	 * AVC parameter set sample of the associated stream. The value of this

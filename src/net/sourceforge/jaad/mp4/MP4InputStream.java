@@ -121,6 +121,12 @@ public class MP4InputStream {
 		final long exponent = l&mask;
 		return Double.longBitsToDouble(mantissa|exponent);
 	}
+	/*public static double readFixedPoint(int m, int n) throws IOException {
+		//final long l = readBytes((m + n) / 8);
+		final long l = 0x00010000;
+		final double d = (double) (l >> n); //integer part
+		return d * Math.pow(2,-n);
+	}*/
 
 	public boolean skipBytes(final long n) throws IOException {
 		long l = 0;

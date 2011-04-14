@@ -107,6 +107,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(VIDEO_MEDIA_HEADER_BOX, VideoMediaHeaderBox.class);
 		BOX_CLASSES.put(XML_BOX, XMLBox.class);
 		BOX_CLASSES.put(OBJECT_DESCRIPTOR_BOX, ObjectDescriptorBox.class);
+		BOX_CLASSES.put(SAMPLE_DEPENDENCY_BOX, SampleDependencyBox.class);
 		BOX_CLASSES.put(ID3_TAG_BOX, ID3TagBox.class);
 		BOX_CLASSES.put(ITUNES_META_LIST_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TRACK_NAME_BOX, BoxImpl.class);
