@@ -18,6 +18,7 @@ package net.sourceforge.jaad.mp4.boxes;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
@@ -109,7 +110,7 @@ public class BoxImpl implements Box {
 	}
 
 	public List<Box> getChildren() {
-		return children;
+		return Collections.unmodifiableList(children);
 	}
 
 	public List<Box> getChildren(long type) {

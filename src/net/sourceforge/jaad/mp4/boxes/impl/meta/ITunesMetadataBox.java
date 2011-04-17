@@ -161,6 +161,10 @@ public class ITunesMetadataBox extends FullBox {
 		return l;
 	}
 
+	public int getInteger() {
+		return (int) getNumber();
+	}
+
 	/**
 	 * Returns the content as a boolean (flag) value.
 	 * @return the metadata as a boolean
