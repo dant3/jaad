@@ -71,9 +71,6 @@ public class MP4Container {
 			box = BoxFactory.parseBox(null, in);
 			boxes.add(box);
 
-			//DEBUG:
-			//System.out.println(box.toTreeString(0));
-
 			type = box.getType();
 			if(type==BoxTypes.MOVIE_BOX) {
 				if(movie==null) moov = box;

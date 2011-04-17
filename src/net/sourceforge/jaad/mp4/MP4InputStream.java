@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 
+//all methods should throw EOFException instead of returning -1
 public class MP4InputStream {
 
 	public static final int MASK8 = 0xFF;
@@ -49,7 +50,8 @@ public class MP4InputStream {
 		if(in!=null) i = in.read();
 		else if(fin!=null) i = fin.read();
 
-		if(in!=null&&i!=-1) offset++;
+		if(i==-1) throw new EOFException();
+		else if(in!=null) offset++;
 		return i;
 	}
 
@@ -58,19 +60,20 @@ public class MP4InputStream {
 		if(in!=null) i = in.read(b, off, len);
 		else if(fin!=null) i = fin.read(b, off, len);
 
-		if(in!=null&&i!=-1) offset += i;
+		if(i==-1) throw new EOFException();
+		else if(in!=null) offset += i;
 		return i;
 	}
 
 	public long readBytes(int n) throws IOException {
 		int i = -1;
 		long result = 0;
-		while(n>0&&(i = read())!=-1) {
+		while(n>0) {
+			i = read();
 			result = (result<<8)|(i&0xFF);
 			n--;
 		}
-		if(i==-1) throw new EOFException();
-		else return result;
+		return result;
 	}
 
 	public boolean readBytes(final byte[] b) throws IOException {
@@ -88,11 +91,11 @@ public class MP4InputStream {
 		int i = -1;
 		int pos = 0;
 		char[] c = new char[n];
-		while(pos<n&&(i = read())!=-1) {
+		while(pos<n) {
+			i = read();
 			c[pos] = (char) i;
 			pos++;
 		}
-		if(i==-1) throw new EOFException();
 		return new String(c, 0, pos);
 	}
 
@@ -122,19 +125,31 @@ public class MP4InputStream {
 		return Double.longBitsToDouble(mantissa|exponent);
 	}
 	/*public static double readFixedPoint(int m, int n) throws IOException {
-		//final long l = readBytes((m + n) / 8);
-		final long l = 0x00010000;
-		final double d = (double) (l >> n); //integer part
-		return d * Math.pow(2,-n);
+	//final long l = readBytes((m + n) / 8);
+	final long l = 0x00010000;
+	final double d = (double) (l >> n); //integer part
+	return d * Math.pow(2,-n);
 	}*/
 
 	public boolean skipBytes(final long n) throws IOException {
+		//first: skip, second: read, if remaining
 		long l = 0;
 		if(in!=null) {
 			l = in.skip(n);
-			offset += n;
+			while(l<n) {
+				read();
+				l++;
+			}
+
+			offset += l;
 		}
-		else if(fin!=null) l = fin.skipBytes((int) n);
+		else if(fin!=null) {
+			l = fin.skipBytes((int) n);
+			while(l<n) {
+				read();
+				l++;
+			}
+		}
 
 		return l==n;
 	}

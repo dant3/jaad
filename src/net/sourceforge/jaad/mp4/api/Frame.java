@@ -1,10 +1,7 @@
 package net.sourceforge.jaad.mp4.api;
 
-import net.sourceforge.jaad.mp4.api.Track.Type;
-
 public class Frame implements Comparable<Frame> {
 
-	//TODO: get type out of track class
 	private final Type type;
 	private final long offset, size;
 	private final double time;

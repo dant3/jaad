@@ -24,7 +24,7 @@ import net.sourceforge.jaad.mp4.MP4Container;
 import net.sourceforge.jaad.mp4.api.AudioTrack;
 import net.sourceforge.jaad.mp4.api.Frame;
 import net.sourceforge.jaad.mp4.api.Movie;
-import net.sourceforge.jaad.mp4.api.Track;
+import net.sourceforge.jaad.mp4.api.Type;
 
 /**
  * Command line example, that can decode an AAC file to a WAVE file.
@@ -58,7 +58,7 @@ public class Main {
 		try {
 			final MP4Container cont = new MP4Container(new FileInputStream(in));
 			final Movie movie = cont.getMovie();
-			final AudioTrack track = (AudioTrack) movie.getTracks(Track.Type.AUDIO).get(0);
+			final AudioTrack track = (AudioTrack) movie.getTracks(Type.AUDIO).get(0);
 			wav = new WaveFileWriter(new File(out), track.getSampleRate(), track.getChannelCount(), track.getSampleSize());
 
 			final Decoder dec = new Decoder(track.getDecoderSpecificInfo());

@@ -20,6 +20,7 @@ public class Movie {
 	public Movie(Box box, MP4InputStream in) {
 		this.in = in;
 
+		//create tracks
 		mvhd = (MovieHeaderBox) box.getChild(BoxTypes.MOVIE_HEADER_BOX);
 		List<Box> trackBoxes = box.getChildren(BoxTypes.TRACK_BOX);
 		tracks = new ArrayList<Track>(trackBoxes.size());
@@ -27,10 +28,11 @@ public class Movie {
 			tracks.add(createTrack(trackBoxes.get(i)));
 		}
 
-		if(box.containsChild(BoxTypes.META_BOX)) metaData = new MetaData(box.getChild(BoxTypes.META_BOX));
-		else if(box.containsChild(BoxTypes.USER_DATA_BOX)) {
+		//read metadata
+		if(box.hasChild(BoxTypes.META_BOX)) metaData = new MetaData(box.getChild(BoxTypes.META_BOX));
+		else if(box.hasChild(BoxTypes.USER_DATA_BOX)) {
 			final Box udta = box.getChild(BoxTypes.USER_DATA_BOX);
-			if(udta.containsChild(BoxTypes.META_BOX)) metaData = new MetaData(udta.getChild(BoxTypes.META_BOX));
+			if(udta.hasChild(BoxTypes.META_BOX)) metaData = new MetaData(udta.getChild(BoxTypes.META_BOX));
 		}
 		else metaData = new MetaData();
 	}
@@ -69,7 +71,7 @@ public class Movie {
 	 *
 	 * @return the tracks contained by this movie with the passed type
 	 */
-	public List<Track> getTracks(Track.Type type) {
+	public List<Track> getTracks(Type type) {
 		final List<Track> l = new ArrayList<Track>();
 		for(Track t : tracks) {
 			if(t.getType().equals(type)) l.add(t);

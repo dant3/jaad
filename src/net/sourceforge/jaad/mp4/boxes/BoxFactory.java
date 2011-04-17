@@ -110,46 +110,54 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(SAMPLE_DEPENDENCY_BOX, SampleDependencyBox.class);
 		BOX_CLASSES.put(ID3_TAG_BOX, ID3TagBox.class);
 		BOX_CLASSES.put(ITUNES_META_LIST_BOX, BoxImpl.class);
-		BOX_CLASSES.put(TRACK_NAME_BOX, BoxImpl.class);
-		BOX_CLASSES.put(ARTIST_NAME_BOX, BoxImpl.class);
-		BOX_CLASSES.put(ALBUM_ARTIST_NAME_BOX, BoxImpl.class);
-		BOX_CLASSES.put(ALBUM_NAME_BOX, BoxImpl.class);
-		BOX_CLASSES.put(GROUPING_BOX, BoxImpl.class);
-		BOX_CLASSES.put(PUBLICATION_YEAR_BOX, BoxImpl.class);
-		BOX_CLASSES.put(TRACK_NUMBER_BOX, BoxImpl.class);
-		BOX_CLASSES.put(DISK_NUMBER_BOX, BoxImpl.class);
-		BOX_CLASSES.put(TEMPO_BOX, BoxImpl.class);
-		BOX_CLASSES.put(COMPOSER_NAME_BOX, BoxImpl.class);
-		BOX_CLASSES.put(COMMENTS_BOX, BoxImpl.class);
-		BOX_CLASSES.put(GENRE_BOX, BoxImpl.class);
-		BOX_CLASSES.put(CUSTOM_GENRE_BOX, BoxImpl.class);
-		BOX_CLASSES.put(COMPILATION_PART_BOX, BoxImpl.class);
-		BOX_CLASSES.put(TELEVISION_SHOW_BOX, BoxImpl.class);
-		BOX_CLASSES.put(TRACK_SORT_BOX, BoxImpl.class);
-		BOX_CLASSES.put(ARTIST_SORT_BOX, BoxImpl.class);
-		BOX_CLASSES.put(ALBUM_ARTIST_SORT_BOX, BoxImpl.class);
-		BOX_CLASSES.put(ALBUM_SORT_BOX, BoxImpl.class);
-		BOX_CLASSES.put(COMPOSER_SORT_BOX, BoxImpl.class);
-		BOX_CLASSES.put(TELEVISION_SHOW_SORT_BOX, BoxImpl.class);
-		BOX_CLASSES.put(LYRICS_BOX, BoxImpl.class);
-		BOX_CLASSES.put(COVER_BOX, BoxImpl.class);
-		BOX_CLASSES.put(ENCODER_TOOL_BOX, BoxImpl.class);
-		BOX_CLASSES.put(RATING_BOX, BoxImpl.class);
-		BOX_CLASSES.put(PODCAST_BOX, BoxImpl.class);
-		BOX_CLASSES.put(PODCAST_URL_BOX, BoxImpl.class);
-		BOX_CLASSES.put(CATEGORY_BOX, BoxImpl.class);
-		BOX_CLASSES.put(KEYWORD_BOX, BoxImpl.class);
-		BOX_CLASSES.put(EPISODE_GLOBAL_UNIQUE_ID_BOX, BoxImpl.class);
-		BOX_CLASSES.put(DESCRIPTION_BOX, BoxImpl.class);
-		BOX_CLASSES.put(TV_NETWORK_NAME_BOX, BoxImpl.class);
-		BOX_CLASSES.put(TV_EPISODE_NUMBER_BOX, BoxImpl.class);
-		BOX_CLASSES.put(TV_SEASON_BOX, BoxImpl.class);
-		BOX_CLASSES.put(TV_EPISODE_BOX, BoxImpl.class);
-		BOX_CLASSES.put(PURCHASE_DATE_BOX, BoxImpl.class);
-		BOX_CLASSES.put(GAPLESS_PLAYBACK_BOX, BoxImpl.class);
 		BOX_CLASSES.put(CUSTOM_ITUNES_METADATA_BOX, BoxImpl.class);
 		BOX_CLASSES.put(ITUNES_METADATA_BOX, ITunesMetadataBox.class);
 		BOX_CLASSES.put(ITUNES_METADATA_NAME_BOX, ITunesMetadataNameBox.class);
+		BOX_CLASSES.put(ALBUM_ARTIST_NAME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ALBUM_ARTIST_SORT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ALBUM_NAME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ALBUM_SORT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ARTIST_NAME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ARTIST_SORT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(CATEGORY_BOX, BoxImpl.class);
+		BOX_CLASSES.put(COMMENTS_BOX, BoxImpl.class);
+		BOX_CLASSES.put(COMPILATION_PART_BOX, BoxImpl.class);
+		BOX_CLASSES.put(COMPOSER_NAME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(COMPOSER_SORT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(COVER_BOX, BoxImpl.class);
+		BOX_CLASSES.put(CUSTOM_GENRE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(DESCRIPTION_BOX, BoxImpl.class);
+		BOX_CLASSES.put(DISK_NUMBER_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ENCODER_NAME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ENCODER_TOOL_BOX, BoxImpl.class);
+		BOX_CLASSES.put(EPISODE_GLOBAL_UNIQUE_ID_BOX, BoxImpl.class);
+		BOX_CLASSES.put(GAPLESS_PLAYBACK_BOX, BoxImpl.class);
+		BOX_CLASSES.put(GENRE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(GROUPING_BOX, BoxImpl.class);
+		BOX_CLASSES.put(HD_VIDEO_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ITUNES_PURCHASE_ACCOUNT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ITUNES_ACCOUNT_TYPE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ITUNES_CATALOGUE_ID_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ITUNES_COUNTRY_CODE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(KEYWORD_BOX, BoxImpl.class);
+		BOX_CLASSES.put(LONG_DESCRIPTION_BOX, BoxImpl.class);
+		BOX_CLASSES.put(LYRICS_BOX, BoxImpl.class);
+		BOX_CLASSES.put(META_TYPE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(PODCAST_BOX, BoxImpl.class);
+		BOX_CLASSES.put(PODCAST_URL_BOX, BoxImpl.class);
+		BOX_CLASSES.put(PURCHASE_DATE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(RATING_BOX, BoxImpl.class);
+		BOX_CLASSES.put(RELEASE_DATE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TEMPO_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TRACK_NAME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TRACK_NUMBER_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TRACK_SORT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TV_EPISODE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TV_EPISODE_NUMBER_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TV_NETWORK_NAME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TV_SEASON_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TV_SHOW_BOX, BoxImpl.class);
+		BOX_CLASSES.put(TV_SHOW_SORT_BOX, BoxImpl.class);
 		BOX_CLASSES.put(VIDEO_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(H263_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(AVC_SAMPLE_ENTRY, VideoSampleEntry.class);
@@ -185,47 +193,57 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(TRACK_FRAGMENT_BOX, new String[]{"Track Fragment Box"});
 		PARAMETER.put(USER_DATA_BOX, new String[]{"User Data Box"});
 		PARAMETER.put(ITUNES_META_LIST_BOX, new String[]{"iTunes Meta List Box"});
-		PARAMETER.put(TRACK_NAME_BOX, new String[]{"Track Name Box"});
-		PARAMETER.put(ARTIST_NAME_BOX, new String[]{"Artist Name BOx"});
+		PARAMETER.put(CUSTOM_ITUNES_METADATA_BOX, new String[]{"Custom iTunes Metadata Box"});
 		PARAMETER.put(ALBUM_ARTIST_NAME_BOX, new String[]{"Album Artist Name Box"});
-		PARAMETER.put(ALBUM_NAME_BOX, new String[]{"Album Name Box"});
-		PARAMETER.put(GROUPING_BOX, new String[]{"Grouping Box"});
-		PARAMETER.put(PUBLICATION_YEAR_BOX, new String[]{"Publication Year Box"});
-		PARAMETER.put(TRACK_NUMBER_BOX, new String[]{"Track Number Box"});
-		PARAMETER.put(DISK_NUMBER_BOX, new String[]{"Disk Number Box"});
-		PARAMETER.put(TEMPO_BOX, new String[]{"Tempo Box"});
-		PARAMETER.put(COMPOSER_NAME_BOX, new String[]{"Composer Name Box"});
-		PARAMETER.put(COMMENTS_BOX, new String[]{"Comments Box"});
-		PARAMETER.put(GENRE_BOX, new String[]{"Genre Box"});
-		PARAMETER.put(CUSTOM_GENRE_BOX, new String[]{"Custom Genre Box"});
-		PARAMETER.put(COMPILATION_PART_BOX, new String[]{"Compilation Part Box"});
-		PARAMETER.put(TELEVISION_SHOW_BOX, new String[]{"Television Show Box"});
-		PARAMETER.put(TRACK_SORT_BOX, new String[]{"Track Sort Box"});
-		PARAMETER.put(ARTIST_SORT_BOX, new String[]{"Artist Sort Box"});
 		PARAMETER.put(ALBUM_ARTIST_SORT_BOX, new String[]{"Album Artist Sort Box"});
+		PARAMETER.put(ALBUM_NAME_BOX, new String[]{"Album Name Box"});
 		PARAMETER.put(ALBUM_SORT_BOX, new String[]{"Album Sort Box"});
+		PARAMETER.put(ARTIST_NAME_BOX, new String[]{"Artist Name BOx"});
+		PARAMETER.put(ARTIST_SORT_BOX, new String[]{"Artist Sort Box"});
+		PARAMETER.put(CATEGORY_BOX, new String[]{"Category Box"});
+		PARAMETER.put(COMMENTS_BOX, new String[]{"Comments Box"});
+		PARAMETER.put(COMPILATION_PART_BOX, new String[]{"Compilation Part Box"});
+		PARAMETER.put(COMPOSER_NAME_BOX, new String[]{"Composer Name Box"});
 		PARAMETER.put(COMPOSER_SORT_BOX, new String[]{"Composer Sort Box"});
-		PARAMETER.put(TELEVISION_SHOW_SORT_BOX, new String[]{"Television Show Sort Box"});
-		PARAMETER.put(LYRICS_BOX, new String[]{"Lyrics Box"});
 		PARAMETER.put(COVER_BOX, new String[]{"Cover Box"});
+		PARAMETER.put(CUSTOM_GENRE_BOX, new String[]{"Custom Genre Box"});
+		PARAMETER.put(DESCRIPTION_BOX, new String[]{"Description Cover Box"});
+		PARAMETER.put(DISK_NUMBER_BOX, new String[]{"Disk Number Box"});
+		PARAMETER.put(ENCODER_NAME_BOX, new String[]{"Encoder Name Box"});
 		PARAMETER.put(ENCODER_TOOL_BOX, new String[]{"Encoder Tool Box"});
-		PARAMETER.put(RATING_BOX, new String[]{"Rating Box"});
+		PARAMETER.put(EPISODE_GLOBAL_UNIQUE_ID_BOX, new String[]{"Episode Global Unique ID Box"});
+		PARAMETER.put(GAPLESS_PLAYBACK_BOX, new String[]{"Gapless Playback Box"});
+		PARAMETER.put(GENRE_BOX, new String[]{"Genre Box"});
+		PARAMETER.put(GROUPING_BOX, new String[]{"Grouping Box"});
+		PARAMETER.put(HD_VIDEO_BOX, new String[]{"HD Video Box"});
+		PARAMETER.put(ITUNES_PURCHASE_ACCOUNT_BOX, new String[]{"iTunes Purchase Account Box"});
+		PARAMETER.put(ITUNES_ACCOUNT_TYPE_BOX, new String[]{"iTunes Account Type Box"});
+		PARAMETER.put(ITUNES_CATALOGUE_ID_BOX, new String[]{"iTunes Catalogue ID Box"});
+		PARAMETER.put(ITUNES_COUNTRY_CODE_BOX, new String[]{"iTunes Country Code Box"});
+		PARAMETER.put(KEYWORD_BOX, new String[]{"Keyword Box"});
+		PARAMETER.put(LONG_DESCRIPTION_BOX, new String[]{"Long Description Box"});
+		PARAMETER.put(LYRICS_BOX, new String[]{"Lyrics Box"});
+		PARAMETER.put(META_TYPE_BOX, new String[]{"Meta Type Box"});
 		PARAMETER.put(PODCAST_BOX, new String[]{"Podcast Box"});
 		PARAMETER.put(PODCAST_URL_BOX, new String[]{"Podcast URL Box"});
-		PARAMETER.put(CATEGORY_BOX, new String[]{"Category Box"});
-		PARAMETER.put(KEYWORD_BOX, new String[]{"Keyword Box"});
-		PARAMETER.put(EPISODE_GLOBAL_UNIQUE_ID_BOX, new String[]{"Episode Global Unique ID Box"});
-		PARAMETER.put(DESCRIPTION_BOX, new String[]{"Description Cover Box"});
-		PARAMETER.put(TV_NETWORK_NAME_BOX, new String[]{"TV Network Name Box"});
-		PARAMETER.put(TV_EPISODE_NUMBER_BOX, new String[]{"TV Episode Number Box"});
-		PARAMETER.put(TV_SEASON_BOX, new String[]{"TV Season Box"});
-		PARAMETER.put(TV_EPISODE_BOX, new String[]{"TV Episode Box"});
 		PARAMETER.put(PURCHASE_DATE_BOX, new String[]{"Purchase Date Box"});
-		PARAMETER.put(GAPLESS_PLAYBACK_BOX, new String[]{"Gapless Playback Box"});
-		PARAMETER.put(CUSTOM_ITUNES_METADATA_BOX, new String[]{"Custom iTunes Metadata Box"});
+		PARAMETER.put(RATING_BOX, new String[]{"Rating Box"});
+		PARAMETER.put(RELEASE_DATE_BOX, new String[]{"Release Date Box"});
+		PARAMETER.put(TEMPO_BOX, new String[]{"Tempo Box"});
+		PARAMETER.put(TRACK_NAME_BOX, new String[]{"Track Name Box"});
+		PARAMETER.put(TRACK_NUMBER_BOX, new String[]{"Track Number Box"});
+		PARAMETER.put(TRACK_SORT_BOX, new String[]{"Track Sort Box"});
+		PARAMETER.put(TV_EPISODE_BOX, new String[]{"TV Episode Box"});
+		PARAMETER.put(TV_EPISODE_NUMBER_BOX, new String[]{"TV Episode Number Box"});
+		PARAMETER.put(TV_NETWORK_NAME_BOX, new String[]{"TV Network Name Box"});
+		PARAMETER.put(TV_SEASON_BOX, new String[]{"TV Season Box"});
+		PARAMETER.put(TV_SHOW_BOX, new String[]{"TV Show Box"});
+		PARAMETER.put(TV_SHOW_SORT_BOX, new String[]{"TV Show Sort Box"});
 	}
 
 	public static Box parseBox(Box parent, MP4InputStream in) throws IOException {
+		final long offset = in.getOffset();
+		
 		long size = in.readBytes(4);
 		long left = size-4;
 		if(size==1) {
@@ -240,7 +258,7 @@ public class BoxFactory implements BoxTypes {
 		}
 
 		final BoxImpl box = forType(type);
-		box.setParams(size, type, parent, left);
+		box.setParams(parent, size, type, offset, left);
 		box.decode(in);
 		//DEBUG:
 		//System.out.println(box.getShortName());
@@ -254,6 +272,8 @@ public class BoxFactory implements BoxTypes {
 	}
 
 	public static Box parseBox(MP4InputStream in, Class<? extends BoxImpl> boxClass) throws IOException {
+		final long offset = in.getOffset();
+		
 		long size = in.readBytes(4);
 		long left = size-4;
 		if(size==1) {
@@ -271,13 +291,13 @@ public class BoxFactory implements BoxTypes {
 		try {
 			box = boxClass.newInstance();
 		}
-		catch(InstantiationException ex) {
+		catch(InstantiationException e) {
 		}
-		catch(IllegalAccessException ex) {
+		catch(IllegalAccessException e) {
 		}
 
 		if(box!=null) {
-			box.setParams(size, type, null, left);
+			box.setParams(null, size, type, offset, left);
 			box.decode(in);
 			in.skipBytes(box.getLeft());
 			//DEBUG:

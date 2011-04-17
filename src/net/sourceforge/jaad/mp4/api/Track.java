@@ -20,7 +20,6 @@ import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox.SampleToChunkEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.DecodingTimeToSampleBox;
 import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificStructure;
 import net.sourceforge.jaad.mp4.boxes.impl.od.DecoderSpecificInfoDescriptor;
 import net.sourceforge.jaad.mp4.boxes.impl.od.ESDBox;
 import net.sourceforge.jaad.mp4.boxes.impl.od.ObjectDescriptor;
@@ -29,7 +28,7 @@ import net.sourceforge.jaad.mp4.boxes.impl.od.ObjectDescriptor;
  * This class represents a track in a movie.
  *
  * Each track contains either a decoder specific info as a byte array or a
- * <code>DecoderInfo</code> object that contain necessary information for the
+ * <code>DecoderInfo</code> object that contains necessary information for the
  * decoder.
  *
  * @author in-somnia
@@ -37,11 +36,6 @@ import net.sourceforge.jaad.mp4.boxes.impl.od.ObjectDescriptor;
 //TODO: expand javadoc
 public abstract class Track {
 
-	public static enum Type {
-
-		VIDEO,
-		AUDIO
-	}
 	private final MP4InputStream in;
 	protected final TrackHeaderBox tkhd;
 	private final MediaHeaderBox mdhd;
@@ -65,7 +59,7 @@ public abstract class Track {
 		final Box dinf = minf.getChild(BoxTypes.DATA_INFORMATION_BOX);
 		final DataReferenceBox dref = (DataReferenceBox) dinf.getChild(BoxTypes.DATA_REFERENCE_BOX);
 		//TODO: support URNs
-		if(dref.containsChild(BoxTypes.DATA_ENTRY_URL_BOX)) {
+		if(dref.hasChild(BoxTypes.DATA_ENTRY_URL_BOX)) {
 			DataEntryUrlBox url = (DataEntryUrlBox) dref.getChild(BoxTypes.DATA_ENTRY_URL_BOX);
 			inFile = url.isInFile();
 			try {
@@ -103,7 +97,7 @@ public abstract class Track {
 		final SampleToChunkEntry[] sampleToChunks = ((SampleToChunkBox) stbl.getChild(BoxTypes.SAMPLE_TO_CHUNK_BOX)).getEntries();
 		final long[] sampleSizes = ((SampleSizeBox) stbl.getChild(BoxTypes.SAMPLE_SIZE_BOX)).getSampleSizes();
 		final ChunkOffsetBox stco;
-		if(stbl.containsChild(BoxTypes.CHUNK_OFFSET_BOX)) stco = (ChunkOffsetBox) stbl.getChild(BoxTypes.CHUNK_OFFSET_BOX);
+		if(stbl.hasChild(BoxTypes.CHUNK_OFFSET_BOX)) stco = (ChunkOffsetBox) stbl.getChild(BoxTypes.CHUNK_OFFSET_BOX);
 		else stco = (ChunkOffsetBox) stbl.getChild(BoxTypes.CHUNK_LARGE_OFFSET_BOX);
 		final long[] chunkOffsets = stco.getChunks();
 
@@ -128,6 +122,7 @@ public abstract class Track {
 		double timeStamp;
 		int current = 0;
 
+		//TODO: is this valid for video samples?
 		for(int i = 0; i<sampleToChunks.length; i++) {
 			entry = sampleToChunks[i];
 			firstChunk = (int) entry.getFirstChunk();
@@ -140,7 +135,6 @@ public abstract class Track {
 				while(samples>0) {
 					timeStamp = (sampleDurations[j]*current)/timeScale;
 					size = sampleSizes[current];
-					//System.out.println(pos+"\t"+size+"\t"+timeStamp);
 					frames.add(new Frame(getType(), pos, size, timeStamp));
 
 					pos += size;
@@ -150,11 +144,12 @@ public abstract class Track {
 			}
 		}
 
-		//sort frames by timestamp
+		//frames need not to be time-ordered: sort by timestamp
+		//TODO: is it possible to add them to the specific position?
 		Collections.sort(frames);
 	}
-	//TODO: implement other entry descriptors
 
+	//TODO: implement other entry descriptors
 	protected void findDecoderSpecificInfo(ESDBox esds) {
 		final ObjectDescriptor ed = esds.getEntryDescriptor();
 		final List<ObjectDescriptor> children = ed.getChildren();
@@ -304,5 +299,26 @@ public abstract class Track {
 			currentFrame++;
 		}
 		return frame;
+	}
+
+	/**
+	 * This method tries to seek to the frame that is nearest to the given
+	 * timestamp. It returns the timestamp of the frame it seeked to or -1 if
+	 * none was found.
+	 * 
+	 * @param timestamp a timestamp to seek to
+	 * @return the frame's timestamp that the method seeked to
+	 */
+	public double seek(double timestamp) {
+		//find first frame > timestamp
+		Frame frame = null;
+		for(int i = 0; i<frames.size(); i++) {
+			frame = frames.get(i++);
+			if(frame.getTime()>timestamp) {
+				currentFrame = i;
+				break;
+			}
+		}
+		return (frame==null) ? -1 : frame.getTime();
 	}
 }

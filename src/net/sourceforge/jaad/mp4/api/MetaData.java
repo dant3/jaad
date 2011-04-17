@@ -8,8 +8,143 @@ import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
 import net.sourceforge.jaad.mp4.boxes.impl.meta.ITunesMetadataBox;
 
-public class MetaData<T> {
+public class MetaData {
 
+	/*public enum Genre {
+
+	UNDEFINED("undefined"),
+	BLUES("blues"),
+	CLASSIC_ROCK("classic rock"),
+	COUNTRY("country"),
+	DANCE("dance"),
+	DISCO("disco"),
+	FUNK("funk"),
+	GRUNGE("grunge"),
+	HIP_HOP("hip hop"),
+	JAZZ("jazz"),
+	METAL("metal"),
+	NEW_AGE("new age"),
+	OLDIES("oldies"),
+	OTHER("other"),
+	POP("pop"),
+	R_AND_B("r and b"),
+	RAP("rap"),
+	REGGAE("reggae"),
+	ROCK("rock"),
+	TECHNO("techno"),
+	INDUSTRIAL("industrial"),
+	ALTERNATIVE("alternative"),
+	SKA("ska"),
+	DEATH_METAL("death metal"),
+	PRANKS("pranks"),
+	SOUNDTRACK("soundtrack"),
+	EURO_TECHNO("euro techno"),
+	AMBIENT("ambient"),
+	TRIP_HOP("trip hop"),
+	VOCAL("vocal"),
+	JAZZ_FUNK("jazz funk"),
+	FUSION("fusion"),
+	TRANCE("trance"),
+	CLASSICAL("classical"),
+	INSTRUMENTAL("instrumental"),
+	ACID("acid"),
+	HOUSE("house"),
+	GAME("game"),
+	SOUND_CLIP("sound clip"),
+	GOSPEL("gospel"),
+	NOISE("noise"),
+	ALTERNROCK("alternrock"),
+	BASS("bass"),
+	SOUL("soul"),
+	PUNK("punk"),
+	SPACE("space"),
+	MEDITATIVE("meditative"),
+	INSTRUMENTAL_POP("instrumental pop"),
+	INSTRUMENTAL_ROCK("instrumental rock"),
+	ETHNIC("ethnic"),
+	GOTHIC("gothic"),
+	DARKWAVE("darkwave"),
+	TECHNO_INDUSTRIAL("techno industrial"),
+	ELECTRONIC("electronic"),
+	POP_FOLK("pop folk"),
+	EURODANCE("eurodance"),
+	DREAM("dream"),
+	SOUTHERN_ROCK("southern rock"),
+	COMEDY("comedy"),
+	CULT("cult"),
+	GANGSTA("gangsta"),
+	TOP_("top "),
+	CHRISTIAN_RAP("christian rap"),
+	POP_FUNK("pop funk"),
+	JUNGLE("jungle"),
+	NATIVE_AMERICAN("native american"),
+	CABARET("cabaret"),
+	NEW_WAVE("new wave"),
+	PSYCHEDELIC("psychedelic"),
+	RAVE("rave"),
+	SHOWTUNES("showtunes"),
+	TRAILER("trailer"),
+	LO_FI("lo fi"),
+	TRIBAL("tribal"),
+	ACID_PUNK("acid punk"),
+	ACID_JAZZ("acid jazz"),
+	POLKA("polka"),
+	RETRO("retro"),
+	MUSICAL("musical"),
+	ROCK_AND_ROLL("rock and roll"),
+	HARD_ROCK("hard rock"),
+	FOLK("folk"),
+	FOLK_ROCK("folk rock"),
+	NATIONAL_FOLK("national folk"),
+	SWING("swing"),
+	FAST_FUSION("fast fusion"),
+	BEBOB("bebob"),
+	LATIN("latin"),
+	REVIVAL("revival"),
+	CELTIC("celtic"),
+	BLUEGRASS("bluegrass"),
+	AVANTGARDE("avantgarde"),
+	GOTHIC_ROCK("gothic rock"),
+	PROGRESSIVE_ROCK("progressive rock"),
+	PSYCHEDELIC_ROCK("psychedelic rock"),
+	SYMPHONIC_ROCK("symphonic rock"),
+	SLOW_ROCK("slow rock"),
+	BIG_BAND("big band"),
+	CHORUS("chorus"),
+	EASY_LISTENING("easy listening"),
+	ACOUSTIC("acoustic"),
+	HUMOUR("humour"),
+	SPEECH("speech"),
+	CHANSON("chanson"),
+	OPERA("opera"),
+	CHAMBER_MUSIC("chamber music"),
+	SONATA("sonata"),
+	SYMPHONY("symphony"),
+	BOOTY_BASS("booty bass"),
+	PRIMUS("primus"),
+	PORN_GROOVE("porn groove"),
+	SATIRE("satire"),
+	SLOW_JAM("slow jam"),
+	CLUB("club"),
+	TANGO("tango"),
+	SAMBA("samba"),
+	FOLKLORE("folklore"),
+	BALLAD("ballad"),
+	POWER_BALLAD("power ballad"),
+	RHYTHMIC_SOUL("rhythmic soul"),
+	FREESTYLE("freestyle"),
+	DUET("duet"),
+	PUNK_ROCK("punk rock"),
+	DRUM_SOLO("drum solo"),
+	A_CAPELLA("a capella"),
+	EURO_HOUSE("euro house"),
+	DANCE_HALL("dance hall");
+	private String name;
+
+	private Genre(String name) {
+	this.name = name;
+	}
+	}*/
 	private static final String[] STANDARD_GENRES = {
 		"undefined",
 		//IDv1 standard
@@ -154,15 +289,16 @@ public class MetaData<T> {
 		COMPOSER(String.class),
 		COMMENTS(String.class),
 		TEMPO(Integer.class),
-		YEAR(Integer.class),
+		RELEASE_DATE(Integer.class),
 		GENRE(String.class),
+		ENCODER_NAME(String.class),
 		ENCODER_TOOL(String.class),
 		COPYRIGHT(String.class),
 		COMPILATION(Boolean.class),
 		COVER_ARTWORK(List.class),
 		GROUPING(String.class),
 		LYRICS(String.class),
-		TELEVISION_SHOW(String.class),
+		TV_SHOW(String.class),
 		RATING(Integer.class),
 		PODCAST(Integer.class),
 		PODCAST_URL(Integer.class),
@@ -170,12 +306,13 @@ public class MetaData<T> {
 		KEYWORDS(String.class),
 		EPISODE_GLOBAL_UNIQUE_ID(Integer.class),
 		DESCRIPTION(String.class),
-		TV_NETWORK_NAME(String.class),
-		TV_EPISODE_NAME(String.class),
+		TV_NETWORK(String.class),
+		TV_EPISODE(String.class),
 		TV_EPISODE_NUMBER(Integer.class),
 		TV_SEASON(Integer.class),
 		PURCHASE_DATE(String.class),
-		GAPLESS_PLAYBACK(String.class);
+		GAPLESS_PLAYBACK(String.class),
+		HD_VIDEO(Boolean.class);
 		private Class<?> type;
 
 		private Field(Class<?> type) {
@@ -206,12 +343,9 @@ public class MetaData<T> {
 		//id3
 		//if(meta.containsChild(BoxTypes.ID3_TAG_BOX)) id3 = (ID3TagBox) meta.getChild(BoxTypes.ID3_TAG_BOX);
 		//itunes
-		if(meta.containsChild(BoxTypes.ITUNES_META_LIST_BOX)) parseITunesMetaData(meta.getChild(BoxTypes.ITUNES_META_LIST_BOX));
+		if(meta.hasChild(BoxTypes.ITUNES_META_LIST_BOX)) parseITunesMetaData(meta.getChild(BoxTypes.ITUNES_META_LIST_BOX));
 	}
 
-	//TODO: rating (rtng), podcast (pcst), category (catg), keyword (keyw), episode id (egid),
-	//description (desc), tv network name (tvnn), tv episode number (tven), tv season (tvsn),
-	//tv episode (tves), purchase date (purd), gapless playback (pgap)
 	@SuppressWarnings({"unchecked", "unchecked"})
 	private void parseITunesMetaData(Box ilst) {
 		final List<Box> boxes = ilst.getChildren();
@@ -232,14 +366,15 @@ public class MetaData<T> {
 			else if(l==BoxTypes.DISK_NUMBER_BOX) contents.put(Field.DISK_NUMBER, data.getNumber());
 			else if(l==BoxTypes.COMPOSER_NAME_BOX) contents.put(Field.COMPOSER, data.getText());
 			else if(l==BoxTypes.COMMENTS_BOX) contents.put(Field.COMMENTS, data.getText());
-			else if(l==BoxTypes.TEMPO_BOX) contents.put(Field.TEMPO, data.getData()[5]);
-			else if(l==BoxTypes.PUBLICATION_YEAR_BOX) contents.put(Field.YEAR, Integer.parseInt(data.getText()));
+			else if(l==BoxTypes.TEMPO_BOX) contents.put(Field.TEMPO, data.getNumber());
+			else if(l==BoxTypes.RELEASE_DATE_BOX) contents.put(Field.RELEASE_DATE, Integer.parseInt(data.getText()));
 			else if(l==BoxTypes.GENRE_BOX||l==BoxTypes.CUSTOM_GENRE_BOX) {
 				final String s;
 				if(data.getDataType()==ITunesMetadataBox.DataType.UTF8) s = data.getText();
 				else s = STANDARD_GENRES[(int) data.getNumber()];
 				contents.put(Field.GENRE, s);
 			}
+			else if(l==BoxTypes.ENCODER_NAME_BOX) contents.put(Field.ENCODER_NAME, data.getText());
 			else if(l==BoxTypes.ENCODER_TOOL_BOX) contents.put(Field.ENCODER_TOOL, data.getText());
 			else if(l==BoxTypes.COPYRIGHT_BOX) contents.put(Field.COPYRIGHT, data.getText());
 			else if(l==BoxTypes.COMPILATION_PART_BOX) contents.put(Field.COMPILATION, data.getBoolean());
@@ -249,19 +384,21 @@ public class MetaData<T> {
 			}
 			else if(l==BoxTypes.GROUPING_BOX) contents.put(Field.GROUPING, data.getText());
 			else if(l==BoxTypes.LYRICS_BOX) contents.put(Field.LYRICS, data.getText());
-			else if(l==BoxTypes.TELEVISION_SHOW_BOX) contents.put(Field.TELEVISION_SHOW, data.getText());
 			else if(l==BoxTypes.RATING_BOX) contents.put(Field.RATING, data.getNumber());
 			else if(l==BoxTypes.PODCAST_BOX) contents.put(Field.PODCAST, data.getNumber());
 			else if(l==BoxTypes.PODCAST_URL_BOX) contents.put(Field.PODCAST_URL, data.getNumber());
 			else if(l==BoxTypes.CATEGORY_BOX) contents.put(Field.CATEGORY, data.getText());
 			else if(l==BoxTypes.KEYWORD_BOX) contents.put(Field.KEYWORDS, data.getText());
 			else if(l==BoxTypes.DESCRIPTION_BOX) contents.put(Field.DESCRIPTION, data.getText());
-			else if(l==BoxTypes.TV_NETWORK_NAME_BOX) contents.put(Field.TV_NETWORK_NAME, data.getText());
-			else if(l==BoxTypes.TV_EPISODE_BOX) contents.put(Field.TV_EPISODE_NAME, data.getText());
+			else if(l==BoxTypes.LONG_DESCRIPTION_BOX) contents.put(Field.DESCRIPTION, data.getText());
+			else if(l==BoxTypes.TV_SHOW_BOX) contents.put(Field.TV_SHOW, data.getText());
+			else if(l==BoxTypes.TV_NETWORK_NAME_BOX) contents.put(Field.TV_NETWORK, data.getText());
+			else if(l==BoxTypes.TV_EPISODE_BOX) contents.put(Field.TV_EPISODE, data.getText());
 			else if(l==BoxTypes.TV_EPISODE_NUMBER_BOX) contents.put(Field.TV_EPISODE_NUMBER, data.getNumber());
 			else if(l==BoxTypes.TV_SEASON_BOX) contents.put(Field.TV_SEASON, data.getNumber());
 			else if(l==BoxTypes.PURCHASE_DATE_BOX) contents.put(Field.PURCHASE_DATE, data.getText());
 			else if(l==BoxTypes.GAPLESS_PLAYBACK_BOX) contents.put(Field.GAPLESS_PLAYBACK, data.getText());
+			else if(l==BoxTypes.HD_VIDEO_BOX) contents.put(Field.HD_VIDEO, data.getBoolean());
 		}
 	}
 

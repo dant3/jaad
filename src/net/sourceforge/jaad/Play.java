@@ -57,7 +57,7 @@ public class Play {
 		try {
 			final MP4Container cont = new MP4Container(new FileInputStream(in));
 			final Movie movie = cont.getMovie();
-			final AudioTrack track = (AudioTrack) movie.getTracks(Track.Type.AUDIO).get(0);
+			final AudioTrack track = (AudioTrack) movie.getTracks(Type.AUDIO).get(0);
 			final AudioFormat aufmt = new AudioFormat(track.getSampleRate(), track.getSampleSize(), track.getChannelCount(), true, true);
 			line = AudioSystem.getSourceDataLine(aufmt);
 			line.open();

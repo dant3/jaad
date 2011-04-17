@@ -17,7 +17,6 @@
 package net.sourceforge.jaad.spi.javasound;
 
 import net.sourceforge.jaad.Decoder;
-import net.sourceforge.jaad.DecoderConfig;
 import net.sourceforge.jaad.SampleBuffer;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +25,7 @@ import net.sourceforge.jaad.mp4.MP4Container;
 import net.sourceforge.jaad.mp4.api.AudioTrack;
 import net.sourceforge.jaad.mp4.api.Frame;
 import net.sourceforge.jaad.mp4.api.Movie;
-import net.sourceforge.jaad.mp4.api.Track;
+import net.sourceforge.jaad.mp4.api.Type;
 
 class MP4AudioInputStream extends AsynchronousAudioInputStream {
 
@@ -40,7 +39,7 @@ class MP4AudioInputStream extends AsynchronousAudioInputStream {
 		super(in, format, length);
 		final MP4Container cont = new MP4Container(in);
 		final Movie movie = cont.getMovie();
-		track = (AudioTrack) movie.getTracks(Track.Type.AUDIO).get(0);
+		track = (AudioTrack) movie.getTracks(Type.AUDIO).get(0);
 
 		decoder = new Decoder(track.getDecoderSpecificInfo());
 		sampleBuffer = new SampleBuffer();

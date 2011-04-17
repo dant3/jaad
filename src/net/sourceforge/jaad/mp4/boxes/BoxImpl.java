@@ -24,8 +24,7 @@ import net.sourceforge.jaad.mp4.MP4InputStream;
 public class BoxImpl implements Box {
 
 	private final String name;
-	protected long size, left;
-	protected long type;
+	protected long size, type, left, offset;
 	protected Box parent;
 	protected final List<Box> children;
 
@@ -35,7 +34,7 @@ public class BoxImpl implements Box {
 		children = new ArrayList<Box>(4);
 	}
 
-	public void setParams(long size, long type, Box parent, long left) {
+	public void setParams(Box parent, long size, long type, long offset, long left) {
 		this.size = size;
 		this.type = type;
 		this.parent = parent;
@@ -65,6 +64,10 @@ public class BoxImpl implements Box {
 		return size;
 	}
 
+	public long getOffset() {
+		return offset;
+	}
+
 	public Box getParent() {
 		return parent;
 	}
@@ -78,19 +81,20 @@ public class BoxImpl implements Box {
 		return name+" ["+BoxFactory.typeToString(type)+"]";
 	}
 
-	//TODO: debugging method, remove
-	public String toTreeString(int off) {
-		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i<off; i++) {
-			sb.append(" ");
-		}
-		sb.append(BoxFactory.typeToString(type)+" ("+getName()+")");
-		return sb.toString();
-	}
-
 	//container methods
 	public boolean hasChildren() {
 		return children.size()>0;
+	}
+
+	public boolean hasChild(long type) {
+		boolean b = false;
+		for(Box box : children) {
+			if(box.getType()==type) {
+				b = true;
+				break;
+			}
+		}
+		return b;
 	}
 
 	public Box getChild(long type) {
@@ -114,17 +118,6 @@ public class BoxImpl implements Box {
 			if(box.getType()==type) l.add(box);
 		}
 		return l;
-	}
-
-	public boolean containsChild(long type) {
-		boolean b = false;
-		for(Box box : children) {
-			if(box.getType()==type) {
-				b = true;
-				break;
-			}
-		}
-		return b;
 	}
 
 	protected void readChildren(MP4InputStream in) throws IOException {
