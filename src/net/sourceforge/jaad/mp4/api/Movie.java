@@ -1,5 +1,6 @@
 package net.sourceforge.jaad.mp4.api;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -43,10 +44,10 @@ public class Movie {
 		final Track track;
 		switch((int) hdlr.getHandlerType()) {
 			case HandlerBox.TYPE_VIDEO:
-				track = new VideoTrack(trak,in);
+				track = new VideoTrack(trak, in);
 				break;
 			case HandlerBox.TYPE_SOUND:
-				track = new AudioTrack(trak,in);
+				track = new AudioTrack(trak, in);
 				break;
 			default:
 				track = null;
@@ -111,5 +112,34 @@ public class Movie {
 	 */
 	public double getDuration() {
 		return (double) mvhd.getDuration()/(double) mvhd.getTimeScale();
+	}
+
+	/**
+	 * Indicates if there are more frames to be read in this movie.
+	 *
+	 * @return true if there is at least one track in this movie that has at least one more frame to read.
+	 */
+	public boolean hasMoreFrames() {
+		for(Track track : tracks) {
+			if(track.hasMoreFrames()) return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Reads the next frame from this movie (from one of the contained tracks).
+	 * The frame is the next in time-order, thus the next for playback. If none
+	 * of the tracks contains any more frames, null is returned.
+	 *
+	 * @return the next frame or null if there are no more frames to read from this movie.
+	 * @throws IOException if reading fails
+	 */
+	public Frame readNextFrame() throws IOException {
+		Track track = null;
+		for(Track t : tracks) {
+			if(t.hasMoreFrames()&&(track==null||t.getNextTimeStamp()<track.getNextTimeStamp())) track = t;
+		}
+
+		return (track==null) ? null : track.readNextFrame();
 	}
 }

@@ -269,16 +269,19 @@ public abstract class Track {
 
 	//reading
 	/**
-	 * Indicates if there are more frames to be read.
-	 * @return true if there is at least one more frame
+	 * Indicates if there are more frames to be read in this track.
+	 * 
+	 * @return true if there is at least one more frame to read.
 	 */
 	public boolean hasMoreFrames() {
 		return currentFrame<frames.size();
 	}
 
 	/**
-	 * Reads the next frame from the container.
-	 * @return the next frame
+	 * Reads the next frame from this track. If it contains no more frames to
+	 * read, null is returned.
+	 * 
+	 * @return the next frame or null if there are no more frames to read
 	 * @throws IOException if reading fails
 	 */
 	public Frame readNextFrame() throws IOException {
@@ -320,5 +323,15 @@ public abstract class Track {
 			}
 		}
 		return (frame==null) ? -1 : frame.getTime();
+	}
+
+	/**
+	 * Returns the timestamp of the next frame to be read. This is needed to
+	 * read frames from a movie that contains multiple tracks.
+	 *
+	 * @return the next frame's timestamp
+	 */
+	double getNextTimeStamp() {
+		return frames.get(currentFrame).getTime();
 	}
 }
