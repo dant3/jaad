@@ -100,8 +100,24 @@ public class MP4InputStream {
 	}
 
 	public String readUTFString(int max, String encoding) throws IOException {
-		byte[] b = new byte[max];
+		return readUTFString(max, encoding, null);
+	}
+
+	public String readUTFString(int max) throws IOException {
+		final byte[] bom = new byte[2];
+		read(bom, 0, 2);
+		final int i = (bom[0]<<8)|bom[1];
+		return readUTFString(max, (i==BYTE_ORDER_MASK) ? UTF16 : UTF8, bom);
+	}
+
+	private String readUTFString(int max, String encoding, byte[] bom) throws IOException {
+		final byte[] b = new byte[max];
 		int pos = 0;
+		if(bom!=null) {
+			System.arraycopy(bom, 0, b, 0, bom.length);
+			pos = bom.length;
+		}
+
 		int i;
 		while((i = read())!=0) {
 			if(i==-1) break;
@@ -110,11 +126,6 @@ public class MP4InputStream {
 		}
 
 		return new String(b, 0, pos, Charset.forName(encoding));
-	}
-
-	public String readUTFString(int max) throws IOException {
-		final int i = (int) readBytes(2);
-		return readUTFString(max, (i==BYTE_ORDER_MASK) ? UTF16 : UTF8);
 	}
 
 	//TODO: test this!

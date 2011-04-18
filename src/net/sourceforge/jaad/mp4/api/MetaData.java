@@ -1,13 +1,20 @@
 package net.sourceforge.jaad.mp4.api;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ID3TagBox;
 import net.sourceforge.jaad.mp4.boxes.impl.meta.ITunesMetadataBox;
 
+//TODO: javadoc
 public class MetaData {
 
 	/*public enum Genre {
@@ -289,16 +296,18 @@ public class MetaData {
 		public static final Field<String> COMPOSER = new Field<String>();
 		public static final Field<String> COMMENTS = new Field<String>();
 		public static final Field<Integer> TEMPO = new Field<Integer>();
-		public static final Field<Integer> RELEASE_DATE = new Field<Integer>();
+		public static final Field<Integer> LENGTH_IN_MILLISECONDS = new Field<Integer>();
+		public static final Field<Date> RELEASE_DATE = new Field<Date>();
 		public static final Field<String> GENRE = new Field<String>();
 		public static final Field<String> ENCODER_NAME = new Field<String>();
 		public static final Field<String> ENCODER_TOOL = new Field<String>();
+		public static final Field<Date> ENCODING_DATE = new Field<Date>();
 		public static final Field<String> COPYRIGHT = new Field<String>();
+		public static final Field<String> PUBLISHER = new Field<String>();
 		public static final Field<Boolean> COMPILATION = new Field<Boolean>();
 		public static final Field<List<Artwork>> COVER_ARTWORK = new Field<List<Artwork>>();
 		public static final Field<String> GROUPING = new Field<String>();
 		public static final Field<String> LYRICS = new Field<String>();
-		public static final Field<String> TV_SHOW = new Field<String>();
 		public static final Field<Integer> RATING = new Field<Integer>();
 		public static final Field<Integer> PODCAST = new Field<Integer>();
 		public static final Field<String> PODCAST_URL = new Field<String>();
@@ -306,13 +315,20 @@ public class MetaData {
 		public static final Field<String> KEYWORDS = new Field<String>();
 		public static final Field<Integer> EPISODE_GLOBAL_UNIQUE_ID = new Field<Integer>();
 		public static final Field<String> DESCRIPTION = new Field<String>();
+		public static final Field<String> TV_SHOW = new Field<String>();
 		public static final Field<String> TV_NETWORK = new Field<String>();
 		public static final Field<String> TV_EPISODE = new Field<String>();
 		public static final Field<Integer> TV_EPISODE_NUMBER = new Field<Integer>();
 		public static final Field<Integer> TV_SEASON = new Field<Integer>();
+		public static final Field<String> INTERNET_RADIO_STATION = new Field<String>();
 		public static final Field<String> PURCHASE_DATE = new Field<String>();
 		public static final Field<String> GAPLESS_PLAYBACK = new Field<String>();
 		public static final Field<Boolean> HD_VIDEO = new Field<Boolean>();
+		public static final Field<Locale> LANGUAGE = new Field<Locale>();
+		//sorting
+		public static final Field<String> ARTIST_SORT_TEXT = new Field<String>();
+		public static final Field<String> TITLE_SORT_TEXT = new Field<String>();
+		public static final Field<String> ALBUM_SORT_TEXT = new Field<String>();
 
 		private Field() {
 		}
@@ -334,8 +350,8 @@ public class MetaData {
 		//if(meta.containsChild(BoxTypes.ITEM_PROTECTION_BOX)) ipro = (ItemProtectionBox) meta.getChild(BoxTypes.ITEM_PROTECTION_BOX);
 		//if(meta.containsChild(BoxTypes.ITEM_INFORMATION_BOX)) iinf = (ItemInformationBox) meta.getChild(BoxTypes.ITEM_INFORMATION_ENTRY);
 		//TODO: optional IPMPControlBox
-		//id3
-		//if(meta.containsChild(BoxTypes.ID3_TAG_BOX)) id3 = (ID3TagBox) meta.getChild(BoxTypes.ID3_TAG_BOX);
+		//id3, TODO: can be present in different languages
+		if(meta.hasChild(BoxTypes.ID3_TAG_BOX)) parseID3((ID3TagBox) meta.getChild(BoxTypes.ID3_TAG_BOX));
 		//itunes
 		if(meta.hasChild(BoxTypes.ITUNES_META_LIST_BOX)) parseITunesMetaData(meta.getChild(BoxTypes.ITUNES_META_LIST_BOX));
 	}
@@ -360,7 +376,7 @@ public class MetaData {
 			else if(l==BoxTypes.COMPOSER_NAME_BOX) put(Field.COMPOSER, data.getText());
 			else if(l==BoxTypes.COMMENTS_BOX) put(Field.COMMENTS, data.getText());
 			else if(l==BoxTypes.TEMPO_BOX) put(Field.TEMPO, data.getInteger());
-			else if(l==BoxTypes.RELEASE_DATE_BOX) put(Field.RELEASE_DATE, Integer.parseInt(data.getText()));
+			else if(l==BoxTypes.RELEASE_DATE_BOX) put(Field.RELEASE_DATE, data.getDate());
 			else if(l==BoxTypes.GENRE_BOX||l==BoxTypes.CUSTOM_GENRE_BOX) {
 				final String s;
 				if(data.getDataType()==ITunesMetadataBox.DataType.UTF8) s = data.getText();
@@ -392,6 +408,76 @@ public class MetaData {
 			else if(l==BoxTypes.PURCHASE_DATE_BOX) put(Field.PURCHASE_DATE, data.getText());
 			else if(l==BoxTypes.GAPLESS_PLAYBACK_BOX) put(Field.GAPLESS_PLAYBACK, data.getText());
 			else if(l==BoxTypes.HD_VIDEO_BOX) put(Field.HD_VIDEO, data.getBoolean());
+			else if(l==BoxTypes.ARTIST_SORT_BOX) put(Field.ARTIST_SORT_TEXT, data.getText());
+			else if(l==BoxTypes.TRACK_SORT_BOX) put(Field.TITLE_SORT_TEXT, data.getText());
+			else if(l==BoxTypes.ALBUM_SORT_BOX) put(Field.ALBUM_SORT_TEXT, data.getText());
+		}
+	}
+
+	private void parseID3(ID3TagBox box) {
+		try {
+			final DataInputStream in = new DataInputStream(new ByteArrayInputStream(box.getID3Data()));
+			ID3Tag tag = new ID3Tag(in);
+			int[] num;
+			for(ID3Frame frame : tag.getFrames()) {
+				switch(frame.getID()) {
+					case ID3Frame.TITLE:
+						put(Field.TITLE, frame.getEncodedText());
+						break;
+					case ID3Frame.ALBUM_TITLE:
+						put(Field.ALBUM, frame.getEncodedText());
+						break;
+					case ID3Frame.TRACK_NUMBER:
+						num = frame.getNumbers();
+						put(Field.TRACK_NUMBER, num[0]);
+						if(num.length>1) put(Field.TOTAL_TRACKS, num[1]);
+						break;
+					case ID3Frame.ARTIST:
+						put(Field.ARTIST, frame.getEncodedText());
+						break;
+					case ID3Frame.COMPOSER:
+						put(Field.COMPOSER, frame.getEncodedText());
+						break;
+					case ID3Frame.BEATS_PER_MINUTE:
+						put(Field.TEMPO, frame.getNumber());
+						break;
+					case ID3Frame.LENGTH:
+						put(Field.LENGTH_IN_MILLISECONDS, frame.getNumber());
+						break;
+					case ID3Frame.LANGUAGES:
+						put(Field.LANGUAGE, frame.getLocale());
+						break;
+					case ID3Frame.COPYRIGHT_MESSAGE:
+						put(Field.COPYRIGHT, frame.getEncodedText());
+						break;
+					case ID3Frame.PUBLISHER:
+						put(Field.PUBLISHER, frame.getEncodedText());
+						break;
+					case ID3Frame.INTERNET_RADIO_STATION_NAME:
+						put(Field.INTERNET_RADIO_STATION, frame.getEncodedText());
+						break;
+					case ID3Frame.ENCODING_TIME:
+						put(Field.ENCODING_DATE, frame.getDate());
+						break;
+					case ID3Frame.RELEASE_TIME:
+						put(Field.RELEASE_DATE, frame.getDate());
+						break;
+					case ID3Frame.ENCODING_TOOLS_AND_SETTINGS:
+						put(Field.ENCODER_TOOL, frame.getEncodedText());
+						break;
+					case ID3Frame.PERFORMER_SORT_ORDER:
+						put(Field.ARTIST_SORT_TEXT, frame.getEncodedText());
+						break;
+					case ID3Frame.TITLE_SORT_ORDER:
+						put(Field.TITLE_SORT_TEXT, frame.getEncodedText());
+						break;
+					case ID3Frame.ALBUM_SORT_ORDER:
+						put(Field.ALBUM_SORT_TEXT, frame.getEncodedText());
+						break;
+				}
+			}
+		}
+		catch(IOException e) {
 		}
 	}
 

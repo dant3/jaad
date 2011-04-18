@@ -2,6 +2,9 @@ package net.sourceforge.jaad.mp4.boxes.impl.meta;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 
@@ -13,8 +16,10 @@ import net.sourceforge.jaad.mp4.boxes.FullBox;
  * @author in-somnia
  */
 /*TODO: use generics here? -> each DataType should return <T> corresponding to
- its class (String/Integer/...)*/
+its class (String/Integer/...)*/
 public class ITunesMetadataBox extends FullBox {
+
+	private static final String[] TIMESTAMPS = {"yyyy", "yyyy-MM", "yyyy-MM-dd"};
 
 	public enum DataType {
 
@@ -171,5 +176,17 @@ public class ITunesMetadataBox extends FullBox {
 	 */
 	public boolean getBoolean() {
 		return getNumber()!=0;
+	}
+
+	public Date getDate() {
+		//timestamp lengths: 4,7,9
+		final int i = (int) Math.floor(data.length/3)-1;
+		final Date date;
+		if(i>=0&&i<TIMESTAMPS.length) {
+			final SimpleDateFormat sdf = new SimpleDateFormat(TIMESTAMPS[i]);
+			date = sdf.parse(new String(data), new ParsePosition(0));
+		}
+		else date = null;
+		return date;
 	}
 }

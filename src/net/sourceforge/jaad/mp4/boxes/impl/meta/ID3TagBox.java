@@ -4,6 +4,7 @@ import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 
+//TODO: use nio ByteBuffer instead of array
 public class ID3TagBox extends FullBox {
 
 	private String language;
@@ -31,11 +32,11 @@ public class ID3TagBox extends FullBox {
 		left = 0;
 	}
 
-	public String getLanguage() {
-		return language;
-	}
-
 	public byte[] getID3Data() {
 		return id3Data;
+	}
+
+	public String getLanguage() {
+		return language;
 	}
 }
