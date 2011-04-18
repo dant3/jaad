@@ -29,13 +29,13 @@ public class Movie {
 			tracks.add(createTrack(trackBoxes.get(i)));
 		}
 
-		//read metadata
-		if(box.hasChild(BoxTypes.META_BOX)) metaData = new MetaData(box.getChild(BoxTypes.META_BOX));
+		//read metadata: moov.meta/moov.udta.meta
+		metaData = new MetaData();
+		if(box.hasChild(BoxTypes.META_BOX)) metaData.parse(box.getChild(BoxTypes.META_BOX));
 		else if(box.hasChild(BoxTypes.USER_DATA_BOX)) {
 			final Box udta = box.getChild(BoxTypes.USER_DATA_BOX);
-			if(udta.hasChild(BoxTypes.META_BOX)) metaData = new MetaData(udta.getChild(BoxTypes.META_BOX));
+			if(udta.hasChild(BoxTypes.META_BOX)) metaData.parse(udta.getChild(BoxTypes.META_BOX));
 		}
-		else metaData = new MetaData();
 	}
 
 	//TODO: support hint and meta

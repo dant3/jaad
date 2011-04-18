@@ -75,6 +75,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(MOVIE_FRAGMENT_BOX, BoxImpl.class);
 		BOX_CLASSES.put(MOVIE_FRAGMENT_HEADER_BOX, MovieFragmentHeaderBox.class);
 		BOX_CLASSES.put(MOVIE_HEADER_BOX, MovieHeaderBox.class);
+		BOX_CLASSES.put(NERO_METADATA_TAGS_BOX, NeroMetadataTagsBox.class);
 		BOX_CLASSES.put(NULL_MEDIA_HEADER_BOX, FullBox.class);
 		BOX_CLASSES.put(PADDING_BIT_BOX, PaddingBitBox.class);
 		BOX_CLASSES.put(PIXEL_ASPECT_RATIO_BOX, PixelAspectRatioBox.class);
@@ -243,7 +244,7 @@ public class BoxFactory implements BoxTypes {
 
 	public static Box parseBox(Box parent, MP4InputStream in) throws IOException {
 		final long offset = in.getOffset();
-		
+
 		long size = in.readBytes(4);
 		long left = size-4;
 		if(size==1) {
@@ -273,7 +274,7 @@ public class BoxFactory implements BoxTypes {
 
 	public static Box parseBox(MP4InputStream in, Class<? extends BoxImpl> boxClass) throws IOException {
 		final long offset = in.getOffset();
-		
+
 		long size = in.readBytes(4);
 		long left = size-4;
 		if(size==1) {

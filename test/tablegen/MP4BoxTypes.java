@@ -45,6 +45,7 @@ public class MP4BoxTypes {
 		{"MOVIE_FRAGMENT_BOX", "moof", "BoxImpl", "Movie Fragment Box"},
 		{"MOVIE_FRAGMENT_HEADER_BOX", "mfhd", "MovieFragmentHeaderBox"},
 		{"MOVIE_HEADER_BOX", "mvhd", "MovieHeaderBox"},
+		{"NERO_METADATA_TAGS_BOX", "tags", "NeroMetadataTagsBox"},
 		{"NULL_MEDIA_HEADER_BOX", "nmhd", "FullBox", "Null Media Header Box"},
 		{"PADDING_BIT_BOX", "padb", "PaddingBitBox"},
 		{"PIXEL_ASPECT_RATIO_BOX", "pasp", "PixelAspectRatioBox"},
