@@ -22,10 +22,11 @@ import net.sourceforge.jaad.mp4.MP4Container;
 import net.sourceforge.jaad.mp4.api.AudioTrack;
 import net.sourceforge.jaad.mp4.api.Frame;
 import net.sourceforge.jaad.mp4.api.Movie;
-import net.sourceforge.jaad.mp4.api.Type;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import javax.sound.sampled.AudioFormat;
+import net.sourceforge.jaad.mp4.api.Track;
 
 class MP4AudioInputStream extends AsynchronousAudioInputStream {
 
@@ -39,7 +40,9 @@ class MP4AudioInputStream extends AsynchronousAudioInputStream {
 		super(in, format, length);
 		final MP4Container cont = new MP4Container(in);
 		final Movie movie = cont.getMovie();
-		track = (AudioTrack) movie.getTracks(Type.AUDIO).get(0);
+		final List<Track> tracks = movie.getTracks(AudioTrack.AudioCodec.AAC);
+		if(tracks.isEmpty()) throw new IOException("movie does not contain any AAC track");
+		track = (AudioTrack) tracks.get(0);
 
 		decoder = new Decoder(track.getDecoderSpecificInfo());
 		sampleBuffer = new SampleBuffer();

@@ -52,6 +52,9 @@ import net.sourceforge.jaad.mp4.boxes.od.ObjectDescriptor;
 //TODO: expand javadoc
 public abstract class Track {
 
+	public interface Codec {
+		//TODO: currently only marker interface
+	}
 	private final MP4InputStream in;
 	protected final TrackHeaderBox tkhd;
 	private final MediaHeaderBox mdhd;
@@ -189,6 +192,8 @@ public abstract class Track {
 
 	public abstract Type getType();
 
+	public abstract Codec getCodec();
+	
 	//tkhd
 	/**
 	 * Returns true if the track is enabled. A disabled track is treated as if

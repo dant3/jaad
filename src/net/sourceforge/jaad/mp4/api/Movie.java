@@ -83,7 +83,7 @@ public class Movie {
 
 	/**
 	 * Returns an unmodifiable list of all tracks in this movie with the
-	 * corresponding type. The tracks are ordered as they appeare in the
+	 * specified type. The tracks are ordered as they appeare in the
 	 * file/stream.
 	 *
 	 * @return the tracks contained by this movie with the passed type
@@ -92,6 +92,21 @@ public class Movie {
 		final List<Track> l = new ArrayList<Track>();
 		for(Track t : tracks) {
 			if(t.getType().equals(type)) l.add(t);
+		}
+		return Collections.unmodifiableList(l);
+	}
+
+	/**
+	 * Returns an unmodifiable list of all tracks in this movie whose samples
+	 * are encoded with the specified codec. The tracks are ordered as they 
+	 * appeare in the file/stream.
+	 *
+	 * @return the tracks contained by this movie with the passed type
+	 */
+	public List<Track> getTracks(Track.Codec codec) {
+		final List<Track> l = new ArrayList<Track>();
+		for(Track t : tracks) {
+			if(t.getCodec().equals(codec)) l.add(t);
 		}
 		return Collections.unmodifiableList(l);
 	}

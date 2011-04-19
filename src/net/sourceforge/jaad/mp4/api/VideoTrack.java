@@ -27,8 +27,25 @@ import net.sourceforge.jaad.mp4.boxes.od.ESDBox;
 
 public class VideoTrack extends Track {
 
-	private VideoMediaHeaderBox vmhd;
-	private VideoSampleEntry sampleEntry;
+	public enum VideoCodec implements Codec {
+
+		AVC,
+		H263,
+		MP4_ASP,
+		UNKNOWN_VIDEO_CODEC;
+
+		private static Codec forType(long type) {
+			final Codec ac;
+			if(type==BoxTypes.AVC_SAMPLE_ENTRY) ac = AVC;
+			else if(type==BoxTypes.H263_SAMPLE_ENTRY) ac = H263;
+			else if(type==BoxTypes.MP4V_SAMPLE_ENTRY) ac = MP4_ASP;
+			else ac = UNKNOWN_VIDEO_CODEC;
+			return ac;
+		}
+	}
+	private final VideoMediaHeaderBox vmhd;
+	private final VideoSampleEntry sampleEntry;
+	private final Codec codec;
 
 	public VideoTrack(Box trak, MP4InputStream in) {
 		super(trak, in);
@@ -43,11 +60,18 @@ public class VideoTrack extends Track {
 		sampleEntry = (VideoSampleEntry) stsd.getChildren().get(0);
 		if(sampleEntry.getType()==BoxTypes.MP4V_SAMPLE_ENTRY) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
 		else decoderInfo = new DecoderInfo((CodecSpecificBox) sampleEntry.getChildren().get(0));
+
+		codec = VideoCodec.forType(sampleEntry.getType());
 	}
 
 	@Override
 	public Type getType() {
 		return Type.VIDEO;
+	}
+
+	@Override
+	public Codec getCodec() {
+		return codec;
 	}
 
 	public int getWidth() {

@@ -27,8 +27,31 @@ import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
 
 public class AudioTrack extends Track {
 
-	private SoundMediaHeaderBox smhd;
-	private AudioSampleEntry sampleEntry;
+	public enum AudioCodec implements Codec {
+
+		AAC,
+		AMR,
+		AMR_WIDE_BAND,
+		EVRC,
+		QCELP,
+		SMV,
+		UNKNOWN_AUDIO_CODEC;
+
+		private static Codec forType(long type) {
+			final Codec ac;
+			if(type==BoxTypes.MP4A_SAMPLE_ENTRY) ac = AAC;
+			else if(type==BoxTypes.AMR_SAMPLE_ENTRY) ac = AMR;
+			else if(type==BoxTypes.AMR_WB_SAMPLE_ENTRY) ac = AMR_WIDE_BAND;
+			else if(type==BoxTypes.EVRC_SAMPLE_ENTRY) ac = EVRC;
+			else if(type==BoxTypes.QCELP_SAMPLE_ENTRY) ac = QCELP;
+			else if(type==BoxTypes.SMV_SAMPLE_ENTRY) ac = SMV;
+			else ac = UNKNOWN_AUDIO_CODEC;
+			return ac;
+		}
+	}
+	private final SoundMediaHeaderBox smhd;
+	private final AudioSampleEntry sampleEntry;
+	private Codec codec;
 
 	public AudioTrack(Box trak, MP4InputStream in) {
 		super(trak, in);
@@ -44,11 +67,18 @@ public class AudioTrack extends Track {
 		sampleEntry = (AudioSampleEntry) stsd.getChildren().get(0);
 		if(sampleEntry.getType()==BoxTypes.MP4A_SAMPLE_ENTRY) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
 		else decoderInfo = new DecoderInfo((CodecSpecificBox) sampleEntry.getChildren().get(0));
+
+		codec = AudioCodec.forType(sampleEntry.getType());
 	}
 
 	@Override
 	public Type getType() {
 		return Type.AUDIO;
+	}
+
+	@Override
+	public Codec getCodec() {
+		return codec;
 	}
 
 	/**
