@@ -29,6 +29,11 @@ import net.sourceforge.jaad.mp4.boxes.impl.meta.*;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.*;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
 
+/*TODO: subtracting from 'left' could be replaced:
+ * skipping in factory -> calculate from inputstream offset
+ * in boxes (e.g. to call readUTF) -> protected int getLeft() in BoxImpl that
+ * subtracts from box-offset
+ */
 public class BoxFactory implements BoxTypes {
 
 	private static final Logger LOGGER = Logger.getLogger("net.sourceforge.jaad.util.mp4.boxes.BoxFactory");
@@ -262,11 +267,10 @@ public class BoxFactory implements BoxTypes {
 		box.setParams(parent, size, type, offset, left);
 		box.decode(in);
 
-		//if mdat found, don't skip
-		//TODO: what if random access can be used??
+		//if mdat found and no random access, don't skip
 		left = box.getLeft();
 		if(left<0) LOGGER.log(Level.WARNING, "box: {0}, left: {1}, offset: {2}", new String[]{typeToString(type), Long.toString(left), Long.toString(in.getOffset())});
-		if(box.getType()!=MEDIA_DATA_BOX) in.skipBytes(left);
+		if(box.getType()!=MEDIA_DATA_BOX||in.hasRandomAccess()) in.skipBytes(left);
 		return box;
 	}
 

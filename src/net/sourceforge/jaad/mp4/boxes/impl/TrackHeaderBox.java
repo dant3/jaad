@@ -90,7 +90,7 @@ public class TrackHeaderBox extends FullBox {
 		width = in.readFixedPoint(4, MP4InputStream.MASK16);
 		height = in.readFixedPoint(4, MP4InputStream.MASK16);
 
-		left = 0;
+		left -= 60;
 	}
 
 	/**

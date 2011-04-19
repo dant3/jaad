@@ -16,11 +16,6 @@
  */
 package net.sourceforge.jaad;
 
-import net.sourceforge.jaad.util.wav.WaveFileWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.List;
 import net.sourceforge.jaad.aac.Decoder;
 import net.sourceforge.jaad.aac.SampleBuffer;
 import net.sourceforge.jaad.mp4.MP4Container;
@@ -28,6 +23,12 @@ import net.sourceforge.jaad.mp4.api.AudioTrack;
 import net.sourceforge.jaad.mp4.api.Frame;
 import net.sourceforge.jaad.mp4.api.Movie;
 import net.sourceforge.jaad.mp4.api.Track;
+import net.sourceforge.jaad.util.wav.WaveFileWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.List;
 
 /**
  * Command line example, that can decode an AAC file to a WAVE file.
@@ -59,12 +60,12 @@ public class Main {
 	private static void decodeMP4(String in, String out) throws Exception {
 		WaveFileWriter wav = null;
 		try {
-			final MP4Container cont = new MP4Container(new FileInputStream(in));
+			final MP4Container cont = new MP4Container(new RandomAccessFile(in, "r"));
 			final Movie movie = cont.getMovie();
 			final List<Track> tracks = movie.getTracks(AudioTrack.AudioCodec.AAC);
 			if(tracks.isEmpty()) throw new Exception("movie does not contain any AAC track");
 			final AudioTrack track = (AudioTrack) tracks.get(0);
-			
+
 			wav = new WaveFileWriter(new File(out), track.getSampleRate(), track.getChannelCount(), track.getSampleSize());
 
 			final Decoder dec = new Decoder(track.getDecoderSpecificInfo());

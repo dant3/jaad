@@ -41,12 +41,14 @@ public class MediaHeaderBox extends FullBox {
 			modificationTime = in.readBytes(8);
 			timeScale = in.readBytes(4);
 			duration = in.readBytes(8);
+			left -= 28;
 		}
 		else {
 			creationTime = in.readBytes(4);
 			modificationTime = in.readBytes(4);
 			timeScale = in.readBytes(4);
 			duration = in.readBytes(4);
+			left -= 16;
 		}
 
 		//1 bit padding, 5*3 bits language code (ISO-639-2/T)
@@ -59,7 +61,7 @@ public class MediaHeaderBox extends FullBox {
 
 		in.skipBytes(2); //pre-defined: 0
 
-		left = 0;
+		left -= 4;
 	}
 
 	/**

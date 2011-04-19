@@ -38,6 +38,6 @@ public class MediaDataBox extends BoxImpl {
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		//media data is found, do nothing
+		//if random access: skip, else: do nothing
 	}
 }

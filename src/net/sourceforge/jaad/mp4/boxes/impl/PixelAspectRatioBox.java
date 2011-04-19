@@ -33,6 +33,7 @@ public class PixelAspectRatioBox extends BoxImpl {
 	public void decode(MP4InputStream in) throws IOException {
 		hSpacing = in.readBytes(4);
 		vSpacing = in.readBytes(4);
+		left -= 8;
 	}
 
 	public long getHorizontalSpacing() {

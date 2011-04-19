@@ -16,16 +16,16 @@
  */
 package net.sourceforge.jaad;
 
-import java.util.List;
+import net.sourceforge.jaad.aac.Decoder;
+import net.sourceforge.jaad.aac.SampleBuffer;
 import net.sourceforge.jaad.mp4.MP4Container;
 import net.sourceforge.jaad.mp4.api.*;
 import java.io.FileInputStream;
+import java.io.RandomAccessFile;
+import java.util.List;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.SourceDataLine;
-import net.sourceforge.jaad.aac.Decoder;
-import net.sourceforge.jaad.aac.SampleBuffer;
-import net.sourceforge.jaad.mp4.boxes.Box;
 
 /**
  * Command line example, that can decode an AAC file and play it.
@@ -59,7 +59,7 @@ public class Play {
 		SourceDataLine line = null;
 		byte[] b;
 		try {
-			final MP4Container cont = new MP4Container(new FileInputStream(in));
+			final MP4Container cont = new MP4Container(new RandomAccessFile(in, "r"));
 			final Movie movie = cont.getMovie();
 			final List<Track> tracks = movie.getTracks(AudioTrack.AudioCodec.AAC);
 			if(tracks.isEmpty()) throw new Exception("movie does not contain any AAC track");

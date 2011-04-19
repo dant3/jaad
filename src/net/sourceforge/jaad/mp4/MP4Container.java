@@ -16,6 +16,7 @@
  */
 package net.sourceforge.jaad.mp4;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -75,6 +76,8 @@ public class MP4Container {
 	public MP4Container(RandomAccessFile in) throws IOException {
 		this.in = new MP4InputStream(in);
 		boxes = new ArrayList<Box>();
+
+		readContent();
 	}
 
 	private void readContent() throws IOException {
@@ -83,25 +86,33 @@ public class MP4Container {
 		long type;
 		boolean moovFound = false;
 		//TODO: while(true)???
-		while(true) {
-			box = BoxFactory.parseBox(null, in);
-			boxes.add(box);
+		try {
+			while(true) {
+				box = BoxFactory.parseBox(null, in);
+				boxes.add(box);
 
-			type = box.getType();
-			if(type==BoxTypes.MOVIE_BOX) {
-				if(movie==null) moov = box;
-				moovFound = true;
+				type = box.getType();
+				if(type==BoxTypes.MOVIE_BOX) {
+					if(movie==null) moov = box;
+					moovFound = true;
+				}
+				else if(type==BoxTypes.FILE_TYPE_BOX) {
+					if(ftyp==null) ftyp = (FileTypeBox) box;
+				}
+				else if(type==BoxTypes.PROGRESSIVE_DOWNLOAD_INFORMATION_BOX) {
+					if(pdin==null) pdin = (ProgressiveDownloadInformationBox) box;
+				}
+				else if(type==BoxTypes.MEDIA_DATA_BOX) {
+					if(moovFound) break;
+					else if(!in.hasRandomAccess()) throw new MP4Exception("movie box at end of file, need random access");
+				}
 			}
-			else if(type==BoxTypes.FILE_TYPE_BOX) {
-				if(ftyp==null) ftyp = (FileTypeBox) box;
-			}
-			else if(type==BoxTypes.PROGRESSIVE_DOWNLOAD_INFORMATION_BOX) {
-				if(pdin==null) pdin = (ProgressiveDownloadInformationBox) box;
-			}
-			else if(type==BoxTypes.MEDIA_DATA_BOX) {
-				if(moovFound) break;
-				else if(!in.hasRandomAccess()) throw new MP4Exception("movie box at end of file, need random access");
-			}
+		}
+		catch(EOFException e) {
+			/*TODO: bad solution! instead of catching the exception, the loop
+			 * should test if there is still something left in the stream
+			 */
+			if(!in.hasRandomAccess()) throw e;
 		}
 	}
 
@@ -119,7 +130,8 @@ public class MP4Container {
 
 	//TODO: pdin, movie fragments??
 	public Movie getMovie() {
-		if(movie==null) movie = new Movie(moov, in);
+		if(moov==null) return null;
+		else if(movie==null) movie = new Movie(moov, in);
 		return movie;
 	}
 

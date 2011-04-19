@@ -33,6 +33,7 @@ public class ObjectDescriptorBox extends FullBox {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 		objectDescriptor = ObjectDescriptor.createDescriptor(in);
+		left -= objectDescriptor.getBytesRead();
 	}
 
 	public ObjectDescriptor getObjectDescriptor() {

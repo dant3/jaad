@@ -48,7 +48,7 @@ public class CopyrightBox extends FullBox {
 
 		notice = in.readUTFString((int) left); //UTF8 or UTF16
 
-		left -= 4+notice.length();
+		left -= 3+notice.length();
 	}
 
 	/**

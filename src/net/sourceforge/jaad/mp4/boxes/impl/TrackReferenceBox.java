@@ -48,6 +48,7 @@ public class TrackReferenceBox extends BoxImpl {
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		referenceType = in.readString(4);
+		left-=4;
 
 		while(left>3) {
 			trackIDs.add(in.readBytes(4));

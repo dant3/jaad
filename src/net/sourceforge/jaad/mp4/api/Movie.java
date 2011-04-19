@@ -41,8 +41,10 @@ public class Movie {
 		mvhd = (MovieHeaderBox) box.getChild(BoxTypes.MOVIE_HEADER_BOX);
 		List<Box> trackBoxes = box.getChildren(BoxTypes.TRACK_BOX);
 		tracks = new ArrayList<Track>(trackBoxes.size());
+		Track track;
 		for(int i = 0; i<trackBoxes.size(); i++) {
-			tracks.add(createTrack(trackBoxes.get(i)));
+			track = createTrack(trackBoxes.get(i));
+			if(track!=null) tracks.add(track);
 		}
 
 		//read metadata: moov.meta/moov.udta.meta
