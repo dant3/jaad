@@ -47,12 +47,12 @@ public abstract class Track {
 	protected DecoderSpecificInfoDescriptor decoderSpecificInfo;
 	protected DecoderInfo decoderInfo;
 
-	Track(Box box, MP4InputStream in) {
+	Track(Box trak, MP4InputStream in) {
 		this.in = in;
 
-		tkhd = (TrackHeaderBox) box.getChild(BoxTypes.TRACK_HEADER_BOX);
+		tkhd = (TrackHeaderBox) trak.getChild(BoxTypes.TRACK_HEADER_BOX);
 
-		final Box mdia = box.getChild(BoxTypes.MEDIA_BOX);
+		final Box mdia = trak.getChild(BoxTypes.MEDIA_BOX);
 		mdhd = (MediaHeaderBox) mdia.getChild(BoxTypes.MEDIA_HEADER_BOX);
 		final Box minf = mdia.getChild(BoxTypes.MEDIA_INFORMATION_BOX);
 
@@ -81,8 +81,7 @@ public abstract class Track {
 
 		//sample table
 		final Box stbl = minf.getChild(BoxTypes.SAMPLE_TABLE_BOX);
-		final List<Box> children = stbl.getChildren();
-		if(children.size()>0) {
+		if(stbl.hasChildren()) {
 			frames = new ArrayList<Frame>();
 			parseSampleTable(stbl);
 		}
@@ -118,28 +117,33 @@ public abstract class Track {
 		//create frames
 		SampleToChunkEntry entry;
 		int firstChunk, lastChunk;
-		long samples, pos, size;
+		long pos, size;
+		int j, s;
 		double timeStamp;
 		int current = 0;
 
 		//TODO: is this valid for video samples?
 		for(int i = 0; i<sampleToChunks.length; i++) {
+			//an entry (run) contains several chunks with the same 'samples-per-chunk' value
 			entry = sampleToChunks[i];
 			firstChunk = (int) entry.getFirstChunk();
+			//since the last chunk of a run is not specified: get it from the next run
 			if(i<sampleToChunks.length-1) lastChunk = (int) sampleToChunks[i+1].getFirstChunk()-1;
 			else lastChunk = chunkOffsets.length;
 
-			for(int j = firstChunk; j<=lastChunk; j++) {
-				samples = entry.getSamplesPerChunk();
+			//iterate over all chunks in this run
+			for(j = firstChunk; j<=lastChunk-1; j++) {
 				pos = chunkOffsets[j-1];
-				while(samples>0) {
+				//iterate over all samples in this chunk
+				for(s = 0; s<entry.getSamplesPerChunk(); s++) {
+					//create frame for sample
 					timeStamp = (sampleDurations[j]*current)/timeScale;
 					size = sampleSizes[current];
 					frames.add(new Frame(getType(), pos, size, timeStamp));
 
+					//calculate sampe offset from chunk offset and sample sizes
 					pos += size;
 					current++;
-					samples--;
 				}
 			}
 		}

@@ -35,25 +35,6 @@ public class HandlerBox extends FullBox {
 	public static final int TYPE_OCSM = 1868788589; //ocsm
 	public static final int TYPE_IPSM = 1768977261; //ipsm
 	public static final int TYPE_MJSM = 1835692909; //mjsm
-
-	public static void main(String[] args) {
-		System.out.println("odsm: "+toLong("odsm"));
-		System.out.println("crsm: "+toLong("crsm"));
-		System.out.println("sdsm: "+toLong("sdsm"));
-		System.out.println("m7sm: "+toLong("m7sm"));
-		System.out.println("ocsm: "+toLong("ocsm"));
-		System.out.println("ipsm: "+toLong("ipsm"));
-		System.out.println("mjsm: "+toLong("mjsm"));
-	}
-
-	private static long toLong(String s) {
-		long l = 0;
-		for(int i = 0; i<4; i++) {
-			l <<= 8;
-			l |= s.charAt(i);
-		}
-		return l;
-	}
 	private long handlerType;
 	private String handlerName;
 

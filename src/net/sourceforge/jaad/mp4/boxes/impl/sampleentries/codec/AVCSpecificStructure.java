@@ -8,11 +8,10 @@ public class AVCSpecificStructure extends CodecSpecificStructure {
 
 	private int configurationVersion, profile, level, lengthSize;
 	private byte profileCompatibility;
-	private int[] sequenceParameterSetLength, pictureParameterSetLength;
 	private long[] sequenceParameterSetNALUnit, pictureParameterSetNALUnit;
 
 	public AVCSpecificStructure() {
-		super(0);
+		super(7); //at least 7 bytes are read
 	}
 
 	@Override
@@ -23,16 +22,23 @@ public class AVCSpecificStructure extends CodecSpecificStructure {
 		level = in.read();
 		//6 bits reserved, 2 bits 'length size minus one'
 		lengthSize = (in.read()&3)+1;
+
+		int len;
 		//3 bits reserved, 5 bits number of sequence parameter sets
 		final int sequenceParameterSets = in.read()&31;
+		sequenceParameterSetNALUnit = new long[sequenceParameterSets];
 		for(int i = 0; i<sequenceParameterSets; i++) {
-			sequenceParameterSetLength[i] = (int) in.readBytes(2);
-			sequenceParameterSetNALUnit[i] = in.readBytes(sequenceParameterSetLength[i]);
+			len = (int) in.readBytes(2);
+			sequenceParameterSetNALUnit[i] = in.readBytes(len);
+			size+=len+2;
 		}
+
 		final int pictureParameterSets = in.read();
+		pictureParameterSetNALUnit = new long[pictureParameterSets];
 		for(int i = 0; i<pictureParameterSets; i++) {
-			pictureParameterSetLength[i] = (int) in.readBytes(2);
-			pictureParameterSetNALUnit[i] = in.readBytes(pictureParameterSetLength[i]);
+			len = (int) in.readBytes(2);
+			pictureParameterSetNALUnit[i] = in.readBytes(len);
+			size+=len+2;
 		}
 	}
 
@@ -76,16 +82,6 @@ public class AVCSpecificStructure extends CodecSpecificStructure {
 	}
 
 	/**
-	 * The sequence parameter set length indicates the length in bytes of the
-	 * SPS NAL unit as defined in ISO/IEC 14496-10.
-	 *
-	 * @return the SPS lengths for all SPS NAL units.
-	 */
-	public int[] getSequenceParameterSetLengths() {
-		return sequenceParameterSetLength;
-	}
-
-	/**
 	 * The SPS NAL units, as specified in ISO/IEC 14496-10. SPSs shall occur in
 	 * order of ascending parameter set identifier with gaps being allowed.
 	 *
@@ -93,16 +89,6 @@ public class AVCSpecificStructure extends CodecSpecificStructure {
 	 */
 	public long[] getSequenceParameterSetNALUnits() {
 		return sequenceParameterSetNALUnit;
-	}
-
-	/**
-	 * The picture parameter set length indicates the length in bytes of the
-	 * PPS NAL unit as defined in ISO/IEC 14496-10.
-	 *
-	 * @return the PPS lengths for all PPS NAL units.
-	 */
-	public int[] getPictureParameterSetLengths() {
-		return pictureParameterSetLength;
 	}
 
 	/**

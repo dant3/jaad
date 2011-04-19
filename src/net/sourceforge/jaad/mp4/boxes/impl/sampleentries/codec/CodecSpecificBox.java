@@ -15,7 +15,7 @@ public class CodecSpecificBox extends BoxImpl {
 
 	private CodecSpecificStructure struc;
 
-	public CodecSpecificBox(String name) {
+	public CodecSpecificBox() {
 		super("CodecSpecificBox");
 	}
 

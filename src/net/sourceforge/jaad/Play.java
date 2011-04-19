@@ -16,12 +16,14 @@
  */
 package net.sourceforge.jaad;
 
+import java.util.List;
 import net.sourceforge.jaad.mp4.MP4Container;
 import net.sourceforge.jaad.mp4.api.*;
 import java.io.FileInputStream;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.SourceDataLine;
+import net.sourceforge.jaad.mp4.boxes.Box;
 
 /**
  * Command line example, that can decode an AAC file and play it.
@@ -29,6 +31,26 @@ import javax.sound.sampled.SourceDataLine;
  */
 public class Play {
 
+	private static void printTree(Box box, int off) {
+		final StringBuilder sb = new StringBuilder();
+		for(int i = 0; i<off; i++) {
+			sb.append(" ");
+		}
+		sb.append(box.getName()+" ("+typeToString(box.getType())+")");
+		System.out.println(sb.toString());
+		for(Box b : box.getChildren()) {
+			printTree(b, off+1);
+		}
+	}
+
+	private static String typeToString(long l) {
+		byte[] b = new byte[4];
+		b[0] = (byte) ((l>>24)&0xFF);
+		b[1] = (byte) ((l>>16)&0xFF);
+		b[2] = (byte) ((l>>8)&0xFF);
+		b[3] = (byte) (l&0xFF);
+		return new String(b);
+	}
 	private static final String USAGE = "usage:\njaad.Play [-mp4] <infile>\n\n\t-mp4\tinput file is in MP4 container format";
 
 	public static void main(String[] args) {
@@ -56,6 +78,10 @@ public class Play {
 		byte[] b;
 		try {
 			final MP4Container cont = new MP4Container(new FileInputStream(in));
+			List<Box> boxes = cont.getBoxes();
+			for(Box box : boxes) {
+				//printTree(box, 0);
+			}
 			final Movie movie = cont.getMovie();
 			final AudioTrack track = (AudioTrack) movie.getTracks(Type.AUDIO).get(0);
 			final AudioFormat aufmt = new AudioFormat(track.getSampleRate(), track.getSampleSize(), track.getChannelCount(), true, true);

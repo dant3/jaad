@@ -34,7 +34,7 @@ public class Frame implements Comparable<Frame> {
 		return (int) (time-f.time);
 	}
 
-	void setData(byte[] data) {
+	public void setData(byte[] data) {
 		this.data = data;
 	}
 

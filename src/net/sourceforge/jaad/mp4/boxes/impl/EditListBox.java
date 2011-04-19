@@ -45,7 +45,7 @@ public class EditListBox extends FullBox {
 		mediaTime = new long[entryCount];
 		mediaRate = new double[entryCount];
 
-		for(int i = 1; i<=entryCount; i++) {
+		for(int i = 0; i<entryCount; i++) {
 			segmentDuration[i] = in.readBytes(len);
 			mediaTime[i] = in.readBytes(len);
 

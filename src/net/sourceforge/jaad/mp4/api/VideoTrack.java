@@ -22,12 +22,10 @@ public class VideoTrack extends Track {
 
 		final Box stbl = minf.getChild(BoxTypes.SAMPLE_TABLE_BOX);
 
-		//sample descriptions
+		//sample descriptions: 'mp4v' has an ESDBox, all others have a CodecSpecificBox
 		final SampleDescriptionBox stsd = (SampleDescriptionBox) stbl.getChild(BoxTypes.SAMPLE_DESCRIPTION_BOX);
-		sampleEntry = (VideoSampleEntry) stsd.getChild(BoxTypes.AUDIO_SAMPLE_ENTRY);
-		if(sampleEntry.getType()==VideoSampleEntry.TYPE_MP4V) {
-			findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
-		}
+		sampleEntry = (VideoSampleEntry) stsd.getChildren().get(0);
+		if(sampleEntry.getType()==BoxTypes.MP4V_SAMPLE_ENTRY) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
 		else decoderInfo = new DecoderInfo((CodecSpecificBox) sampleEntry.getChildren().get(0));
 	}
 

@@ -409,7 +409,7 @@ public class MetaData {
 	}
 
 	private <T> void put(Field<T> field, T value) {
-		put(field, value);
+		contents.put(field, value);
 	}
 
 	@SuppressWarnings("unchecked")

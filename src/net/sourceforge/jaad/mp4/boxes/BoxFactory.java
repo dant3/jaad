@@ -159,10 +159,10 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(TV_SEASON_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TV_SHOW_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TV_SHOW_SORT_BOX, BoxImpl.class);
-		BOX_CLASSES.put(VIDEO_SAMPLE_ENTRY, VideoSampleEntry.class);
+		BOX_CLASSES.put(MP4V_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(H263_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(AVC_SAMPLE_ENTRY, VideoSampleEntry.class);
-		BOX_CLASSES.put(AUDIO_SAMPLE_ENTRY, AudioSampleEntry.class);
+		BOX_CLASSES.put(MP4A_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(AMR_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(AMR_WB_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(EVRC_SAMPLE_ENTRY, AudioSampleEntry.class);
@@ -261,8 +261,6 @@ public class BoxFactory implements BoxTypes {
 		final BoxImpl box = forType(type);
 		box.setParams(parent, size, type, offset, left);
 		box.decode(in);
-		//DEBUG:
-		//System.out.println(box.getShortName());
 
 		//if mdat found, don't skip
 		//TODO: what if random access can be used??
@@ -272,6 +270,7 @@ public class BoxFactory implements BoxTypes {
 		return box;
 	}
 
+	//TODO: remove usages
 	public static Box parseBox(MP4InputStream in, Class<? extends BoxImpl> boxClass) throws IOException {
 		final long offset = in.getOffset();
 

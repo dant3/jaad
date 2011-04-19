@@ -23,12 +23,10 @@ public class AudioTrack extends Track {
 
 		final Box stbl = minf.getChild(BoxTypes.SAMPLE_TABLE_BOX);
 
-		//sample descriptions
+		//sample descriptions: 'mp4a' has an ESDBox, all others have a CodecSpecificBox
 		final SampleDescriptionBox stsd = (SampleDescriptionBox) stbl.getChild(BoxTypes.SAMPLE_DESCRIPTION_BOX);
-		sampleEntry = (AudioSampleEntry) stsd.getChild(BoxTypes.AUDIO_SAMPLE_ENTRY);
-		if(sampleEntry.getType()==AudioSampleEntry.TYPE_MP4A) {
-			findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
-		}
+		sampleEntry = (AudioSampleEntry) stsd.getChildren().get(0);
+		if(sampleEntry.getType()==BoxTypes.MP4A_SAMPLE_ENTRY) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
 		else decoderInfo = new DecoderInfo((CodecSpecificBox) sampleEntry.getChildren().get(0));
 	}
 

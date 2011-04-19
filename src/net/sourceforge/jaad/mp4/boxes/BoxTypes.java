@@ -147,10 +147,10 @@ public interface BoxTypes {
 	long TV_SHOW_BOX = 1953919848l; //tvsh
 	long TV_SHOW_SORT_BOX = 1936683886l; //sosn
 	//sample entries
-	long VIDEO_SAMPLE_ENTRY = 1836070006l; //mp4v
+	long MP4V_SAMPLE_ENTRY = 1836070006l; //mp4v
 	long H263_SAMPLE_ENTRY = 1932670515l; //s263
 	long AVC_SAMPLE_ENTRY = 1635148593l; //avc1
-	long AUDIO_SAMPLE_ENTRY = 1836069985l; //mp4a
+	long MP4A_SAMPLE_ENTRY = 1836069985l; //mp4a
 	long AMR_SAMPLE_ENTRY = 1935764850l; //samr
 	long AMR_WB_SAMPLE_ENTRY = 1935767394l; //sawb
 	long EVRC_SAMPLE_ENTRY = 1936029283l; //sevc
