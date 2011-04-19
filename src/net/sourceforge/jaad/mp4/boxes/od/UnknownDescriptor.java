@@ -14,24 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.mp4.api;
+package net.sourceforge.jaad.mp4.boxes.od;
 
-import java.util.Date;
+import java.io.IOException;
+import net.sourceforge.jaad.mp4.MP4InputStream;
 
-class Utils {
+public class UnknownDescriptor extends ObjectDescriptor {
 
-	private static final long DATE_OFFSET = 2082850791998l;
-
-	static Date getDate(long time) {
-		return new Date(time*1000-DATE_OFFSET);
+	public UnknownDescriptor(int type, int size) {
+		super(type, size);
 	}
 
-	static long bytesToLong(byte[] b, int off, int len) {
-		long l = 0;
-		for(int i = 0; i<len; i++) {
-			l <<= 8;
-			l |= b[off+i];
-		}
-		return l;
+	@Override
+	void decode(MP4InputStream in) throws IOException {
 	}
 }

@@ -14,18 +14,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.mp4.boxes.impl.samplegroupentries;
+package net.sourceforge.jaad.mp4.boxes.od;
 
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
-public class AudioSampleGroupEntry extends SampleGroupDescriptionEntry {
+public class ESDescriptor extends ObjectDescriptor {
 
-	public AudioSampleGroupEntry() {
-		super("Audio Sample Group Entry");
+	ESDescriptor(int type, int size) {
+		super(type, size);
 	}
 
-	@Override
-	public void decode(MP4InputStream in) throws IOException {
+	void decode(MP4InputStream in) throws IOException {
+		in.skipBytes(2);
+		final int flags = in.read();
+		final boolean streamDependenceFlag = (flags&(1<<7))!=0;
+		final boolean urlFlag = (flags&(1<<6))!=0;
+		final boolean ocrFlag = (flags&(1<<5))!=0;
+		bytesRead += 3;
+		if(streamDependenceFlag) {
+			in.skipBytes(2);
+			bytesRead += 2;
+		}
+		if(urlFlag) {
+			final int len = in.read();
+			in.skipBytes(len);
+			bytesRead += len+1;
+		}
+		if(ocrFlag) {
+			in.skipBytes(2);
+			bytesRead += 2;
+		}
+
+		readChildren(in);
 	}
 }

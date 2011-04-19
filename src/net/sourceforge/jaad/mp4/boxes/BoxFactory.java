@@ -16,7 +16,7 @@
  */
 package net.sourceforge.jaad.mp4.boxes;
 
-import net.sourceforge.jaad.mp4.boxes.impl.od.ESDBox;
+import net.sourceforge.jaad.mp4.boxes.od.ESDBox;
 import java.util.logging.Level;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
