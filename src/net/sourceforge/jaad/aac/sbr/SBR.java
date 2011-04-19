@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.impl.sbr;
+package net.sourceforge.jaad.aac.sbr;
 
-import net.sourceforge.jaad.AACException;
-import net.sourceforge.jaad.SampleFrequency;
-import net.sourceforge.jaad.impl.BitStream;
-import net.sourceforge.jaad.impl.Constants;
-import net.sourceforge.jaad.impl.ps.PS;
+import net.sourceforge.jaad.aac.AACException;
+import net.sourceforge.jaad.aac.SampleFrequency;
+import net.sourceforge.jaad.aac.ps.PS;
+import net.sourceforge.jaad.aac.syntax.BitStream;
+import net.sourceforge.jaad.aac.syntax.Constants;
 import java.util.Arrays;
 import java.util.logging.Level;
 

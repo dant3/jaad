@@ -21,6 +21,8 @@ import java.net.URL;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.SourceDataLine;
+import net.sourceforge.jaad.aac.Decoder;
+import net.sourceforge.jaad.aac.SampleBuffer;
 
 /**
  * Command line example, that can decode an AAC file and play it.

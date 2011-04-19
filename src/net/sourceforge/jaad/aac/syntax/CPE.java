@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.impl;
+package net.sourceforge.jaad.aac.syntax;
 
-import net.sourceforge.jaad.SampleFrequency;
-import net.sourceforge.jaad.AACException;
-import net.sourceforge.jaad.DecoderConfig;
-import net.sourceforge.jaad.Profile;
-import net.sourceforge.jaad.impl.stereo.MSMask;
+import net.sourceforge.jaad.aac.AACException;
+import net.sourceforge.jaad.aac.DecoderConfig;
+import net.sourceforge.jaad.aac.Profile;
+import net.sourceforge.jaad.aac.SampleFrequency;
+import net.sourceforge.jaad.aac.stereo.MSMask;
 
 public class CPE extends Element implements Constants {
 

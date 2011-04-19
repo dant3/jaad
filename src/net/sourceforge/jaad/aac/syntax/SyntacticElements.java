@@ -14,20 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.impl;
+package net.sourceforge.jaad.aac.syntax;
 
-import net.sourceforge.jaad.ChannelConfiguration;
-import net.sourceforge.jaad.SampleFrequency;
-import net.sourceforge.jaad.AACException;
-import net.sourceforge.jaad.DecoderConfig;
-import net.sourceforge.jaad.Profile;
-import net.sourceforge.jaad.SampleBuffer;
-import net.sourceforge.jaad.impl.filterbank.FilterBank;
-import net.sourceforge.jaad.impl.noise.PNS;
-import net.sourceforge.jaad.impl.prediction.LTPrediction;
-import net.sourceforge.jaad.impl.sbr.SBR;
-import net.sourceforge.jaad.impl.stereo.IS;
-import net.sourceforge.jaad.impl.stereo.MS;
+import net.sourceforge.jaad.aac.AACException;
+import net.sourceforge.jaad.aac.ChannelConfiguration;
+import net.sourceforge.jaad.aac.DecoderConfig;
+import net.sourceforge.jaad.aac.Profile;
+import net.sourceforge.jaad.aac.SampleBuffer;
+import net.sourceforge.jaad.aac.SampleFrequency;
+import net.sourceforge.jaad.aac.filterbank.FilterBank;
+import net.sourceforge.jaad.aac.noise.PNS;
+import net.sourceforge.jaad.aac.prediction.LTPrediction;
+import net.sourceforge.jaad.aac.sbr.SBR;
+import net.sourceforge.jaad.aac.stereo.IS;
+import net.sourceforge.jaad.aac.stereo.MS;
 import java.util.logging.Level;
 
 public class SyntacticElements implements Constants {

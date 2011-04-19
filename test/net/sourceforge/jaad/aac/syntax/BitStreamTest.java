@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.impl;
+package net.sourceforge.jaad.aac.syntax;
 
-import net.sourceforge.jaad.AACException;
+import net.sourceforge.jaad.aac.AACException;
+import net.sourceforge.jaad.aac.syntax.BitStream;
 import java.util.Random;
 import org.junit.BeforeClass;
 import org.junit.Test;

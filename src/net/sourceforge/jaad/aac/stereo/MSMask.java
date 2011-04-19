@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.impl.stereo;
+package net.sourceforge.jaad.aac.stereo;
 
-import net.sourceforge.jaad.AACException;
+import net.sourceforge.jaad.aac.AACException;
 
 /**
  * The MSMask indicates, if MS is applied to a specific ICStream.

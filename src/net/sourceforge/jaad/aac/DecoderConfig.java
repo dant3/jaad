@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad;
+package net.sourceforge.jaad.aac;
 
-import net.sourceforge.jaad.impl.BitStream;
-import net.sourceforge.jaad.impl.Constants;
-import net.sourceforge.jaad.impl.InputBitStream;
-import net.sourceforge.jaad.impl.PCE;
-import net.sourceforge.jaad.impl.transport.ADIFHeader;
-import net.sourceforge.jaad.impl.transport.ADTSFrame;
+import net.sourceforge.jaad.aac.syntax.BitStream;
+import net.sourceforge.jaad.aac.syntax.Constants;
+import net.sourceforge.jaad.aac.syntax.InputBitStream;
+import net.sourceforge.jaad.aac.syntax.PCE;
+import net.sourceforge.jaad.aac.transport.ADIFHeader;
+import net.sourceforge.jaad.aac.transport.ADTSFrame;
 import java.io.InputStream;
 
 /**

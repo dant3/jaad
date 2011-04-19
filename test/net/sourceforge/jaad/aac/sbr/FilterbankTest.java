@@ -1,6 +1,6 @@
-package net.sourceforge.jaad.impl.sbr;
+package net.sourceforge.jaad.aac.sbr;
 
-import net.sourceforge.jaad.impl.TestUtils;
+import net.sourceforge.jaad.aac.syntax.TestUtils;
 import org.junit.Test;
 
 public class FilterbankTest implements FilterbankTables {

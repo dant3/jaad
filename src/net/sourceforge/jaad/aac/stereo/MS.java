@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.impl.stereo;
+package net.sourceforge.jaad.aac.stereo;
 
-import net.sourceforge.jaad.impl.CPE;
-import net.sourceforge.jaad.impl.Constants;
-import net.sourceforge.jaad.impl.ICSInfo;
-import net.sourceforge.jaad.impl.ICStream;
-import net.sourceforge.jaad.impl.SectionData;
+import net.sourceforge.jaad.aac.syntax.CPE;
+import net.sourceforge.jaad.aac.syntax.Constants;
+import net.sourceforge.jaad.aac.syntax.ICSInfo;
+import net.sourceforge.jaad.aac.syntax.ICStream;
+import net.sourceforge.jaad.aac.syntax.SectionData;
 
 /**
  * Mid/side stereo

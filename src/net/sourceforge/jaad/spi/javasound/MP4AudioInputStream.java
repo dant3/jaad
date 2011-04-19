@@ -16,16 +16,16 @@
  */
 package net.sourceforge.jaad.spi.javasound;
 
-import net.sourceforge.jaad.Decoder;
-import net.sourceforge.jaad.SampleBuffer;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.sound.sampled.AudioFormat;
+import net.sourceforge.jaad.aac.Decoder;
+import net.sourceforge.jaad.aac.SampleBuffer;
 import net.sourceforge.jaad.mp4.MP4Container;
 import net.sourceforge.jaad.mp4.api.AudioTrack;
 import net.sourceforge.jaad.mp4.api.Frame;
 import net.sourceforge.jaad.mp4.api.Movie;
 import net.sourceforge.jaad.mp4.api.Type;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.sound.sampled.AudioFormat;
 
 class MP4AudioInputStream extends AsynchronousAudioInputStream {
 

@@ -16,9 +16,9 @@
  */
 package net.sourceforge.jaad.spi.javasound;
 
-import net.sourceforge.jaad.impl.BitStream;
-import net.sourceforge.jaad.impl.transport.ADIFHeader;
-import net.sourceforge.jaad.impl.transport.ADTSFrame;
+import net.sourceforge.jaad.aac.syntax.BitStream;
+import net.sourceforge.jaad.aac.transport.ADIFHeader;
+import net.sourceforge.jaad.aac.transport.ADTSFrame;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;

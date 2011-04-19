@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If notf, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.impl.filterbank;
+package net.sourceforge.jaad.aac.filterbank;
 
 interface SineWindows {
 

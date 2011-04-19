@@ -16,10 +16,9 @@
  */
 package net.sourceforge.jaad.spi.javasound;
 
-import net.sourceforge.jaad.AACException;
-import net.sourceforge.jaad.Decoder;
-import net.sourceforge.jaad.DecoderConfig;
-import net.sourceforge.jaad.SampleBuffer;
+import net.sourceforge.jaad.aac.AACException;
+import net.sourceforge.jaad.aac.Decoder;
+import net.sourceforge.jaad.aac.SampleBuffer;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.sound.sampled.AudioFormat;

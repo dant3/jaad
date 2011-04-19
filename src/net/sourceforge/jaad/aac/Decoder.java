@@ -14,19 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad;
+package net.sourceforge.jaad.aac;
 
 import java.io.InputStream;
-import net.sourceforge.jaad.impl.BitStream;
-import net.sourceforge.jaad.impl.Constants;
-import net.sourceforge.jaad.impl.PCE;
-import net.sourceforge.jaad.impl.SyntacticElements;
-import net.sourceforge.jaad.impl.filterbank.FilterBank;
-import net.sourceforge.jaad.impl.transport.ADIFHeader;
-import net.sourceforge.jaad.impl.transport.ADTSFrame;
+import net.sourceforge.jaad.aac.syntax.BitStream;
+import net.sourceforge.jaad.aac.syntax.Constants;
+import net.sourceforge.jaad.aac.syntax.PCE;
+import net.sourceforge.jaad.aac.syntax.SyntacticElements;
+import net.sourceforge.jaad.aac.filterbank.FilterBank;
+import net.sourceforge.jaad.aac.transport.ADIFHeader;
+import net.sourceforge.jaad.aac.transport.ADTSFrame;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
-import net.sourceforge.jaad.impl.InputBitStream;
+import net.sourceforge.jaad.aac.syntax.InputBitStream;
 
 /**
  * Main AAC decoder class

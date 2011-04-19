@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.impl.gain;
+package net.sourceforge.jaad.aac.gain;
 
-import net.sourceforge.jaad.AACException;
-import net.sourceforge.jaad.impl.BitStream;
-import net.sourceforge.jaad.impl.ICSInfo.WindowSequence;
+import net.sourceforge.jaad.aac.AACException;
+import net.sourceforge.jaad.aac.syntax.BitStream;
+import net.sourceforge.jaad.aac.syntax.ICSInfo.WindowSequence;
 import java.util.Arrays;
 
 public class GainControl implements GCConstants {

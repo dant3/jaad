@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.SourceDataLine;
+import net.sourceforge.jaad.aac.Decoder;
+import net.sourceforge.jaad.aac.SampleBuffer;
 import net.sourceforge.jaad.mp4.boxes.Box;
 
 /**

@@ -20,6 +20,8 @@ import net.sourceforge.jaad.util.wav.WaveFileWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import net.sourceforge.jaad.aac.Decoder;
+import net.sourceforge.jaad.aac.SampleBuffer;
 import net.sourceforge.jaad.mp4.MP4Container;
 import net.sourceforge.jaad.mp4.api.AudioTrack;
 import net.sourceforge.jaad.mp4.api.Frame;

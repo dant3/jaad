@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.impl.huffman;
+package net.sourceforge.jaad.aac.huffman;
 
-import net.sourceforge.jaad.AACException;
-import net.sourceforge.jaad.impl.BitStream;
-import net.sourceforge.jaad.impl.error.BitsBuffer;
+import net.sourceforge.jaad.aac.AACException;
+import net.sourceforge.jaad.aac.error.BitsBuffer;
+import net.sourceforge.jaad.aac.syntax.BitStream;
 
 public final class Huffman implements Codebooks, HCB_SF {
 
