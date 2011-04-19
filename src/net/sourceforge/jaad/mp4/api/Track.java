@@ -121,6 +121,7 @@ public abstract class Track {
 
 		final DecodingTimeToSampleBox stts = (DecodingTimeToSampleBox) stbl.getChild(BoxTypes.DECODING_TIME_TO_SAMPLE_BOX);
 		final long[] sampleCounts = stts.getSampleCounts();
+		if(getType()==Type.VIDEO) System.out.println("samples: "+sampleSizes.length);
 		final long[] sampleDeltas = stts.getSampleDeltas();
 
 		//decode sampleDurations
@@ -151,12 +152,12 @@ public abstract class Track {
 			else lastChunk = chunkOffsets.length;
 
 			//iterate over all chunks in this run
-			for(j = firstChunk; j<=lastChunk-1; j++) {
+			for(j = firstChunk; j<=lastChunk; j++) {
 				pos = chunkOffsets[j-1];
 				//iterate over all samples in this chunk
 				for(s = 0; s<entry.getSamplesPerChunk(); s++) {
 					//create frame for sample
-					timeStamp = (sampleDurations[j]*current)/timeScale;
+					timeStamp = (sampleDurations[j-1]*current)/timeScale;
 					size = sampleSizes[current];
 					frames.add(new Frame(getType(), pos, size, timeStamp));
 
@@ -193,7 +194,7 @@ public abstract class Track {
 	public abstract Type getType();
 
 	public abstract Codec getCodec();
-	
+
 	//tkhd
 	/**
 	 * Returns true if the track is enabled. A disabled track is treated as if

@@ -92,7 +92,7 @@ public class MP4BoxTypes {
 		{"ALBUM_ARTIST_SORT_BOX", "soaa ", "BoxImpl", "Album Artist Sort Box"},
 		{"ALBUM_NAME_BOX", "©alb", "BoxImpl", "Album Name Box"},
 		{"ALBUM_SORT_BOX", "soal", "BoxImpl", "Album Sort Box"},
-		{"ARTIST_NAME_BOX", "©ART", "BoxImpl", "Artist Name BOx"},
+		{"ARTIST_NAME_BOX", "©ART", "BoxImpl", "Artist Name Box"},
 		{"ARTIST_SORT_BOX", "soar", "BoxImpl", "Artist Sort Box"},
 		{"CATEGORY_BOX", "catg", "BoxImpl", "Category Box"},
 		{"COMMENTS_BOX", "©cmt", "BoxImpl", "Comments Box"},

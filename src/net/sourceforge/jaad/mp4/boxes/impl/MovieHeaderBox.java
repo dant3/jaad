@@ -72,7 +72,7 @@ public class MovieHeaderBox extends FullBox {
 
 		nextTrackID = in.readBytes(4);
 
-		left = 80;
+		left -= 80;
 	}
 
 	/**

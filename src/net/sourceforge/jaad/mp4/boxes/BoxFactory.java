@@ -204,7 +204,7 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(ALBUM_ARTIST_SORT_BOX, new String[]{"Album Artist Sort Box"});
 		PARAMETER.put(ALBUM_NAME_BOX, new String[]{"Album Name Box"});
 		PARAMETER.put(ALBUM_SORT_BOX, new String[]{"Album Sort Box"});
-		PARAMETER.put(ARTIST_NAME_BOX, new String[]{"Artist Name BOx"});
+		PARAMETER.put(ARTIST_NAME_BOX, new String[]{"Artist Name Box"});
 		PARAMETER.put(ARTIST_SORT_BOX, new String[]{"Artist Sort Box"});
 		PARAMETER.put(CATEGORY_BOX, new String[]{"Category Box"});
 		PARAMETER.put(COMMENTS_BOX, new String[]{"Comments Box"});
