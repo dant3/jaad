@@ -16,7 +16,6 @@
  */
 package net.sourceforge.jaad.aac;
 
-import java.io.InputStream;
 import net.sourceforge.jaad.aac.syntax.BitStream;
 import net.sourceforge.jaad.aac.syntax.Constants;
 import net.sourceforge.jaad.aac.syntax.PCE;
@@ -25,8 +24,8 @@ import net.sourceforge.jaad.aac.filterbank.FilterBank;
 import net.sourceforge.jaad.aac.transport.ADIFHeader;
 import net.sourceforge.jaad.aac.transport.ADTSFrame;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
-import net.sourceforge.jaad.aac.syntax.InputBitStream;
 
 /**
  * Main AAC decoder class
@@ -35,9 +34,13 @@ import net.sourceforge.jaad.aac.syntax.InputBitStream;
 public class Decoder implements Constants {
 
 	static {
-		LOGGER.setLevel(Level.CONFIG);
+		for(Handler h : LOGGER.getHandlers()) {
+			LOGGER.removeHandler(h);
+		}
+		LOGGER.setLevel(Level.ALL);
+
 		final ConsoleHandler h = new ConsoleHandler();
-		h.setLevel(Level.FINE);
+		h.setLevel(Level.FINEST);
 		LOGGER.addHandler(h);
 	}
 	private final DecoderConfig config;
@@ -55,32 +58,6 @@ public class Decoder implements Constants {
 	 */
 	public static boolean canDecode(Profile profile) {
 		return profile.isDecodingSupported();
-	}
-
-	/**
-	 * Initializes the decoder with an InputStream to read from. This
-	 * constructor can only be used with a stream containing an ADTS or ADIF
-	 * header. This constructor may skip up to the maximum framelength (6144
-	 * bytes) to find the next transport header in the stream.
-	 * 
-	 * After this the <code>decodeFrame(SampleBuffer)</code> method can be used
-	 * to decode the frames.
-	 * 
-	 * @param in an InputStream to read from
-	 * @throws AACException if the specified profile is not supported
-	 */
-	public Decoder(InputStream in) throws AACException {
-		config = DecoderConfig.parseTransportHeader(in);
-		if(config==null) throw new IllegalArgumentException("no transport header could be found in the stream");
-
-		if(!canDecode(config.getProfile())) throw new AACException("unsupported profile: "+config.getProfile().getDescription());
-
-		syntacticElements = new SyntacticElements(config);
-		filterBank = new FilterBank(config.isSmallFrameUsed(), config.getChannelConfiguration().getChannelCount());
-
-		this.in = new InputBitStream(in);
-
-		printLog();
 	}
 
 	/**
@@ -125,24 +102,12 @@ public class Decoder implements Constants {
 	 */
 	public void decodeFrame(byte[] frame, SampleBuffer buffer) throws AACException {
 		if(frame!=null) in.setData(frame);
-		decodeFrame(buffer);
-	}
-
-	/**
-	 * Decodes one frame of AAC data in stream mode and returns the raw PCM
-	 * data.
-	 * @param buffer a buffer to hold the decoded PCM data
-	 * @throws AACException if decoding fails
-	 * @return true if a frame could be decoded, false if the stream ended
-	 */
-	public boolean decodeFrame(SampleBuffer buffer) throws AACException {
 		try {
 			decode(buffer);
-			return true;
 		}
 		catch(AACException e) {
-			if(e.isEndOfStream()) return false;
-			else throw e;
+			//TODO: some MP4 frames seem to be not long enough, EOFException in Huffman!
+			if(!e.isEndOfStream()) throw e;
 		}
 	}
 

@@ -16,16 +16,21 @@
  */
 package net.sourceforge.jaad;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.SourceDataLine;
 import net.sourceforge.jaad.aac.Decoder;
 import net.sourceforge.jaad.aac.SampleBuffer;
+import net.sourceforge.jaad.adts.ADTSDemultiplexer;
 
 /**
- * Command line example, that can decode an AAC file and play it.
+ * Command line example, that can decode an AAC stream from an Shoutcast/Icecast
+ * server.
+ * 
  * @author in-somnia
  */
 public class Radio {
@@ -38,6 +43,7 @@ public class Radio {
 			else decode(args[0]);
 		}
 		catch(Exception e) {
+			e.printStackTrace();
 			System.err.println("error while decoding: "+e.toString());
 		}
 	}
@@ -55,11 +61,22 @@ public class Radio {
 		try {
 			final URL url = new URL(arg);
 			final InputStream in = url.openStream();
-			final Decoder dec = new Decoder(in);
-			while(true) {
-				if(!dec.decodeFrame(buf)) break;
+			//skip icy header
+			final BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String x;
+			do {
+				x = br.readLine();
+			}
+			while(x!=null&&!x.trim().equals(""));
 
-				final AudioFormat aufmt = new AudioFormat(buf.getSampleRate(), buf.getBitsPerSample(), buf.getChannels(), true, true);
+			final ADTSDemultiplexer adts = new ADTSDemultiplexer(in);
+			final AudioFormat aufmt = new AudioFormat(adts.getSampleFrequency(), 16, adts.getChannelCount(), true, true);
+			final Decoder dec = new Decoder(adts.getDecoderSpecificInfo());
+			
+			while(true) {
+				b = adts.readNextFrame();
+				dec.decodeFrame(b, buf);
+
 				if(line!=null&&!line.getFormat().matches(aufmt)) {
 					//format has changed (e.g. SBR has started)
 					line.stop();

@@ -155,7 +155,7 @@ public class SyntacticElements implements Constants {
 		}
 		in.byteAlign();
 
-		bitsRead =  in.getPosition()-start;
+		bitsRead = in.getPosition()-start;
 	}
 
 	private Element decodeSCE_LFE(BitStream in) throws AACException {
@@ -220,7 +220,7 @@ public class SyntacticElements implements Constants {
 		Element e;
 		SCE_LFE scelfe;
 		CPE cpe;
-		for(int i = 0; channel<chs; i++) {
+		for(int i = 0; i<elements.length&&channel<chs; i++) {
 			e = elements[i];
 			if(e==null) continue;
 			if(e instanceof SCE_LFE) {

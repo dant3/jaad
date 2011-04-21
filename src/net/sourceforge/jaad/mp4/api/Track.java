@@ -268,12 +268,11 @@ public abstract class Track {
 
 	//info structures
 	/**
-	 * Returns the <code>DecoderSpecificInfoDescriptor</code>, if present.
-	 * It contains configuration data for the decoder.
-	 * If the decoder specific info is not present, the track contains a
-	 * <code>CodecSpecificStructure</code>.
+	 * Returns the decoder specific info, if present. It contains configuration
+	 * data for the decoder. If the decoder specific info is not present, the
+	 * track contains a <code>DecoderInfo</code>.
 	 *
-	 * @see #getCodecSpecificStructure()
+	 * @see #getDecoderInfo() 
 	 * @return the decoder specific info
 	 */
 	public byte[] getDecoderSpecificInfo() {
@@ -281,10 +280,9 @@ public abstract class Track {
 	}
 
 	/**
-	 * Returns the <code>CodecSpecificStructure</code>, if present. It contains
-	 * configuration information for the decoder.
-	 * If the structure is not present, the track contains a
-	 * <code>DecoderSpecificInfoDescriptor</code>.
+	 * Returns the <code>DecoderInfo</code>, if present. It contains 
+	 * configuration information for the decoder. If the structure is not
+	 * present, the track contains a decoder specific info.
 	 *
 	 * @see #getDecoderSpecificInfo()
 	 * @return the codec specific structure

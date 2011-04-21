@@ -48,7 +48,7 @@ import net.sourceforge.jaad.mp4.boxes.impl.ProgressiveDownloadInformationBox;
  * version). Optionally, the following data may be present:
  * <ul>
  * <li>progressive download informations: pairs of download rate and playback
- * delay, see {@link #<getDownloadInformationPairs()> [getDownloadInformationPairs()]}</li>
+ * delay, see {@link #getDownloadInformationPairs() getDownloadInformationPairs()}</li>
  * <li>a <code>Movie</code></li>
  * </ul>
  *

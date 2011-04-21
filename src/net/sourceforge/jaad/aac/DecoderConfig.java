@@ -18,11 +18,7 @@ package net.sourceforge.jaad.aac;
 
 import net.sourceforge.jaad.aac.syntax.BitStream;
 import net.sourceforge.jaad.aac.syntax.Constants;
-import net.sourceforge.jaad.aac.syntax.InputBitStream;
 import net.sourceforge.jaad.aac.syntax.PCE;
-import net.sourceforge.jaad.aac.transport.ADIFHeader;
-import net.sourceforge.jaad.aac.transport.ADTSFrame;
-import java.io.InputStream;
 
 /**
  * DecoderConfig that must be passed to the <code>Decoder</code> constructor.
@@ -141,8 +137,8 @@ public class DecoderConfig implements Constants {
 	public boolean isSpectralDataResilienceUsed() {
 		return spectralDataResilience;
 	}
-	/* ======== static builder ========= */
 
+	/* ======== static builder ========= */
 	/**
 	 * Parses the input arrays as a DecoderSpecificInfo, as used in MP4
 	 * containers.
@@ -186,19 +182,11 @@ public class DecoderConfig implements Constants {
 				case ER_AAC_LD:
 					//ga-specific info:
 					config.frameLengthFlag = in.readBool();
-					if(config.frameLengthFlag) throw new AACException("config uses 960-sample frames, not yet supported");
+					if(config.frameLengthFlag) throw new AACException("config uses 960-sample frames, not yet supported"); //TODO: are 960-frames working yet?
 					config.dependsOnCoreCoder = in.readBool();
 					if(config.dependsOnCoreCoder) config.coreCoderDelay = in.readBits(14);
 					else config.coreCoderDelay = 0;
 					config.extensionFlag = in.readBool();
-
-					if(config.channelConfiguration==ChannelConfiguration.CHANNEL_CONFIG_NONE) {
-						PCE pce = new PCE();
-						pce.decode(in);
-						config.profile = pce.getProfile();
-						config.sampleFrequency = pce.getSampleFrequency();
-						config.channelConfiguration = ChannelConfiguration.forInt(pce.getChannelCount());
-					}
 
 					if(config.extensionFlag) {
 						if(config.profile.isErrorResilientProfile()) {
@@ -208,6 +196,16 @@ public class DecoderConfig implements Constants {
 						}
 						//extensionFlag3
 						in.skipBit();
+					}
+
+					if(config.channelConfiguration==ChannelConfiguration.CHANNEL_CONFIG_NONE) {
+						//TODO: is this working correct? -> ISO 14496-3 part 1: 1.A.4.3
+						in.skipBits(3); //PCE
+						PCE pce = new PCE();
+						pce.decode(in);
+						config.profile = pce.getProfile();
+						config.sampleFrequency = pce.getSampleFrequency();
+						config.channelConfiguration = ChannelConfiguration.forInt(pce.getChannelCount());
 					}
 					break;
 				default:
@@ -226,42 +224,5 @@ public class DecoderConfig implements Constants {
 			i = 32+in.readBits(6);
 		}
 		return Profile.forInt(i);
-	}
-
-	/**
-	 * Reads and parses a transport header from the InputStream. The method can
-	 * detect and parse ADTS and ADIF headers.
-	 * The maximum number of bytes to skip can be passed as parameter. This is
-	 * useful since some streams (like internet radios) may start within a
-	 * frame. The method then skippes until it finds the next header.
-	 * @param input the InputStream to read from
-	 * @param maxSkip the maximum number of bytes to skip while searching for a header.
-	 * @return a DecoderConfig or null if no header was found
-	 */
-	static DecoderConfig parseTransportHeader(InputStream input) throws AACException {
-		final InputBitStream in = new InputBitStream(input);
-		final DecoderConfig config = new DecoderConfig();
-		int left = MAXIMUM_FRAME_SIZE;
-		do {
-			if(ADIFHeader.isPresent(in)) {
-				final ADIFHeader adif = ADIFHeader.readHeader(in);
-				final PCE pce = adif.getFirstPCE();
-				config.profile = pce.getProfile();
-				config.sampleFrequency = pce.getSampleFrequency();
-				config.channelConfiguration = ChannelConfiguration.forInt(pce.getChannelCount());
-				return config;
-			}
-			else if(ADTSFrame.isPresent(in)) {
-				final ADTSFrame adts = ADTSFrame.readFrame(in);
-				config.profile = adts.getProfile();
-				config.sampleFrequency = adts.getSampleFrequency();
-				config.channelConfiguration = adts.getChannelConfiguration();
-				return config;
-			}
-			else if(left>0) in.skipBits(8);
-			left--;
-		}
-		while(left>=0);
-		return null;
 	}
 }

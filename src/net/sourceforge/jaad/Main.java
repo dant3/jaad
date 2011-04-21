@@ -18,6 +18,7 @@ package net.sourceforge.jaad;
 
 import net.sourceforge.jaad.aac.Decoder;
 import net.sourceforge.jaad.aac.SampleBuffer;
+import net.sourceforge.jaad.adts.ADTSDemultiplexer;
 import net.sourceforge.jaad.mp4.MP4Container;
 import net.sourceforge.jaad.mp4.api.AudioTrack;
 import net.sourceforge.jaad.mp4.api.Frame;
@@ -86,11 +87,14 @@ public class Main {
 	private static void decodeAAC(String in, String out) throws IOException {
 		WaveFileWriter wav = null;
 		try {
-			final Decoder dec = new Decoder(new FileInputStream(in));
+			final ADTSDemultiplexer adts = new ADTSDemultiplexer(new FileInputStream(in));
+			final Decoder dec = new Decoder(adts.getDecoderSpecificInfo());
 
 			final SampleBuffer buf = new SampleBuffer();
+			byte[] b;
 			while(true) {
-				if(!dec.decodeFrame(buf)) break;
+				b = adts.readNextFrame();
+				dec.decodeFrame(b, buf);
 
 				if(wav==null) wav = new WaveFileWriter(new File(out), buf.getSampleRate(), buf.getChannels(), buf.getBitsPerSample());
 				wav.write(buf.getData());

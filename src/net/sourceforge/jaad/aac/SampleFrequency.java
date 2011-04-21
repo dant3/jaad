@@ -41,7 +41,7 @@ public enum SampleFrequency {
 	 * is not between 0 and 11 inclusive, SAMPLE_FREQUENCY_NONE is returned.
 	 * @return a sample frequency with the given index
 	 */
-	public static SampleFrequency forInt(int i) throws AACException {
+	public static SampleFrequency forInt(int i) {
 		SampleFrequency freq;
 		switch(i) {
 			case 0:
@@ -81,7 +81,7 @@ public enum SampleFrequency {
 				freq = SAMPLE_FREQUENCY_8000;
 				break;
 			default:
-				throw new AACException("invalid sample frequency index: "+i);
+				freq = SAMPLE_FREQUENCY_NONE;
 		}
 		return freq;
 	}

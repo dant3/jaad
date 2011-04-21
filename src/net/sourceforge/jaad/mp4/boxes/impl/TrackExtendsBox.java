@@ -160,7 +160,7 @@ public class TrackExtendsBox extends FullBox {
 
 	/**
 	 * The default degradation priority for the samples.
-	 * @return
+	 * @return the default degradation priority
 	 */
 	public int getSampleDegradationPriority() {
 		return (int) (defaultSampleFlags&0xFFFF);
