@@ -208,7 +208,7 @@ class ID3Frame {
 	public Locale getLocale() {
 		final String s = new String(data).toLowerCase();
 		final Locale l;
-		if(s.equals(UNKNOWN_LANGUAGE)) l = null; //TODO: return something else than null
+		if(s.equals(UNKNOWN_LANGUAGE)) l = null;
 		else l = new Locale(s);
 		return l;
 	}

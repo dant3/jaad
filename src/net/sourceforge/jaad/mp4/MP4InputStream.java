@@ -19,6 +19,7 @@ package net.sourceforge.jaad.mp4;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 
@@ -30,12 +31,12 @@ public class MP4InputStream {
 	public static final String UTF8 = "UTF-8";
 	public static final String UTF16 = "UTF-16";
 	private static final int BYTE_ORDER_MASK = 0xFEFF;
-	private final InputStream in;
+	private final PushbackInputStream in;
 	private final RandomAccessFile fin;
 	private long offset; //only used with InputStream
 
 	MP4InputStream(InputStream in) {
-		this.in = in;
+		this.in = new PushbackInputStream(in);
 		fin = null;
 		offset = 0;
 	}
@@ -179,6 +180,18 @@ public class MP4InputStream {
 
 	public boolean hasRandomAccess() {
 		return fin!=null;
+	}
+
+	public boolean hasLeft() throws IOException {
+		final boolean b;
+		if(fin!=null) b = fin.getFilePointer()<(fin.length()-1);
+		else {
+			//TODO: pushback is needed to peek next -> do this any other way?
+			final int i = in.read();
+			b = (i==-1);
+			if(b) in.unread(i);
+		}
+		return b;
 	}
 
 	void close() throws IOException {

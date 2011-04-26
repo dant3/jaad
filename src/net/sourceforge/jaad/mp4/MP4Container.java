@@ -16,13 +16,13 @@
  */
 package net.sourceforge.jaad.mp4;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.sourceforge.jaad.mp4.api.Brand;
 import net.sourceforge.jaad.mp4.api.Movie;
 import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxFactory;
@@ -61,6 +61,8 @@ public class MP4Container {
 
 	private final MP4InputStream in;
 	private final List<Box> boxes;
+	private Brand major, minor;
+	private Brand[] compatible;
 	private FileTypeBox ftyp;
 	private ProgressiveDownloadInformationBox pdin;
 	private Box moov;
@@ -85,47 +87,48 @@ public class MP4Container {
 		Box box = null;
 		long type;
 		boolean moovFound = false;
-		//TODO: while(true)???
-		try {
-			while(true) {
-				box = BoxFactory.parseBox(null, in);
-				boxes.add(box);
+		while(in.hasLeft()) {
+			box = BoxFactory.parseBox(null, in);
+			if(boxes.isEmpty()&&box.getType()!=BoxTypes.FILE_TYPE_BOX) throw new MP4Exception("no MP4 signature found");
+			boxes.add(box);
 
-				type = box.getType();
-				if(type==BoxTypes.MOVIE_BOX) {
-					if(movie==null) moov = box;
-					moovFound = true;
-				}
-				else if(type==BoxTypes.FILE_TYPE_BOX) {
-					if(ftyp==null) ftyp = (FileTypeBox) box;
-				}
-				else if(type==BoxTypes.PROGRESSIVE_DOWNLOAD_INFORMATION_BOX) {
-					if(pdin==null) pdin = (ProgressiveDownloadInformationBox) box;
-				}
-				else if(type==BoxTypes.MEDIA_DATA_BOX) {
-					if(moovFound) break;
-					else if(!in.hasRandomAccess()) throw new MP4Exception("movie box at end of file, need random access");
-				}
+			type = box.getType();
+			if(type==BoxTypes.FILE_TYPE_BOX) {
+				if(ftyp==null) ftyp = (FileTypeBox) box;
+			}
+			else if(type==BoxTypes.MOVIE_BOX) {
+				if(movie==null) moov = box;
+				moovFound = true;
+			}
+			else if(type==BoxTypes.PROGRESSIVE_DOWNLOAD_INFORMATION_BOX) {
+				if(pdin==null) pdin = (ProgressiveDownloadInformationBox) box;
+			}
+			else if(type==BoxTypes.MEDIA_DATA_BOX) {
+				if(moovFound) break;
+				else if(!in.hasRandomAccess()) throw new MP4Exception("movie box at end of file, need random access");
 			}
 		}
-		catch(EOFException e) {
-			/*TODO: bad solution! instead of catching the exception, the loop
-			 * should test if there is still something left in the stream
-			 */
-			if(!in.hasRandomAccess()) throw e;
+	}
+
+	public Brand getMajorBrand() {
+		if(major==null) major = Brand.forID(ftyp.getMajorBrand());
+		return major;
+	}
+
+	public Brand getMinorBrand() {
+		if(minor==null) minor = Brand.forID(ftyp.getMajorBrand());
+		return minor;
+	}
+
+	public Brand[] getCompatibleBrands() {
+		if(compatible==null) {
+			final String[] s = ftyp.getCompatibleBrands();
+			compatible = new Brand[s.length];
+			for(int i = 0; i<s.length; i++) {
+				compatible[i] = Brand.forID(s[i]);
+			}
 		}
-	}
-
-	public String getMajorBrand() {
-		return ftyp.getMajorBrand();
-	}
-
-	public String getMinorBrand() {
-		return ftyp.getMajorBrand();
-	}
-
-	public String[] getCompatibleBrands() {
-		return ftyp.getCompatibleBrands();
+		return compatible;
 	}
 
 	//TODO: pdin, movie fragments??
