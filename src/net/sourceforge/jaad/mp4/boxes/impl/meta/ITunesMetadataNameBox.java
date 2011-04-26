@@ -39,6 +39,7 @@ public class ITunesMetadataNameBox extends FullBox {
 		super.decode(in);
 
 		metaName = in.readString((int) left);
+		left-=metaName.length();
 	}
 
 	public String getMetaName() {

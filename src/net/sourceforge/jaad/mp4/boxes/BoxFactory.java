@@ -79,6 +79,8 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(MOVIE_EXTENDS_HEADER_BOX, MovieExtendsHeaderBox.class);
 		BOX_CLASSES.put(MOVIE_FRAGMENT_BOX, BoxImpl.class);
 		BOX_CLASSES.put(MOVIE_FRAGMENT_HEADER_BOX, MovieFragmentHeaderBox.class);
+		BOX_CLASSES.put(MOVIE_FRAGMENT_RANDOM_ACCESS_BOX, BoxImpl.class);
+		BOX_CLASSES.put(MOVIE_FRAGMENT_RANDOM_ACCESS_OFFSET_BOX, MovieFragmentRandomAccessOffsetBox.class);
 		BOX_CLASSES.put(MOVIE_HEADER_BOX, MovieHeaderBox.class);
 		BOX_CLASSES.put(NERO_METADATA_TAGS_BOX, NeroMetadataTagsBox.class);
 		BOX_CLASSES.put(NULL_MEDIA_HEADER_BOX, FullBox.class);
@@ -105,6 +107,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(TRACK_EXTENDS_BOX, TrackExtendsBox.class);
 		BOX_CLASSES.put(TRACK_FRAGMENT_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TRACK_FRAGMENT_HEADER_BOX, TrackFragmentHeaderBox.class);
+		BOX_CLASSES.put(TRACK_FRAGMENT_RANDOM_ACCESS_BOX, TrackFragmentRandomAccessBox.class);
 		BOX_CLASSES.put(TRACK_FRAGMENT_RUN_BOX, TrackFragmentRunBox.class);
 		BOX_CLASSES.put(TRACK_HEADER_BOX, TrackHeaderBox.class);
 		BOX_CLASSES.put(TRACK_REFERENCE_BOX, TrackReferenceBox.class);
@@ -192,6 +195,7 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(MOVIE_BOX, new String[]{"Movie Box"});
 		PARAMETER.put(MOVIE_EXTENDS_BOX, new String[]{"Movie Extends Box"});
 		PARAMETER.put(MOVIE_FRAGMENT_BOX, new String[]{"Movie Fragment Box"});
+		PARAMETER.put(MOVIE_FRAGMENT_RANDOM_ACCESS_BOX, new String[]{"Movie Fragment Random Access Box"});
 		PARAMETER.put(NULL_MEDIA_HEADER_BOX, new String[]{"Null Media Header Box"});
 		PARAMETER.put(SAMPLE_TABLE_BOX, new String[]{"Sample Table Box"});
 		PARAMETER.put(SCHEME_INFORMATION_BOX, new String[]{"Scheme Information Box"});

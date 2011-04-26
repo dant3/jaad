@@ -276,8 +276,8 @@ public class MetaData {
 			else if(l==BoxTypes.ALBUM_NAME_BOX) put(Field.ALBUM, data.getText());
 			else if(l==BoxTypes.TRACK_NUMBER_BOX) {
 				byte[] b = data.getData();
-				put(Field.TRACK_NUMBER, new Integer(b[7]));
-				put(Field.TOTAL_TRACKS, new Integer(b[9]));
+				put(Field.TRACK_NUMBER, new Integer(b[3]));
+				put(Field.TOTAL_TRACKS, new Integer(b[5]));
 			}
 			else if(l==BoxTypes.DISK_NUMBER_BOX) put(Field.DISK_NUMBER, data.getInteger());
 			else if(l==BoxTypes.COMPOSER_NAME_BOX) put(Field.COMPOSER, data.getText());
@@ -285,18 +285,26 @@ public class MetaData {
 			else if(l==BoxTypes.TEMPO_BOX) put(Field.TEMPO, data.getInteger());
 			else if(l==BoxTypes.RELEASE_DATE_BOX) put(Field.RELEASE_DATE, data.getDate());
 			else if(l==BoxTypes.GENRE_BOX||l==BoxTypes.CUSTOM_GENRE_BOX) {
-				final String s;
+				String s = null;
 				if(data.getDataType()==ITunesMetadataBox.DataType.UTF8) s = data.getText();
-				else s = STANDARD_GENRES[data.getInteger()];
-				put(Field.GENRE, s);
+				else {
+					final int i = data.getInteger();
+					if(i>0&&i<STANDARD_GENRES.length) s = STANDARD_GENRES[data.getInteger()];
+				}
+				if(s!=null) put(Field.GENRE, s);
 			}
 			else if(l==BoxTypes.ENCODER_NAME_BOX) put(Field.ENCODER_NAME, data.getText());
 			else if(l==BoxTypes.ENCODER_TOOL_BOX) put(Field.ENCODER_TOOL, data.getText());
 			else if(l==BoxTypes.COPYRIGHT_BOX) put(Field.COPYRIGHT, data.getText());
 			else if(l==BoxTypes.COMPILATION_PART_BOX) put(Field.COMPILATION, data.getBoolean());
 			else if(l==BoxTypes.COVER_BOX) {
-				if(contents.containsKey(Field.COVER_ARTWORK)) get(Field.COVER_ARTWORK).add(new Artwork(Artwork.Type.forDataType(data.getDataType()), data.getData()));
-				else put(Field.COVER_ARTWORK, new ArrayList<Artwork>());
+				final Artwork aw = new Artwork(Artwork.Type.forDataType(data.getDataType()), data.getData());
+				if(contents.containsKey(Field.COVER_ARTWORK)) get(Field.COVER_ARTWORK).add(aw);
+				else {
+					final List<Artwork> list = new ArrayList<Artwork>();
+					list.add(aw);
+					put(Field.COVER_ARTWORK, list);
+				}
 			}
 			else if(l==BoxTypes.GROUPING_BOX) put(Field.GROUPING, data.getText());
 			else if(l==BoxTypes.LYRICS_BOX) put(Field.LYRICS, data.getText());

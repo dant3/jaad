@@ -7,12 +7,11 @@ MP4 boxes
 =========
 - mp3 also uses 'mp4a' (probably all kinds of MPEG audio) -> how to identify?
 - boxes to implement:
-	mfra, tfra, mfro, sinf, frma, imif, fiin, paen, fpar, fecr, segr, gitn, rash, fdp, 
+	sinf, frma, imif, fiin, paen, fpar, fecr, segr, gitn, rash, fdp, 
 	mpod, wide, chpl, colr, m4ds, btrt, avcp, avss, avll, sdep
 	alac (apple lossless), 
 	albm (album title & track number (user-data)),
 	auth (media author name (user-data)),
-	bpcc (bits per component),
 	buff (buffering information),
 	ccid (OMA DRM Content ID),
 	cdef (type and ordering of the components within the codestream),
@@ -21,7 +20,6 @@ MP4 boxes
 
 MP4 API
 =======
-- get coverart images from itunes meta
 - movie/track fragments & extends
 - implement rating
 - how to use sample grouping?

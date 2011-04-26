@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
@@ -89,6 +90,9 @@ public class ITunesMetadataBox extends FullBox {
 
 		dataType = DataType.forInt(flags);
 
+		in.skipBytes(4); //padding?
+		left -= 4;
+
 		data = new byte[(int) left];
 		in.readBytes(data);
 		left = 0;
@@ -99,11 +103,13 @@ public class ITunesMetadataBox extends FullBox {
 	}
 
 	/**
-	 * Returns the raw content, that can be present in different formats.
+	 * Returns an unmodifiable array with the raw content, that can be present
+	 * in different formats.
+	 * 
 	 * @return the raw metadata
 	 */
 	public byte[] getData() {
-		return data;
+		return Arrays.copyOf(data, data.length);
 	}
 
 	/**
@@ -112,7 +118,7 @@ public class ITunesMetadataBox extends FullBox {
 	 */
 	public String getText() {
 		//first four bytes are padding (zero)
-		return new String(data, 4, data.length-4, Charset.forName("UTF-8"));
+		return new String(data, 0, data.length, Charset.forName("UTF-8"));
 	}
 
 	/**
@@ -122,9 +128,9 @@ public class ITunesMetadataBox extends FullBox {
 	public long getNumber() {
 		//first four bytes are padding (zero)
 		long l = 0;
-		for(int i = 5; i<data.length; i++) {
+		for(int i = 0; i<data.length; i++) {
 			l <<= 8;
-			l |= data[i];
+			l |= (data[i]&0xFF);
 		}
 		return l;
 	}
