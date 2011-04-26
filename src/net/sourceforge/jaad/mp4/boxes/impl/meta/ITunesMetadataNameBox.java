@@ -28,12 +28,20 @@ import net.sourceforge.jaad.mp4.boxes.FullBox;
  */
 public class ITunesMetadataNameBox extends FullBox {
 
+	private String metaName;
+
 	public ITunesMetadataNameBox() {
 		super("iTunes Metadata Name Box");
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		//TODO
+		super.decode(in);
+
+		metaName = in.readString((int) left);
+	}
+
+	public String getMetaName() {
+		return metaName;
 	}
 }

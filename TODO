@@ -1,0 +1,32 @@
+AAC decoder
+===========
+- ADTS demultiplexer not working
+- some frames throw IOException (EOF) -> perhaps Huffman decoding not correct
+
+MP4 boxes
+=========
+- mp3 also uses 'mp4a' (probably all kinds of MPEG audio) -> how to identify?
+- boxes to implement:
+	mfra, tfra, mfro, sinf, frma, imif, fiin, paen, fpar, fecr, segr, gitn, rash, fdp, 
+	mpod, wide, chpl, colr, m4ds, btrt, avcp, avss, avll, sdep
+	alac (apple lossless), 
+	albm (album title & track number (user-data)),
+	auth (media author name (user-data)),
+	bpcc (bits per component),
+	buff (buffering information),
+	ccid (OMA DRM Content ID),
+	cdef (type and ordering of the components within the codestream),
+	clsf (Media classification (user-data)),
+- implement more codecs boxes: e.g. ac3
+
+MP4 API
+=======
+- get coverart images from itunes meta
+- movie/track fragments & extends
+- implement rating
+- how to use sample grouping?
+- how to use sync samples & shadow sync samples?
+- what is 'sample degradation priority'?
+- what is 'track selection'?
+- add itunes tags for 'account' and 'account type'
+- use more tags from ID3

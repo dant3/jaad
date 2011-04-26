@@ -59,73 +59,20 @@ public class ITunesMetadataBox extends FullBox {
 		UPC(/*String.class*/),
 		BMP(/*byte[].class*/),
 		UNDEFINED(/*byte[].class*/);
+		private static final DataType[] TYPES = {
+			IMPLICIT, UTF8, UTF16, null, null, null, HTML, XML, UUID, ISRC, MI3P, null,
+			GIF, JPEG, PNG, URL, DURATION, DATETIME, GENRE, null, null, INTEGER,
+			null, null, RIAA, UPC, null, BMP
+		};
 
 		private DataType() {
 		}
 
 		private static DataType forInt(int i) {
-			final DataType type;
-			switch(i) {
-				case 0:
-					type = IMPLICIT;
-					break;
-				case 1:
-					type = UTF8;
-					break;
-				case 2:
-					type = UTF16;
-					break;
-				case 6:
-					type = HTML;
-					break;
-				case 7:
-					type = XML;
-					break;
-				case 8:
-					type = UUID;
-					break;
-				case 9:
-					type = ISRC;
-					break;
-				case 10:
-					type = MI3P;
-					break;
-				case 12:
-					type = GIF;
-					break;
-				case 13:
-					type = JPEG;
-					break;
-				case 14:
-					type = PNG;
-					break;
-				case 15:
-					type = URL;
-					break;
-				case 16:
-					type = DURATION;
-					break;
-				case 17:
-					type = DATETIME;
-					break;
-				case 18:
-					type = GENRE;
-					break;
-				case 21:
-					type = INTEGER;
-					break;
-				case 24:
-					type = RIAA;
-					break;
-				case 25:
-					type = UPC;
-					break;
-				case 27:
-					type = BMP;
-					break;
-				default:
-					type = UNDEFINED;
-			}
+			DataType type = null;
+			if(i>=0&&i<TYPES.length) type = TYPES[i];
+
+			if(type==null) type = UNDEFINED;
 			return type;
 		}
 	}
