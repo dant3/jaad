@@ -14,29 +14,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.mp4.boxes.impl;
+package net.sourceforge.jaad.mp4.od;
 
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.FullBox;
-import net.sourceforge.jaad.mp4.od.ObjectDescriptor;
 
-public class ObjectDescriptorBox extends FullBox {
+public class ESDescriptor extends ObjectDescriptor {
 
-	private ObjectDescriptor objectDescriptor;
-
-	public ObjectDescriptorBox() {
-		super("Object Descriptor Box");
+	ESDescriptor(int type, int size) {
+		super(type, size);
 	}
 
-	@Override
-	public void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
-		objectDescriptor = ObjectDescriptor.createDescriptor(in);
-		left -= objectDescriptor.getBytesRead();
-	}
+	void decode(MP4InputStream in) throws IOException {
+		in.skipBytes(2);
+		final int flags = in.read();
+		final boolean streamDependenceFlag = (flags&(1<<7))!=0;
+		final boolean urlFlag = (flags&(1<<6))!=0;
+		final boolean ocrFlag = (flags&(1<<5))!=0;
+		bytesRead += 3;
+		if(streamDependenceFlag) {
+			in.skipBytes(2);
+			bytesRead += 2;
+		}
+		if(urlFlag) {
+			final int len = in.read();
+			in.skipBytes(len);
+			bytesRead += len+1;
+		}
+		if(ocrFlag) {
+			in.skipBytes(2);
+			bytesRead += 2;
+		}
 
-	public ObjectDescriptor getObjectDescriptor() {
-		return objectDescriptor;
+		readChildren(in);
 	}
 }

@@ -14,29 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.mp4.boxes.impl;
+package net.sourceforge.jaad.mp4.od;
 
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.FullBox;
-import net.sourceforge.jaad.mp4.od.ObjectDescriptor;
 
-public class ObjectDescriptorBox extends FullBox {
+public class UnknownDescriptor extends ObjectDescriptor {
 
-	private ObjectDescriptor objectDescriptor;
-
-	public ObjectDescriptorBox() {
-		super("Object Descriptor Box");
+	public UnknownDescriptor(int type, int size) {
+		super(type, size);
 	}
 
 	@Override
-	public void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
-		objectDescriptor = ObjectDescriptor.createDescriptor(in);
-		left -= objectDescriptor.getBytesRead();
-	}
-
-	public ObjectDescriptor getObjectDescriptor() {
-		return objectDescriptor;
+	void decode(MP4InputStream in) throws IOException {
 	}
 }

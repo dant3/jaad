@@ -19,7 +19,7 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
-import net.sourceforge.jaad.mp4.boxes.od.ObjectDescriptor;
+import net.sourceforge.jaad.mp4.od.ObjectDescriptor;
 
 public class IPMPControlBox extends FullBox {
 

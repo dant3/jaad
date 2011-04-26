@@ -23,7 +23,7 @@ import net.sourceforge.jaad.mp4.boxes.impl.SampleDescriptionBox;
 import net.sourceforge.jaad.mp4.boxes.impl.VideoMediaHeaderBox;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.VideoSampleEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
-import net.sourceforge.jaad.mp4.boxes.od.ESDBox;
+import net.sourceforge.jaad.mp4.od.ESDBox;
 
 public class VideoTrack extends Track {
 

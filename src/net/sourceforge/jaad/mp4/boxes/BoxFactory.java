@@ -16,18 +16,18 @@
  */
 package net.sourceforge.jaad.mp4.boxes;
 
-import net.sourceforge.jaad.mp4.boxes.od.ESDBox;
-import java.util.logging.Level;
-import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.impl.*;
 import net.sourceforge.jaad.mp4.boxes.impl.meta.*;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.*;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
+import net.sourceforge.jaad.mp4.od.ESDBox;
 
 /*TODO: subtracting from 'left' could be replaced:
  * skipping in factory -> calculate from inputstream offset

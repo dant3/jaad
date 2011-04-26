@@ -36,9 +36,9 @@ import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox.SampleToChunkEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.DecodingTimeToSampleBox;
 import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
-import net.sourceforge.jaad.mp4.boxes.od.DecoderSpecificInfoDescriptor;
-import net.sourceforge.jaad.mp4.boxes.od.ESDBox;
-import net.sourceforge.jaad.mp4.boxes.od.ObjectDescriptor;
+import net.sourceforge.jaad.mp4.od.DecoderSpecificInfoDescriptor;
+import net.sourceforge.jaad.mp4.od.ESDBox;
+import net.sourceforge.jaad.mp4.od.ObjectDescriptor;
 
 /**
  * This class represents a track in a movie.
@@ -183,7 +183,7 @@ public abstract class Track {
 			children2 = e.getChildren();
 			for(ObjectDescriptor e2 : children2) {
 				switch(e2.getType()) {
-					case ObjectDescriptor.TYPE_DECODER_SPECIFIC_INFO_DESCRIPTOR:
+					case ObjectDescriptor.TYPE_DECODER_SPECIFIC_INFO:
 						decoderSpecificInfo = (DecoderSpecificInfoDescriptor) e2;
 						break;
 				}
