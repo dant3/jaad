@@ -14,11 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.mp4.od;
+package net.sourceforge.jaad.mp4.boxes.impl;
 
-import net.sourceforge.jaad.mp4.boxes.FullBox;
-import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
+import net.sourceforge.jaad.mp4.MP4InputStream;
+import net.sourceforge.jaad.mp4.boxes.FullBox;
+import net.sourceforge.jaad.mp4.od.ESDescriptor;
+import net.sourceforge.jaad.mp4.od.ObjectDescriptor;
 
 /**
  * The entry sample descriptor (ESD) box is a container for entry descriptors.
@@ -29,7 +31,7 @@ import java.io.IOException;
  */
 public class ESDBox extends FullBox {
 
-	private ObjectDescriptor esd;
+	private ESDescriptor esd;
 
 	public ESDBox() {
 		super("ESD Box");
@@ -38,11 +40,12 @@ public class ESDBox extends FullBox {
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
-		esd = ObjectDescriptor.createDescriptor(in);
-		left -= esd.getBytesRead();
+		
+		esd = (ESDescriptor) ObjectDescriptor.createDescriptor(in);
+		left -= esd.getSize();
 	}
 
-	public ObjectDescriptor getEntryDescriptor() {
+	public ESDescriptor getEntryDescriptor() {
 		return esd;
 	}
 }

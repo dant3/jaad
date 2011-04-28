@@ -36,8 +36,9 @@ import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox.SampleToChunkEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.DecodingTimeToSampleBox;
 import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
-import net.sourceforge.jaad.mp4.od.DecoderSpecificInfoDescriptor;
-import net.sourceforge.jaad.mp4.od.ESDBox;
+import net.sourceforge.jaad.mp4.od.DecoderSpecificInfo;
+import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
+import net.sourceforge.jaad.mp4.od.Descriptor;
 import net.sourceforge.jaad.mp4.od.ObjectDescriptor;
 
 /**
@@ -63,7 +64,7 @@ public abstract class Track {
 	private URL location;
 	private int currentFrame;
 	//info structures
-	protected DecoderSpecificInfoDescriptor decoderSpecificInfo;
+	protected DecoderSpecificInfo decoderSpecificInfo;
 	protected DecoderInfo decoderInfo;
 
 	Track(Box trak, MP4InputStream in) {
@@ -175,16 +176,16 @@ public abstract class Track {
 
 	//TODO: implement other entry descriptors
 	protected void findDecoderSpecificInfo(ESDBox esds) {
-		final ObjectDescriptor ed = esds.getEntryDescriptor();
-		final List<ObjectDescriptor> children = ed.getChildren();
-		List<ObjectDescriptor> children2;
+		final Descriptor ed = esds.getEntryDescriptor();
+		final List<Descriptor> children = ed.getChildren();
+		List<Descriptor> children2;
 
-		for(ObjectDescriptor e : children) {
+		for(Descriptor e : children) {
 			children2 = e.getChildren();
-			for(ObjectDescriptor e2 : children2) {
+			for(Descriptor e2 : children2) {
 				switch(e2.getType()) {
-					case ObjectDescriptor.TYPE_DECODER_SPECIFIC_INFO:
-						decoderSpecificInfo = (DecoderSpecificInfoDescriptor) e2;
+					case Descriptor.TYPE_DECODER_SPECIFIC_INFO:
+						decoderSpecificInfo = (DecoderSpecificInfo) e2;
 						break;
 				}
 			}

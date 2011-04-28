@@ -27,7 +27,7 @@ import net.sourceforge.jaad.mp4.boxes.impl.*;
 import net.sourceforge.jaad.mp4.boxes.impl.meta.*;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.*;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
-import net.sourceforge.jaad.mp4.od.ESDBox;
+import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
 
 /*TODO: subtracting from 'left' could be replaced:
  * skipping in factory -> calculate from inputstream offset
@@ -267,6 +267,7 @@ public class BoxFactory implements BoxTypes {
 			left -= 16;
 		}
 
+		System.out.println(typeToString(type)+" ("+type+")");
 		final BoxImpl box = forType(type);
 		box.setParams(parent, size, type, offset, left);
 		box.decode(in);

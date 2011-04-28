@@ -23,7 +23,7 @@ import net.sourceforge.jaad.mp4.boxes.impl.SampleDescriptionBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SoundMediaHeaderBox;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.AudioSampleEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
-import net.sourceforge.jaad.mp4.od.ESDBox;
+import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
 
 public class AudioTrack extends Track {
 

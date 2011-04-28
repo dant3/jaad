@@ -19,21 +19,31 @@ package net.sourceforge.jaad.mp4.od;
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
-public class DecoderSpecificInfoDescriptor extends ObjectDescriptor {
+/**
+ * The <code>DecoderSpecificInfo</code> constitutes an opaque container with
+ * information for a specific media decoder. Depending on the required amout of
+ * data, two classes with a maximum of 255 and 2<sup>32</sup>-1 bytes of data
+ * are provided. The existence and semantics of the
+ * <code>DecoderSpecificInfo</code> depends on the stream type and object
+ * profile of the parent <code>DecoderConfigDescriptor</code>.
+ *
+ * @author in-somnia
+ */
+public class DecoderSpecificInfo extends Descriptor {
 
 	private byte[] data;
-
-	public DecoderSpecificInfoDescriptor(int type, int size) {
-		super(type, size);
-	}
 
 	@Override
 	void decode(MP4InputStream in) throws IOException {
 		data = new byte[size];
 		in.readBytes(data);
-		bytesRead += size;
 	}
 
+	/**
+	 * A byte array containing the decoder specific information.
+	 *
+	 * @return the decoder specific information
+	 */
 	public byte[] getData() {
 		return data;
 	}

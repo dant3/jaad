@@ -18,86 +18,71 @@ package net.sourceforge.jaad.mp4.od;
 
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-public abstract class ObjectDescriptor {
+/**
+ * The <code>ObjectDescriptor</code> consists of three different parts:
+ *
+ * The first part uniquely labels the <code>ObjectDescriptor</code> within its
+ * name scope by means of an ID. Media objects in the scene description use this
+ * ID to refer to their object descriptor. An optional URL String indicates that
+ * the actual object descriptor resides at a remote location.
+ *
+ * The second part is a set of optional descriptors that support the inclusion
+ * if future extensions as well as the transport of private data in a backward
+ * compatible way.
+ *
+ * The third part consists of a list of <code>ESDescriptors</code>, each
+ * providing parameters for a single elementary stream that relates to the media
+ * object as well as an optional set of object content information descriptors.
+ *
+ * @author in-somnia
+ */
+public class ObjectDescriptor extends Descriptor {
 
-	public static final int TYPE_OBJECT_DESCRIPTOR = 1;
-	public static final int TYPE_INITIAL_OBJECT_DESCRIPTOR = 2;
-	public final static int TYPE_ES_DESCRIPTOR = 3;
-	public final static int TYPE_DECODER_CONFIG_DESCRIPTOR = 4;
-	public final static int TYPE_DECODER_SPECIFIC_INFO = 5;
-	public static final int TYPE_SL_CONFIG_DESCRIPTOR = 6;
-	public static final int TYPE_ES_ID_INC = 14;
-	public static final int TYPE_MP4_INITIAL_OBJECT_DESCRIPTOR = 16;
-	protected int type, size, bytesRead;
-	private List<ObjectDescriptor> children;
+	private int objectDescriptorID;
+	private boolean urlPresent;
+	private String url;
 
-	public static ObjectDescriptor createDescriptor(MP4InputStream in) throws IOException {
-		final int tag = in.read();
-		int read = 1;
-		int size = 0;
-		int b = 0;
-		do {
-			b = in.read();
-			size <<= 7;
-			size |= b&0x7f;
-			read++;
-		}
-		while((b&0x80)==0x80);
-		final ObjectDescriptor desc;
-		switch(tag) {
-			case TYPE_ES_DESCRIPTOR:
-				desc = new ESDescriptor(tag, size);
-				break;
-			case TYPE_DECODER_CONFIG_DESCRIPTOR:
-				desc = new DecoderConfigDescriptor(tag, size);
-				break;
-			case TYPE_DECODER_SPECIFIC_INFO:
-				desc = new DecoderSpecificInfoDescriptor(tag, size);
-				break;
-			default:
-				desc = new UnknownDescriptor(tag, size);
-		}
+	void decode(MP4InputStream in) throws IOException {
+		//10 bits objectDescriptorID, 1 bit url flag, 5 bits reserved
+		final int x = (int) in.readBytes(2);
+		objectDescriptorID = (x>>6)&0x3FF;
+		urlPresent = ((x>>5)&1)==1;
 
-		desc.decode(in);
-		in.skipBytes(desc.size-desc.bytesRead);
-		desc.bytesRead = read+desc.size;
+		if(urlPresent) url = in.readString(size-2);
 
-		return desc;
+		readChildren(in);
 	}
 
-	abstract void decode(MP4InputStream in) throws IOException;
-
-	protected ObjectDescriptor(int type, int size) {
-		this.bytesRead = 0;
-		this.type = type;
-		this.size = size;
-		children = new ArrayList<ObjectDescriptor>();
+	/**
+	 * The ID uniquely identifies this ObjectDescriptor within its name scope.
+	 * It should be within 0 and 1023 exclusively. The value 0 is forbidden and
+	 * the value 1023 is reserved.
+	 *
+	 * @return this ObjectDescriptor's ID
+	 */
+	public int getObjectDescriptorID() {
+		return objectDescriptorID;
 	}
 
-	//children
-	protected void readChildren(MP4InputStream in) throws IOException {
-		ObjectDescriptor desc;
-		while(bytesRead<size) {
-			desc = createDescriptor(in);
-			children.add(desc);
-			bytesRead += desc.getBytesRead();
-		}
+	/**
+	 * A flag that indicates the presence of a URL. If set, no profiles are
+	 * present.
+	 *
+	 * @return true if a URL is present
+	 */
+	public boolean isURLPresent() {
+		return urlPresent;
 	}
 
-	public List<ObjectDescriptor> getChildren() {
-		return Collections.unmodifiableList(children);
-	}
-
-	//getter
-	public int getType() {
-		return type;
-	}
-
-	public int getBytesRead() {
-		return bytesRead;
+	/**
+	 * A URL String that shall point to another InitialObjectDescriptor. If no
+	 * URL is present (if <code>isURLPresent()</code> returns false) this method
+	 * returns null.
+	 *
+	 * @return a URL String or null if none is present
+	 */
+	public String getURL() {
+		return url;
 	}
 }
