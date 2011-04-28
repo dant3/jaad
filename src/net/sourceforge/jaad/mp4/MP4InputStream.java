@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 //all methods should throw EOFException instead of returning -1
 public class MP4InputStream {
@@ -101,32 +102,35 @@ public class MP4InputStream {
 	}
 
 	public String readUTFString(int max, String encoding) throws IOException {
-		return readUTFString(max, encoding, null);
+		return new String(readNullTerminated(max), Charset.forName(encoding));
 	}
 
 	public String readUTFString(int max) throws IOException {
+		//read byte order mask
 		final byte[] bom = new byte[2];
 		read(bom, 0, 2);
 		final int i = (bom[0]<<8)|bom[1];
-		return readUTFString(max, (i==BYTE_ORDER_MASK) ? UTF16 : UTF8, bom);
+
+		//read null-terminated
+		final byte[] b = readNullTerminated(max);
+		//copy bom
+		byte[] b2 = new byte[b.length+bom.length];
+		System.arraycopy(bom, 0, b2, 0, bom.length);
+		System.arraycopy(b, 0, b2, bom.length, b.length);
+
+		return new String(b2, Charset.forName((i==BYTE_ORDER_MASK) ? UTF16 : UTF8));
 	}
 
-	private String readUTFString(int max, String encoding, byte[] bom) throws IOException {
+	public byte[] readNullTerminated(int max) throws IOException {
 		final byte[] b = new byte[max];
 		int pos = 0;
-		if(bom!=null) {
-			System.arraycopy(bom, 0, b, 0, bom.length);
-			pos = bom.length;
-		}
-
 		int i;
 		while((i = read())!=0) {
 			if(i==-1) break;
 			b[pos] = (byte) i;
 			pos++;
 		}
-
-		return new String(b, 0, pos, Charset.forName(encoding));
+		return Arrays.copyOf(b, pos);
 	}
 
 	//TODO: test this!
