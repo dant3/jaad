@@ -39,7 +39,6 @@ import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
 import net.sourceforge.jaad.mp4.od.DecoderSpecificInfo;
 import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
 import net.sourceforge.jaad.mp4.od.Descriptor;
-import net.sourceforge.jaad.mp4.od.ObjectDescriptor;
 
 /**
  * This class represents a track in a movie.

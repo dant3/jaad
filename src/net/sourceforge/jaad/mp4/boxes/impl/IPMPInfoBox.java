@@ -2,6 +2,7 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
@@ -61,6 +62,6 @@ public class IPMPInfoBox extends FullBox {
 	 * @return the IPMP descriptors
 	 */
 	public List</*IPMP*/Descriptor> getIPMPDescriptors() {
-		return ipmpDescriptors;
+		return Collections.unmodifiableList(ipmpDescriptors);
 	}
 }

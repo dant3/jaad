@@ -189,6 +189,8 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(MPEG_SAMPLE_ENTRY, MPEGSampleEntry.class);
 		BOX_CLASSES.put(TEXT_METADATA_SAMPLE_ENTRY, TextMetadataSampleEntry.class);
 		BOX_CLASSES.put(XML_METADATA_SAMPLE_ENTRY, XMLMetadataSampleEntry.class);
+		BOX_CLASSES.put(RTP_HINT_SAMPLE_ENTRY, RTPHintSampleEntry.class);
+		BOX_CLASSES.put(FD_HINT_SAMPLE_ENTRY, FDHintSampleEntry.class);
 		BOX_CLASSES.put(ESD_BOX, ESDBox.class);
 		BOX_CLASSES.put(H263_SPECIFIC_BOX, CodecSpecificBox.class);
 		BOX_CLASSES.put(AVC_SPECIFIC_BOX, CodecSpecificBox.class);

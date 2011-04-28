@@ -19,6 +19,7 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import net.sourceforge.jaad.mp4.boxes.BoxImpl;
 
@@ -77,6 +78,6 @@ public class TrackReferenceBox extends BoxImpl {
 	 * @return the track IDs this box refers to
 	 */
 	public List<Long> getTrackIDs() {
-		return trackIDs;
+		return Collections.unmodifiableList(trackIDs);
 	}
 }

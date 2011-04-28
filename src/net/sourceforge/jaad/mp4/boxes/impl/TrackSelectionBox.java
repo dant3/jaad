@@ -18,6 +18,7 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
@@ -138,6 +139,6 @@ public class TrackSelectionBox extends FullBox {
 	 * the track from other tracks with the same attribute.</p>
 	 */
 	public List<Long> getAttributes() {
-		return attributes;
+		return Collections.unmodifiableList(attributes);
 	}
 }

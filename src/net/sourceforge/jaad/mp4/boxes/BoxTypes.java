@@ -105,10 +105,9 @@ public interface BoxTypes {
 	//mp4 extension
 	long OBJECT_DESCRIPTOR_BOX = 1768907891l; //iods
 	long SAMPLE_DEPENDENCY_BOX = 1935959408l; //sdep
-	//metadata extensions
-	//id3
+	//metadata: id3
 	long ID3_TAG_BOX = 1768174386l; //id32
-	//itunes
+	//metadata: itunes
 	long ITUNES_META_LIST_BOX = 1768715124l; //ilst
 	long CUSTOM_ITUNES_METADATA_BOX = 757935405l; //----
 	long ITUNES_METADATA_BOX = 1684108385l; //data
@@ -171,6 +170,8 @@ public interface BoxTypes {
 	long MPEG_SAMPLE_ENTRY = 1836070003l; //mp4s
 	long TEXT_METADATA_SAMPLE_ENTRY = 1835365492l; //mett
 	long XML_METADATA_SAMPLE_ENTRY = 1835365496l; //metx
+	long RTP_HINT_SAMPLE_ENTRY = 1920233504l; //rtp
+	long FD_HINT_SAMPLE_ENTRY = 1717858336l; //fdp
 	//codec infos
 	long ESD_BOX = 1702061171l; //esds
 	//video codecs

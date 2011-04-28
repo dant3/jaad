@@ -19,25 +19,32 @@ package net.sourceforge.jaad.mp4.boxes.impl.sampleentries;
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
-public class HintSampleEntry extends SampleEntry {
+public class RTPHintSampleEntry extends SampleEntry {
 
-	private byte[] data;
+	private int hintTrackVersion, highestCompatibleVersion;
+	private long maxPacketSize;
 
-	public HintSampleEntry() {
-		super("Hint Sample Entry");
-		data = new byte[0];
+	public RTPHintSampleEntry() {
+		super("RTP Hint Sample Entry");
 	}
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 
-		data = new byte[(int) left];
-		in.readBytes(data);
-		left = 0;
+		hintTrackVersion = (int) in.readBytes(2);
+		highestCompatibleVersion = (int) in.readBytes(2);
+		maxPacketSize = in.readBytes(4);
+		left -= 8;
 	}
 
-	public byte[] getData() {
-		return data;
+	/**
+	 * The maximum packet size indicates the size of the largest packet that
+	 * this track will generate.
+	 *
+	 * @return the maximum packet size
+	 */
+	public long getMaxPacketSize() {
+		return maxPacketSize;
 	}
 }

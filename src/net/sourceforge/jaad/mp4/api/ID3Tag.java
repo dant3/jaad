@@ -19,6 +19,7 @@ package net.sourceforge.jaad.mp4.api;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 class ID3Tag {
@@ -57,7 +58,7 @@ class ID3Tag {
 	}
 
 	public List<ID3Frame> getFrames() {
-		return frames;
+		return Collections.unmodifiableList(frames);
 	}
 
 	static int readSynch(DataInputStream in) throws IOException {

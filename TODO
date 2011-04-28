@@ -5,10 +5,10 @@ AAC decoder
 
 MP4 boxes
 =========
+- implement IPMP descriptors
 - mp3 also uses 'mp4a' (probably all kinds of MPEG audio) -> how to identify?
 - boxes to implement:
-	frma, fiin, paen, fpar, fecr, segr, gitn, rash, fdp, 
-	mpod, wide, chpl, colr, m4ds, btrt, avcp, avss, avll, sdep
+	rash, mpod, wide, m4ds, btrt, avcp, avss, avll, sdep
 	alac (apple lossless), 
 	albm (album title & track number (user-data)),
 	auth (media author name (user-data)),
@@ -18,6 +18,7 @@ MP4 boxes
 	clsf (Media classification (user-data)),
 - implement more codecs boxes: e.g. ac3
 - why are the ObjectDescriptor tags different in 14496-1 8.3.12 (table 8-12)?
+- change samplegroup structures to the one used for sampleentries
 
 MP4 API
 =======
