@@ -78,8 +78,8 @@ class ADTSFrame {
 		rawDataBlockCount = i&0x3;
 	}
 
-	public int getFrameLength() {
-		return frameLength;
+	int getFrameLength() {
+		return frameLength-(protectionAbsent ? 7 : 9);
 	}
 
 	byte[] createDecoderSpecificInfo() {

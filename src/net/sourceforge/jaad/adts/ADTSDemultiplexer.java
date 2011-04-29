@@ -38,7 +38,6 @@ public class ADTSDemultiplexer {
 		boolean found = false;
 		int left = MAXIMUM_FRAME_SIZE;
 		int i;
-		int off = -1;
 		while(!found&&left>0) {
 			i = in.read();
 			left--;
@@ -47,9 +46,8 @@ public class ADTSDemultiplexer {
 				if(((i>>4)&0xF)==0xF) found = true;
 				in.unread(i);
 			}
-			off++;
 		}
-		System.out.println("offset: "+off);
+
 		if(found) frame = new ADTSFrame(din);
 		return found;
 	}
