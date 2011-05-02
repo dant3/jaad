@@ -4,6 +4,7 @@ import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
 //ISO 14496-1 - 10.2.3
+//TODO: not working: reads too much! did the specification change?
 public class SLConfigDescriptor extends Descriptor {
 
 	private boolean useAccessUnitStart, useAccessUnitEnd, useRandomAccessPoint,

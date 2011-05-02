@@ -1,7 +1,7 @@
 AAC decoder
 ===========
-- ADTS demultiplexer not working
 - some frames throw IOException (EOF) -> perhaps Huffman decoding not correct
+- SBR in ADTS stream has problems with sample frequency
 
 MP4 boxes
 =========
@@ -19,6 +19,7 @@ MP4 boxes
 - implement more codecs boxes: e.g. ac3
 - why are the ObjectDescriptor tags different in 14496-1 8.3.12 (table 8-12)?
 - change samplegroup structures to the one used for sampleentries
+- object descriptors decode wrong (SLConfigDescriptor, MP4-IODS)
 
 MP4 API
 =======

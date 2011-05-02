@@ -63,10 +63,12 @@ public class SampleGroupDescriptionBox extends FullBox {
 			defaultLength = in.readBytes(4);
 			left -= 4;
 		}
+		else defaultLength = 0;
+
 		final int entryCount = (int) in.readBytes(4);
 		left -= 8;
 
-		final HandlerBox hdlr = (HandlerBox) parent.getParent().getParent().getChild(BoxTypes.HANDLER_BOX);
+		/*final HandlerBox hdlr = (HandlerBox) parent.getParent().getParent().getChild(BoxTypes.HANDLER_BOX);
 		final int handlerType = (int) hdlr.getHandlerType();
 
 		final Class<? extends BoxImpl> boxClass;
@@ -93,7 +95,7 @@ public class SampleGroupDescriptionBox extends FullBox {
 				entries[i] = (SampleGroupDescriptionEntry) BoxFactory.parseBox(in, boxClass);
 				if(entries[i]!=null) left -= entries[i].getSize();
 			}
-		}
+		}*/
 	}
 
 	/**

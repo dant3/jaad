@@ -15,7 +15,7 @@ public class InitialObjectDescriptor extends Descriptor {
 	private int objectDescriptorID;
 	private boolean urlPresent, includeInlineProfiles;
 	private String url;
-	private int sceneProfile, audioProfile, visualProfile, graphicsProfile;
+	private int odProfile, sceneProfile, audioProfile, visualProfile, graphicsProfile;
 
 	@Override
 	void decode(MP4InputStream in) throws IOException {
@@ -28,6 +28,7 @@ public class InitialObjectDescriptor extends Descriptor {
 
 		if(urlPresent) url = in.readString(size-2);
 		else {
+			odProfile = in.read();
 			sceneProfile = in.read();
 			audioProfile = in.read();
 			visualProfile = in.read();
@@ -88,6 +89,11 @@ public class InitialObjectDescriptor extends Descriptor {
 	 */
 	public boolean areProfilesPresent() {
 		return !urlPresent;
+	}
+
+	//TODO: javadoc
+	public int getODProfile() {
+		return odProfile;
 	}
 
 	/**
