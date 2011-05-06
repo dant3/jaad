@@ -36,7 +36,6 @@ public abstract class Descriptor {
 			read++;
 		}
 		while((b&0x80)==0x80);
-		System.out.println("type: "+type+", size: "+size+"; "+in.getOffset());
 
 		//create descriptor
 		final Descriptor desc = forTag(type);
@@ -46,7 +45,6 @@ public abstract class Descriptor {
 
 		//decode
 		desc.decode(in);
-		System.out.println("nach "+type+": "+in.getOffset());
 		in.skipBytes(size-(in.getOffset()-desc.start)); //skip remaining bytes
 		desc.size += read; //include type and size fields
 

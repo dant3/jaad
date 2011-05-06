@@ -70,9 +70,9 @@ public class Radio {
 			while(x!=null&&!x.trim().equals(""));
 
 			final ADTSDemultiplexer adts = new ADTSDemultiplexer(in);
-			final AudioFormat aufmt = new AudioFormat(adts.getSampleFrequency(), 16, adts.getChannelCount(), true, true);
+			AudioFormat aufmt = new AudioFormat(adts.getSampleFrequency(), 16, adts.getChannelCount(), true, true);
 			final Decoder dec = new Decoder(adts.getDecoderSpecificInfo());
-			
+
 			while(true) {
 				b = adts.readNextFrame();
 				dec.decodeFrame(b, buf);
@@ -82,6 +82,7 @@ public class Radio {
 					line.stop();
 					line.close();
 					line = null;
+					aufmt = new AudioFormat(buf.getSampleRate(), buf.getBitsPerSample(), buf.getChannels(), true, true);
 				}
 				if(line==null) {
 					line = AudioSystem.getSourceDataLine(aufmt);

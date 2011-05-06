@@ -24,6 +24,8 @@ public final class Huffman implements Codebooks, HCB_SF {
 
 	private static final int PAIR_LEN = 2, QUAD_LEN = 4;
 	private static final int[] BITS = {0, 5, 5, 0, 5, 0, 5, 0, 5, 0, 6, 5};
+	private static final boolean[] BINARY = {false, false, true, false, true, false, true, false, true, false};
+	private static final boolean[] SIGNED = {false, false, true, true, false, false, true, true, true, true};
 	private static final int[] VCB11_LAV = {
 		16, 31, 47, 63, 95, 127, 159, 191, 223,
 		255, 319, 383, 511, 767, 1023, 2047
@@ -46,9 +48,9 @@ public final class Huffman implements Codebooks, HCB_SF {
 	}
 
 	private static void signBits(BitStream in, short[] data, int off, int len) throws AACException {
-		for(int i = 0; i<len; i++) {
-			if(data[off+i]!=0) {
-				if(in.readBool()) data[off+i] = (short) -data[off+i];
+		for(int i = off; i<off+len; i++) {
+			if(data[i]!=0) {
+				if(in.readBool()) data[i] = (short) -data[i];
 			}
 		}
 	}
@@ -67,34 +69,7 @@ public final class Huffman implements Codebooks, HCB_SF {
 		return (short) (neg ? -j : j);
 	}
 
-	private static void decode2StepQuad(int cb, BitStream in, short[] data, int off) throws AACException {
-		final short[][] TABLE1 = TWO_STEP_CODEBOOKS[cb][0];
-		final short[][] TABLE2 = TWO_STEP_CODEBOOKS[cb][1];
-		final int cw = in.peekBits(BITS[cb]);
-		int offset = TABLE1[cw][0];
-		final short extraBits = TABLE1[cw][1];
-
-		if(extraBits==0) in.skipBits(TABLE2[offset][0]);
-		else {
-			in.skipBits(BITS[cb]);
-			offset += in.peekBits(extraBits);
-			in.skipBits(TABLE2[offset][0]-BITS[cb]);
-		}
-
-		if(offset>TABLE2.length) throw new AACException("invalid offset in scalefactor decoding: "+offset+", codebook: "+cb);
-
-		data[off] = TABLE2[offset][1];
-		data[off+1] = TABLE2[offset][2];
-		data[off+2] = TABLE2[offset][3];
-		data[off+3] = TABLE2[offset][4];
-	}
-
-	private static void decode2StepQuadSign(int cb, BitStream in, short[] data, int off) throws AACException {
-		decode2StepQuad(cb, in, data, off);
-		signBits(in, data, off, QUAD_LEN);
-	}
-
-	private static void decode2StepPair(int cb, BitStream in, short[] data, int off) throws AACException {
+	private static void decode2Step(int cb, BitStream in, short[] data, int off) throws AACException {
 		final short[][] TABLE1 = TWO_STEP_CODEBOOKS[cb][0];
 		final short[][] TABLE2 = TWO_STEP_CODEBOOKS[cb][1];
 		final int cw = in.peekBits(BITS[cb]);
@@ -112,14 +87,13 @@ public final class Huffman implements Codebooks, HCB_SF {
 
 		data[off] = TABLE2[offset][1];
 		data[off+1] = TABLE2[offset][2];
+		if(cb<5) {
+			data[off+2] = TABLE2[offset][3];
+			data[off+3] = TABLE2[offset][4];
+		}
 	}
 
-	private static void decode2StepPairSign(int cb, BitStream in, short[] data, int off) throws AACException {
-		decode2StepPair(cb, in, data, off);
-		signBits(in, data, off, PAIR_LEN);
-	}
-
-	private static void decodeBinaryQuad(int cb, BitStream in, short[] data, int off) throws AACException {
+	private static void decodeBinary(int cb, BitStream in, short[] data, int off) throws AACException {
 		final byte[][] TABLE = BINARY_CODEBOOKS[cb];
 		int offset = 0;
 
@@ -133,89 +107,33 @@ public final class Huffman implements Codebooks, HCB_SF {
 
 		data[off] = TABLE[offset][1];
 		data[off+1] = TABLE[offset][2];
-		data[off+2] = TABLE[offset][3];
-		data[off+3] = TABLE[offset][4];
-	}
-
-	private static void decodeBinaryQuadSign(int cb, BitStream in, short[] data, int off) throws AACException {
-		decodeBinaryQuad(cb, in, data, off);
-		signBits(in, data, off, QUAD_LEN);
-	}
-
-	private static void decodeBinaryPair(int cb, BitStream in, short[] data, int off) throws AACException {
-		final byte[][] TABLE = BINARY_CODEBOOKS[cb];
-		int offset = 0;
-
-		int b;
-		while(TABLE[offset][0]==0) {
-			b = in.readBit();
-			offset += TABLE[offset][b+1];
+		if(cb<5) {
+			data[off+2] = TABLE[offset][3];
+			data[off+3] = TABLE[offset][4];
 		}
-
-		if(offset>TABLE.length) throw new AACException("invalid offset in scalefactor decoding: "+offset+", codebook: "+cb);
-
-		data[off] = TABLE[offset][1];
-		data[off+1] = TABLE[offset][2];
-	}
-
-	private static void decodeBinaryPairSign(int cb, BitStream in, short[] data, int off) throws AACException {
-		decodeBinaryPair(cb, in, data, off);
-		signBits(in, data, off, PAIR_LEN);
 	}
 
 	public static void decodeSpectralData(BitStream in, int cb, short[] data, int off) throws AACException {
-		switch(cb) {
-			case 1:
-			case 2:
-				decode2StepQuad(cb, in, data, off);
-				break;
-			case 3:
-				decodeBinaryQuadSign(cb, in, data, off);
-				break;
-			case 4:
-				decode2StepQuadSign(cb, in, data, off);
-				break;
-			case 5:
-				decodeBinaryPair(cb, in, data, off);
-				break;
-			case 6:
-				decode2StepPair(cb, in, data, off);
-				break;
-			case 7:
-			case 9:
-				decodeBinaryPairSign(cb, in, data, off);
-				break;
-			case 8:
-			case 10:
-				decode2StepPairSign(cb, in, data, off);
-				break;
-			case 11:
-			case 16:
-			case 17:
-			case 18:
-			case 19:
-			case 20:
-			case 21:
-			case 22:
-			case 23:
-			case 24:
-			case 25:
-			case 26:
-			case 27:
-			case 28:
-			case 29:
-			case 30:
-			case 31:
-				decode2StepPairSign(11, in, data, off);
-				data[off] = getEscape(in, data[off]);
-				data[off+1] = getEscape(in, data[off+1]);
+		if(cb<1||cb>31) throw new AACException("Huffman: codebook out of range: "+cb);
 
-				//error resilience
-				if(cb>11) checkLAV(cb, data, off);
-				break;
-			default:
-				throw new AACException("unknown huffman codebook: "+cb);
+		if(cb<11) {
+			//standard codebook (1-10)
+			if(BINARY[cb-1]) decodeBinary(cb, in, data, off);
+			else decode2Step(cb, in, data, off);
+
+			if(SIGNED[cb-1]) signBits(in, data, off, cb<5 ? QUAD_LEN : PAIR_LEN);
 		}
+		else if(cb==11||cb>15) {
+			//11 or virtual codebook (16-31)
+			decode2Step(11, in, data, off);
+			signBits(in, data, off, cb<5 ? QUAD_LEN : PAIR_LEN);
+			data[off] = getEscape(in, data[off]);
+			data[off+1] = getEscape(in, data[off+1]);
+
+			//error resilience
+			if(cb>11) checkLAV(cb, data, off);
+		}
+		else throw new AACException("Huffman: unknown codebook: "+cb);
 	}
 
 	/**

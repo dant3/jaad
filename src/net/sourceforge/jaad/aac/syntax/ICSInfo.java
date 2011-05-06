@@ -279,7 +279,7 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 	}
 
 	public void setData(ICSInfo info) {
-		windowSequence = info.windowSequence;
+		windowSequence = WindowSequence.valueOf(info.windowSequence.name());
 		windowShape[PREVIOUS] = info.windowShape[PREVIOUS];
 		windowShape[CURRENT] = info.windowShape[CURRENT];
 		maxSFB = info.maxSFB;

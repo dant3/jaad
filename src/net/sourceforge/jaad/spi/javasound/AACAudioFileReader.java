@@ -16,9 +16,8 @@
  */
 package net.sourceforge.jaad.spi.javasound;
 
+import net.sourceforge.jaad.adts.ADTSDemultiplexer;
 import net.sourceforge.jaad.aac.syntax.BitStream;
-import net.sourceforge.jaad.aac.transport.ADIFHeader;
-import net.sourceforge.jaad.aac.transport.ADTSFrame;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -83,7 +82,13 @@ public class AACAudioFileReader extends AudioFileReader {
 		if(new String(b, 4, 4).equals("ftyp")) canHandle = true;
 		else {
 			final BitStream bit = new BitStream(b);
-			if(ADIFHeader.isPresent(bit)||ADTSFrame.isPresent(bit)) canHandle = true;
+			try {
+				ADTSDemultiplexer adts = new ADTSDemultiplexer(in);
+				canHandle = true;
+			}
+			catch(Exception e) {
+				canHandle = false;
+			}
 		}
 		if(canHandle) {
 			final AudioFormat format = new AudioFormat(AAC_ENCODING, AudioSystem.NOT_SPECIFIED, AudioSystem.NOT_SPECIFIED, mediaLength, AudioSystem.NOT_SPECIFIED, AudioSystem.NOT_SPECIFIED, true);

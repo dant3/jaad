@@ -22,7 +22,6 @@ import net.sourceforge.jaad.aac.syntax.PCE;
 import net.sourceforge.jaad.aac.syntax.SyntacticElements;
 import net.sourceforge.jaad.aac.filterbank.FilterBank;
 import net.sourceforge.jaad.aac.transport.ADIFHeader;
-import net.sourceforge.jaad.aac.transport.ADTSFrame;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -40,7 +39,7 @@ public class Decoder implements Constants {
 		LOGGER.setLevel(Level.ALL);
 
 		final ConsoleHandler h = new ConsoleHandler();
-		h.setLevel(Level.FINEST);
+		h.setLevel(Level.OFF);
 		LOGGER.addHandler(h);
 	}
 	private final DecoderConfig config;
@@ -48,7 +47,6 @@ public class Decoder implements Constants {
 	private final FilterBank filterBank;
 	private BitStream in;
 	private ADIFHeader adifHeader;
-	private ADTSFrame adtsFrame;
 
 	/**
 	 * The methods returns true, if a profile is supported by the decoder.
@@ -108,6 +106,7 @@ public class Decoder implements Constants {
 		catch(AACException e) {
 			//TODO: some MP4 frames seem to be not long enough, EOFException in Huffman!
 			if(!e.isEndOfStream()) throw e;
+			else LOGGER.warning("unexpected end of frame");
 		}
 	}
 
@@ -118,12 +117,6 @@ public class Decoder implements Constants {
 			config.setProfile(pce.getProfile());
 			config.setSampleFrequency(pce.getSampleFrequency());
 			config.setChannelConfiguration(ChannelConfiguration.forInt(pce.getChannelCount()));
-		}
-		if(ADTSFrame.isPresent(in)) {
-			adtsFrame = ADTSFrame.readFrame(in);
-			config.setProfile(adtsFrame.getProfile());
-			config.setSampleFrequency(adtsFrame.getSampleFrequency());
-			config.setChannelConfiguration(adtsFrame.getChannelConfiguration());
 		}
 
 		if(!canDecode(config.getProfile())) throw new AACException("unsupported profile: "+config.getProfile().getDescription());

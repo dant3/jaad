@@ -27,15 +27,13 @@ import net.sourceforge.jaad.aac.syntax.PCE;
  */
 public class DecoderConfig implements Constants {
 
-	private static final int MAXIMUM_FRAME_SIZE = 6144;
-	private Profile profile;
+	private Profile profile, extProfile;
 	private SampleFrequency sampleFrequency;
 	private ChannelConfiguration channelConfiguration;
 	private boolean frameLengthFlag;
 	private boolean dependsOnCoreCoder;
 	private int coreCoderDelay;
 	private boolean extensionFlag;
-	private Profile extProfile;
 	//extension: SBR
 	private boolean sbrPresent, downSampledSBR;
 	//extension: error resilience
@@ -43,12 +41,15 @@ public class DecoderConfig implements Constants {
 
 	private DecoderConfig() {
 		profile = Profile.AAC_MAIN;
+		extProfile = Profile.UNKNOWN;
 		sampleFrequency = SampleFrequency.SAMPLE_FREQUENCY_NONE;
 		channelConfiguration = ChannelConfiguration.CHANNEL_CONFIG_UNSUPPORTED;
 		frameLengthFlag = false;
 		sbrPresent = false;
 		downSampledSBR = false;
-		extProfile = Profile.UNKNOWN;
+		sectionDataResilience = false;
+		scalefactorResilience = false;
+		spectralDataResilience = false;
 	}
 
 	/* ========== gets/sets ========== */
@@ -246,7 +247,6 @@ public class DecoderConfig implements Constants {
 							throw new AACException("sample rate specified explicitly, not supported yet!");
 							//tmp = in.readBits(24);
 						}
-						config.sampleFrequency = SampleFrequency.forInt(tmp);
 					}
 				}
 				break;

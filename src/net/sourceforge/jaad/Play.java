@@ -16,6 +16,7 @@
  */
 package net.sourceforge.jaad;
 
+import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.Decoder;
 import net.sourceforge.jaad.aac.SampleBuffer;
 import net.sourceforge.jaad.adts.ADTSDemultiplexer;
@@ -77,9 +78,14 @@ public class Play {
 			final SampleBuffer buf = new SampleBuffer();
 			while(track.hasMoreFrames()) {
 				frame = track.readNextFrame();
-				dec.decodeFrame(frame.getData(), buf);
-				b = buf.getData();
-				line.write(b, 0, b.length);
+				try {
+					dec.decodeFrame(frame.getData(), buf);
+					b = buf.getData();
+					line.write(b, 0, b.length);
+				}
+				catch(AACException e) {
+					//since the frames are separate, decoding can continue if one fails
+				}
 			}
 		}
 		finally {
