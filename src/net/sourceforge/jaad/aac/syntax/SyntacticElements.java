@@ -411,6 +411,8 @@ public class SyntacticElements implements Constants {
 	}
 
 	public void sendToOutput(SampleBuffer buffer) {
+		final boolean be = buffer.isBigEndian();
+
 		final int chs = data.length;
 		final int length = (sbrPresent ? 2 : 1)*config.getFrameLength();
 		int freq = config.getSampleFrequency().getFrequency();
@@ -427,8 +429,14 @@ public class SyntacticElements implements Constants {
 			for(j = 0; j<length; j++) {
 				s = (short) Math.max(Math.min(Math.round(cur[j]), Short.MAX_VALUE), Short.MIN_VALUE);
 				off = (j*chs+i)*2;
-				b[off] = (byte) ((s>>8)&BYTE_MASK);
-				b[off+1] = (byte) (s&BYTE_MASK);
+				if(be) {
+					b[off] = (byte) ((s>>8)&BYTE_MASK);
+					b[off+1] = (byte) (s&BYTE_MASK);
+				}
+				else {
+					b[off+1] = (byte) ((s>>8)&BYTE_MASK);
+					b[off] = (byte) (s&BYTE_MASK);
+				}
 			}
 		}
 

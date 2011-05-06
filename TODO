@@ -19,7 +19,7 @@ MP4 boxes
 - implement more codecs boxes: e.g. ac3
 - why are the ObjectDescriptor tags different in 14496-1 8.3.12 (table 8-12)?
 - change samplegroup structures to the one used for sampleentries
-- object descriptors decode wrong (SLConfigDescriptor, MP4-IODS)
+- SLConfigDescriptor decodes wrong
 
 MP4 API
 =======
