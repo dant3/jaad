@@ -192,7 +192,7 @@ public class MP4InputStream {
 		else {
 			//TODO: pushback is needed to peek next -> do this any other way?
 			final int i = in.read();
-			b = (i==-1);
+			b = (i!=-1);
 			if(b) in.unread(i);
 		}
 		return b;
