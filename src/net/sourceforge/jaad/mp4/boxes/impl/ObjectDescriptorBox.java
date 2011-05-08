@@ -33,9 +33,7 @@ public class ObjectDescriptorBox extends FullBox {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 		objectDescriptor = Descriptor.createDescriptor(in);
-		System.out.println("size: "+objectDescriptor.getSize());
 		left -= objectDescriptor.getSize();
-		System.out.println("left: "+left);
 	}
 
 	public Descriptor getObjectDescriptor() {

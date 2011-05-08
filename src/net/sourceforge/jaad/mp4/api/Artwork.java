@@ -19,6 +19,8 @@ package net.sourceforge.jaad.mp4.api;
 import java.awt.Image;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import net.sourceforge.jaad.mp4.boxes.impl.meta.ITunesMetadataBox.DataType;
 
@@ -85,7 +87,13 @@ public class Artwork {
 	 * @throws IOException if decoding fails
 	 */
 	public Image getImage() throws IOException {
-		if(image==null) image = ImageIO.read(new ByteArrayInputStream(data));
-		return image;
+		try {
+			if(image==null) image = ImageIO.read(new ByteArrayInputStream(data));
+			return image;
+		}
+		catch(IOException e) {
+			Logger.getLogger("MP4 API").log(Level.SEVERE, "Artwork.getImage failed: {0}", e.toString());
+			throw e;
+		}
 	}
 }

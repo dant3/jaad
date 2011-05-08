@@ -16,6 +16,7 @@
  */
 package net.sourceforge.jaad.mp4.api;
 
+import java.util.logging.Logger;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
@@ -85,6 +87,7 @@ public abstract class Track {
 				location = new URL(url.getLocation());
 			}
 			catch(MalformedURLException e) {
+				Logger.getLogger("MP4 API").log(Level.WARNING, "Parsing URL-Box failed: {0}, url: {1}", new String[]{e.toString(), url.toString()});
 				location = null;
 			}
 		}
@@ -121,7 +124,6 @@ public abstract class Track {
 
 		final DecodingTimeToSampleBox stts = (DecodingTimeToSampleBox) stbl.getChild(BoxTypes.DECODING_TIME_TO_SAMPLE_BOX);
 		final long[] sampleCounts = stts.getSampleCounts();
-		if(getType()==Type.VIDEO) System.out.println("samples: "+sampleSizes.length);
 		final long[] sampleDeltas = stts.getSampleDeltas();
 
 		//decode sampleDurations
@@ -142,7 +144,6 @@ public abstract class Track {
 		double timeStamp;
 		int current = 0;
 
-		//TODO: is this valid for video samples?
 		for(int i = 0; i<sampleToChunks.length; i++) {
 			//an entry (run) contains several chunks with the same 'samples-per-chunk' value
 			entry = sampleToChunks[i];
@@ -317,11 +318,17 @@ public abstract class Track {
 			if(diff>0) in.skipBytes(diff);
 			else if(diff<0) {
 				if(in.hasRandomAccess()) in.seek(frame.getOffset());
-				else throw new IOException("frame already skipped and no random access");
+				else {
+					Logger.getLogger("MP4 API").log(Level.WARNING, "Track.readNextFrame failed: frame {0} already skipped, offset:{1}, stream:{2}", new Object[]{currentFrame, frame.getOffset(), in.getOffset()});
+					throw new IOException("frame already skipped and no random access");
+				}
 			}
 
 			final byte[] b = new byte[(int) frame.getSize()];
-			if(!in.readBytes(b)) throw new IOException("unexpected end of stream");
+			if(!in.readBytes(b)) {
+				Logger.getLogger("MP4 API").log(Level.WARNING, "Track.readNextFrame failed: tried to read {0} bytes at {1}", new Long[]{frame.getSize(), in.getOffset()});
+				throw new IOException("unexpected end of stream");
+			}
 			frame.setData(b);
 			currentFrame++;
 		}

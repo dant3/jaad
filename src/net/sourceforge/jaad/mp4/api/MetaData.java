@@ -26,6 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.sourceforge.jaad.mp4.MP4Container;
 import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
 import net.sourceforge.jaad.mp4.boxes.impl.CopyrightBox;
@@ -393,6 +396,7 @@ public class MetaData {
 			}
 		}
 		catch(IOException e) {
+			Logger.getLogger("MP4 API").log(Level.SEVERE, "Exception in MetaData.parseID3: {0}", e.toString());
 		}
 	}
 
@@ -428,6 +432,7 @@ public class MetaData {
 				if(key.equals(NERO_TAGS[19])) put(Field.TEMPO, Integer.parseInt(val));
 			}
 			catch(NumberFormatException e) {
+				Logger.getLogger("MP4 API").log(Level.SEVERE, "Exception in MetaData.parseNeroTags: {0}", e.toString());
 			}
 		}
 	}

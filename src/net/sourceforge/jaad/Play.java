@@ -61,19 +61,24 @@ public class Play {
 		SourceDataLine line = null;
 		byte[] b;
 		try {
+			//create container
 			final MP4Container cont = new MP4Container(new RandomAccessFile(in, "r"));
 			final Movie movie = cont.getMovie();
+			//find AAC track
 			final List<Track> tracks = movie.getTracks(AudioTrack.AudioCodec.AAC);
 			if(tracks.isEmpty()) throw new Exception("movie does not contain any AAC track");
 			final AudioTrack track = (AudioTrack) tracks.get(0);
 
+			//create audio format
 			final AudioFormat aufmt = new AudioFormat(track.getSampleRate(), track.getSampleSize(), track.getChannelCount(), true, true);
 			line = AudioSystem.getSourceDataLine(aufmt);
 			line.open();
 			line.start();
 
+			//create AAC decoder
 			final Decoder dec = new Decoder(track.getDecoderSpecificInfo());
 
+			//decode
 			Frame frame;
 			final SampleBuffer buf = new SampleBuffer();
 			while(track.hasMoreFrames()) {
@@ -84,6 +89,7 @@ public class Play {
 					line.write(b, 0, b.length);
 				}
 				catch(AACException e) {
+					e.printStackTrace();
 					//since the frames are separate, decoding can continue if one fails
 				}
 			}

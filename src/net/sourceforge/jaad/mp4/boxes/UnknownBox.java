@@ -19,9 +19,14 @@ package net.sourceforge.jaad.mp4.boxes;
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
-public class UnknownBox extends BoxImpl {
+/**
+ * Box implementation that is used for unknown types.
+ * 
+ * @author in-somnia
+ */
+class UnknownBox extends BoxImpl {
 
-	public UnknownBox() {
+	UnknownBox() {
 		super("unknown");
 	}
 

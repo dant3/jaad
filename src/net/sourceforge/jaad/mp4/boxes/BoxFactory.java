@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.jaad.mp4.MP4InputStream;
@@ -37,7 +39,17 @@ import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
  */
 public class BoxFactory implements BoxTypes {
 
-	private static final Logger LOGGER = Logger.getLogger("net.sourceforge.jaad.util.mp4.boxes.BoxFactory");
+	private static final Logger LOGGER = Logger.getLogger("MP4 Boxes");
+	static {
+		for(Handler h : LOGGER.getHandlers()) {
+			LOGGER.removeHandler(h);
+		}
+		LOGGER.setLevel(Level.ALL);
+
+		final ConsoleHandler h = new ConsoleHandler();
+		h.setLevel(Level.WARNING);
+		LOGGER.addHandler(h);
+	}
 	private static final Map<Long, Class<? extends BoxImpl>> BOX_CLASSES = new HashMap<Long, Class<? extends BoxImpl>>();
 	private static final Map<Long, String[]> PARAMETER = new HashMap<Long, String[]>();
 
@@ -281,14 +293,14 @@ public class BoxFactory implements BoxTypes {
 			left -= 16;
 		}
 
-		System.out.println(typeToString(type)+" ("+type+")");
+		Logger.getLogger("MP4 Boxes").finest(typeToString(type));
 		final BoxImpl box = forType(type);
 		box.setParams(parent, size, type, offset, left);
 		box.decode(in);
 
 		//if mdat found and no random access, don't skip
 		left = box.getLeft();
-		if(left<0) LOGGER.log(Level.WARNING, "box: {0}, left: {1}, offset: {2}", new String[]{typeToString(type), Long.toString(left), Long.toString(in.getOffset())});
+		if(left<0) LOGGER.log(Level.INFO, "BoxFactory: bytes left after reading box {0}: left: {1}, offset: {2}", new Object[]{typeToString(type), left, in.getOffset()});
 		if(box.getType()!=MEDIA_DATA_BOX||in.hasRandomAccess()) in.skipBytes(left);
 		return box;
 	}
@@ -323,8 +335,6 @@ public class BoxFactory implements BoxTypes {
 			box.setParams(null, size, type, offset, left);
 			box.decode(in);
 			in.skipBytes(box.getLeft());
-			//DEBUG:
-			//System.out.println(box.getShortName());
 		}
 		return box;
 	}
@@ -342,7 +352,7 @@ public class BoxFactory implements BoxTypes {
 					box = con.newInstance(s[0]);
 				}
 				catch(Exception e) {
-					LOGGER.log(Level.WARNING, "could not call constructor for "+typeToString(type), e);
+					LOGGER.log(Level.SEVERE, "BoxFactory: could not call constructor for "+typeToString(type), e);
 					box = new UnknownBox();
 				}
 			}
@@ -351,12 +361,15 @@ public class BoxFactory implements BoxTypes {
 					box = cl.newInstance();
 				}
 				catch(Exception e) {
-					LOGGER.log(Level.WARNING, "could not instantiate box "+typeToString(type), e);
+					LOGGER.log(Level.SEVERE, "BoxFactory: could not instantiate box "+typeToString(type), e);
 				}
 			}
 		}
 
-		if(box==null) box = new UnknownBox();
+		if(box==null) {
+			LOGGER.log(Level.INFO, "BoxFactory: unknown box type: {0}", typeToString(type));
+			box = new UnknownBox();
+		}
 		return box;
 	}
 

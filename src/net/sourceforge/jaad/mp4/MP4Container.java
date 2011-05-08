@@ -22,6 +22,10 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sourceforge.jaad.mp4.api.Brand;
 import net.sourceforge.jaad.mp4.api.Movie;
 import net.sourceforge.jaad.mp4.boxes.Box;
@@ -32,17 +36,16 @@ import net.sourceforge.jaad.mp4.boxes.impl.ProgressiveDownloadInformationBox;
 
 /**
  * The MP4Container is the central class for the MP4 demultiplexer. It reads the
- * container and gives access to the boxes and the containing data.
+ * container and gives access to the containing data.
  *
  * The data source can be either an <code>InputStream</code> or a
  * <code>RandomAccessFile</code>. Since the specification does not decree a
- * specific order of the boxes, the data needed for parsing (e.g. the sample
+ * specific order of the content, the data needed for parsing (the sample
  * tables) may be at the end of the stream. In this case, random access is
  * needed and reading from an <code>InputSteam</code> will cause an exception.
- *
- * Whenever possible, a <code>RandomAccessFile</code> should be used for local
- * files. Parsing from an <code>InputStream</code> is useful when reading from
- * a network stream.
+ * Thus, whenever possible, a <code>RandomAccessFile</code> should be used for 
+ * local files. Parsing from an <code>InputStream</code> is useful when reading 
+ * from a network stream.
  *
  * Each <code>MP4Container</code> can return the used file brand (file format
  * version). Optionally, the following data may be present:
@@ -52,13 +55,25 @@ import net.sourceforge.jaad.mp4.boxes.impl.ProgressiveDownloadInformationBox;
  * <li>a <code>Movie</code></li>
  * </ul>
  *
- * Finally it gives access to the underlying MP4 boxes, that can be retrieved
- * by <code>getBoxes()</code>.
+ * Additionally it gives access to the underlying MP4 boxes, that can be 
+ * retrieved by <code>getBoxes()</code>. However, it is not recommended to 
+ * access the boxes directly.
  * 
  * @author in-somnia
  */
 public class MP4Container {
 
+	static {
+		Logger log = Logger.getLogger("MP4 API");
+		for(Handler h : log.getHandlers()) {
+			log.removeHandler(h);
+		}
+		log.setLevel(Level.ALL);
+
+		final ConsoleHandler h = new ConsoleHandler();
+		h.setLevel(Level.WARNING);
+		log.addHandler(h);
+	}
 	private final MP4InputStream in;
 	private final List<Box> boxes;
 	private Brand major, minor;

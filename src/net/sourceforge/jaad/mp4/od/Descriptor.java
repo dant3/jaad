@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
 /**
@@ -45,7 +47,12 @@ public abstract class Descriptor {
 
 		//decode
 		desc.decode(in);
-		in.skipBytes(size-(in.getOffset()-desc.start)); //skip remaining bytes
+		//skip remaining bytes
+		final long remaining = size-(in.getOffset()-desc.start);
+		if(remaining>0) {
+			Logger.getLogger("MP4 Boxes").log(Level.WARNING, "Descriptor: bytes left: {0}, offset: {1}", new Long[]{remaining, in.getOffset()});
+			in.skipBytes(remaining);
+		}
 		desc.size += read; //include type and size fields
 
 		return desc;
@@ -71,9 +78,10 @@ public abstract class Descriptor {
 				desc = new DecoderSpecificInfo();
 				break;
 			case TYPE_SL_CONFIG_DESCRIPTOR:
-				//desc = new SLConfigDescriptor();
-				//break;
+			//desc = new SLConfigDescriptor();
+			//break;
 			default:
+				Logger.getLogger("MP4 Boxes").log(Level.INFO, "Unknown descriptor type: {0}", tag);
 				desc = new UnknownDescriptor();
 		}
 		return desc;
