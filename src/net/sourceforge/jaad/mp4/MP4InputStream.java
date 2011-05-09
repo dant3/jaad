@@ -24,7 +24,6 @@ import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-//all methods should throw EOFException instead of returning -1
 public class MP4InputStream {
 
 	public static final int MASK8 = 0xFF;
@@ -36,17 +35,41 @@ public class MP4InputStream {
 	private final RandomAccessFile fin;
 	private long offset; //only used with InputStream
 
+	/**
+	 * Constructs an <code>MP4InputStream</code> that reads from an 
+	 * <code>InputStream</code>. It will have no random access, thus seeking 
+	 * will not be possible.
+	 * 
+	 * @param in an <code>InputStream</code> to read from
+	 */
 	MP4InputStream(InputStream in) {
 		this.in = new PushbackInputStream(in);
 		fin = null;
 		offset = 0;
 	}
 
+	/**
+	 * Constructs an <code>MP4InputStream</code> that reads from a 
+	 * <code>RandomAccessFile</code>. It will have random access and seeking 
+	 * will be possible.
+	 * 
+	 * @param in a <code>RandomAccessFile</code> to read from
+	 */
 	MP4InputStream(RandomAccessFile fin) {
 		this.fin = fin;
 		in = null;
 	}
 
+	/**
+	 * Reads the next byte of data from the input. The value byte is returned as
+	 * an int in the range 0 to 255. If no byte is available because the end of 
+	 * the stream has been reached, an EOFException is thrown. This method 
+	 * blocks until input data is available, the end of the stream is detected, 
+	 * or an I/O error occurs.
+	 * 
+	 * @return the next byte of data
+	 * @throws IOException If the end of the stream is detected or any I/O error occurs.
+	 */
 	public int read() throws IOException {
 		int i = 0;
 		if(in!=null) i = in.read();
@@ -57,38 +80,85 @@ public class MP4InputStream {
 		return i;
 	}
 
-	public int read(byte[] b, int off, int len) throws IOException {
+	/**
+	 * Reads <code>len</code> bytes of data from the input into the array 
+	 * <code>b</code>. If len is zero, then no bytes are read.
+	 * 
+	 * This method blocks until all bytes could be read, the end of the stream 
+	 * is detected, or an I/O error occurs.
+	 * 
+	 * If the stream ends before <code>len</code> bytes could be read an 
+	 * EOFException is thrown.
+	 * 
+	 * @param b the buffer into which the data is read.
+	 * @param off the start offset in array <code>b</code> at which the data is written.
+	 * @param len the number of bytes to read.
+	 * @throws IOException If the end of the stream is detected, the input 
+	 * stream has been closed, or if some other I/O error occurs.
+	 */
+	public void read(final byte[] b, int off, int len) throws IOException {
+		int read = 0;
 		int i = 0;
-		if(in!=null) i = in.read(b, off, len);
-		else if(fin!=null) i = fin.read(b, off, len);
+		while(read<len) {
+			if(in!=null) i = in.read(b, off+read, len-read);
+			else if(fin!=null) i = fin.read(b, off+read, len-read);
+			if(i<0) throw new EOFException();
+			else read += i;
+		}
 
-		if(i==-1) throw new EOFException();
-		else if(in!=null) offset += i;
-		return i;
+		offset += read;
 	}
 
+	/**
+	 * Reads up to eight bytes as a long value. This method blocks until all 
+	 * bytes could be read, the end of the stream is detected, or an I/O error 
+	 * occurs.
+	 * 
+	 * @param n the number of bytes to read >0 and <=8
+	 * @return the read bytes as a long value
+	 * @throws IOException If the end of the stream is detected, the input 
+	 * stream has been closed, or if some other I/O error occurs.
+	 * @throws IndexOutOfBoundsException if <code>n</code> is not in the range 
+	 * [1...8] inclusive.
+	 */
 	public long readBytes(int n) throws IOException {
-		int i = -1;
+		if(n<1||n>8) throw new IndexOutOfBoundsException("invalid number of bytes to read: "+n);
+		final byte[] b = new byte[n];
+		read(b, 0, n);
+
 		long result = 0;
-		while(n>0) {
-			i = read();
-			result = (result<<8)|(i&0xFF);
-			n--;
+		for(int i = 0; i<n; i++) {
+			result = (result<<8)|(b[i]&0xFF);
 		}
 		return result;
 	}
 
-	public boolean readBytes(final byte[] b) throws IOException {
-		int read = 0;
-		int i;
-		while(read<b.length) {
-			i = read(b, read, b.length-read);
-			if(i==-1) break;
-			else read += i;
-		}
-		return read==b.length;
+	/**
+	 * Reads data from the input stream and stores them into the buffer array b.
+	 * This method blocks until all bytes could be read, the end of the stream 
+	 * is detected, or an I/O error occurs.
+	 * If the length of b is zero, then no bytes are read.
+	 * 
+	 * @param b the buffer into which the data is read.
+	 * @throws IOException If the end of the stream is detected, the input 
+	 * stream has been closed, or if some other I/O error occurs.
+	 */
+	public void readBytes(final byte[] b) throws IOException {
+		read(b, 0, b.length);
 	}
 
+	/**
+	 * Reads <code>n</code> bytes from the input as a String. The bytes are 
+	 * directly converted into characters. If not enough bytes could be read, an
+	 * EOFException is thrown.
+	 * This method blocks until all bytes could be read, the end of the stream 
+	 * is detected, or an I/O error occurs.
+	 * 
+	 * @param n the length of the String.
+	 * @return the String, that was read
+	 * @throws IOException If the end of the stream is detected, the input 
+	 * stream has been closed, or if some other I/O error occurs.
+	 */
 	public String readString(final int n) throws IOException {
 		int i = -1;
 		int pos = 0;
@@ -101,10 +171,44 @@ public class MP4InputStream {
 		return new String(c, 0, pos);
 	}
 
+	/**
+	 * Reads a null-terminated UTF-encoded String from the input. The maximum 
+	 * number of bytes that can be read before the null must appear must be 
+	 * specified.
+	 * Although the method is preferred for unicode, the encoding can be any 
+	 * charset name, that is supported by the system.
+	 * 
+	 * This method blocks until all bytes could be read, the end of the stream 
+	 * is detected, or an I/O error occurs.
+	 * 
+	 * @param max the maximum number of bytes to read, before the null-terminator
+	 * must appear.
+	 * @param encoding the charset used to encode the String
+	 * @return the decoded String
+	 * @throws IOException If the end of the stream is detected, the input 
+	 * stream has been closed, or if some other I/O error occurs.
+	 */
 	public String readUTFString(int max, String encoding) throws IOException {
 		return new String(readNullTerminated(max), Charset.forName(encoding));
 	}
 
+	/**
+	 * Reads a null-terminated UTF-encoded String from the input. The maximum 
+	 * number of bytes that can be read before the null must appear must be 
+	 * specified.
+	 * The encoding is detected automatically, it may be UTF-8 or UTF-16 
+	 * (determined by a byte order mask at the beginning).
+	 * 
+	 * This method blocks until all bytes could be read, the end of the stream 
+	 * is detected, or an I/O error occurs.
+	 * 
+	 * @param max the maximum number of bytes to read, before the null-terminator
+	 * must appear.
+	 * @param encoding the charset used to encode the String
+	 * @return the decoded String
+	 * @throws IOException If the end of the stream is detected, the input 
+	 * stream has been closed, or if some other I/O error occurs.
+	 */
 	public String readUTFString(int max) throws IOException {
 		//read byte order mask
 		final byte[] bom = new byte[2];
@@ -121,6 +225,20 @@ public class MP4InputStream {
 		return new String(b2, Charset.forName((i==BYTE_ORDER_MASK) ? UTF16 : UTF8));
 	}
 
+	/**
+	 * Reads a null-terminated byte array from the input. The maximum 
+	 * number of bytes that can be read before the null must appear must be 
+	 * specified.
+	 * 
+	 * This method blocks until all bytes could be read, the end of the stream 
+	 * is detected, or an I/O error occurs.
+	 * 
+	 * @param max the maximum number of bytes to read, before the null-terminator
+	 * must appear.
+	 * @return the buffer into which the data is read.
+	 * @throws IOException If the end of the stream is detected, the input 
+	 * stream has been closed, or if some other I/O error occurs.
+	 */
 	public byte[] readNullTerminated(int max) throws IOException {
 		final byte[] b = new byte[max];
 		int pos = 0;
@@ -133,43 +251,52 @@ public class MP4InputStream {
 		return Arrays.copyOf(b, pos);
 	}
 
-	//TODO: test this!
-	public double readFixedPoint(int len, int mask) throws IOException {
-		final long l = readBytes(len);
-		final long mantissa = (l&mask)<<52;
-		final long exponent = l&mask;
-		return Double.longBitsToDouble(mantissa|exponent);
+	/**
+	 * Reads a fixed point number from the input. The number is read as a 
+	 * <code>m.n</code> value, that results from deviding an integer by 
+	 * 2<sup>n</sup>.
+	 * 
+	 * @param m the number of bits before the point
+	 * @param n the number of bits after the point
+	 * @return a floating point number with the same value
+	 * @throws IOException If the end of the stream is detected, the input 
+	 * stream has been closed, or if some other I/O error occurs.
+	 * @throws IllegalArgumentException if the total number of bits (m+n) is not
+	 * a multiple of eight
+	 */
+	public double readFixedPoint(int m, int n) throws IOException {
+		final int bits = m+n;
+		if((bits%8)!=0) throw new IllegalArgumentException("number of bits is not a multiple of 8: "+(m+n));
+		final long l = readBytes(bits/8);
+		final double x = Math.pow(2, n);
+		double d = ((double) l)/x;
+		return d;
 	}
-	/*public static double readFixedPoint(int m, int n) throws IOException {
-	//final long l = readBytes((m + n) / 8);
-	final long l = 0x00010000;
-	final double d = (double) (l >> n); //integer part
-	return d * Math.pow(2,-n);
-	}*/
 
-	public boolean skipBytes(final long n) throws IOException {
-		//first: skip, second: read, if remaining
+	/**
+	 * Skips <code>n</code> bytes in the input. This method blocks until all 
+	 * bytes could be skipped, the end of the stream is detected, or an I/O 
+	 * error occurs.
+	 * 
+	 * @param n the number of bytes to skip
+	 * @throws IOException If the end of the stream is detected, the input 
+	 * stream has been closed, or if some other I/O error occurs.
+	 */
+	public void skipBytes(final long n) throws IOException {
 		long l = 0;
-		if(in!=null) {
-			l = in.skip(n);
-			while(l<n) {
-				read();
-				l++;
-			}
-
-			offset += l;
+		while(l<n) {
+			if(in!=null) l += in.skip((n-l));
+			else if(fin!=null) l += in.skip((n-l));
 		}
-		else if(fin!=null) {
-			l = fin.skipBytes((int) n);
-			while(l<n) {
-				read();
-				l++;
-			}
-		}
-
-		return l==n;
+		offset += l;
 	}
 
+	/**
+	 * Returns the current offset in the stream.
+	 * 
+	 * @return the current offset
+	 * @throws IOException if an I/O error occurs (only when using a RandomAccessFile)
+	 */
 	public long getOffset() throws IOException {
 		long l = -1;
 		if(in!=null) l = offset;
@@ -177,15 +304,38 @@ public class MP4InputStream {
 		return l;
 	}
 
-	public void seek(long l) throws IOException {
-		if(fin!=null) fin.seek(l);
+	/**
+	 * Seeks to a specific offset in the stream. This is only possible when 
+	 * using a RandomAccessFile. If an InputStream is used, this method throws 
+	 * an IOException.
+	 * 
+	 * @param pos the offset position, measured in bytes from the beginning of the
+	 * stream
+	 * @throws IOException if an InputStream is used, pos is less than 0 or an 
+	 * I/O error occurs
+	 */
+	public void seek(long pos) throws IOException {
+		if(fin!=null) fin.seek(pos);
 		else throw new IOException("could not seek: no random access");
 	}
 
+	/**
+	 * Indicates, if random access is available. That is, if this 
+	 * <code>MP4InputStream</code> was constructed with a RandomAccessFile. If 
+	 * this method returns false, seeking is not possible.
+	 * 
+	 * @return true if random access is available
+	 */
 	public boolean hasRandomAccess() {
 		return fin!=null;
 	}
 
+	/**
+	 * Indicates, if the input has some data left.
+	 * 
+	 * @return true if there is at least one byte left
+	 * @throws IOException if an I/O error occurs
+	 */
 	public boolean hasLeft() throws IOException {
 		final boolean b;
 		if(fin!=null) b = fin.getFilePointer()<(fin.length()-1);
@@ -198,7 +348,15 @@ public class MP4InputStream {
 		return b;
 	}
 
+	/**
+	 * Closes the input and releases any system resources associated with it. 
+	 * Once the stream has been closed, further reading or skipping will throw 
+	 * an IOException. Closing a previously closed stream has no effect.
+	 * 
+	 * @throws IOException if an I/O error occurs
+	 */
 	void close() throws IOException {
-		in.close();
+		if(in!=null) in.close();
+		else if(fin!=null) fin.close();
 	}
 }

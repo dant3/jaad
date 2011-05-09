@@ -43,8 +43,8 @@ public class VideoSampleEntry extends SampleEntry {
 
 		width = (int) in.readBytes(2);
 		height = (int) in.readBytes(2);
-		horizontalResolution = in.readFixedPoint(4, MP4InputStream.MASK16);
-		verticalResolution = in.readFixedPoint(4, MP4InputStream.MASK16);
+		horizontalResolution = in.readFixedPoint(16, 16);
+		verticalResolution = in.readFixedPoint(16, 16);
 		in.skipBytes(4); //reserved
 		frameCount = (int) in.readBytes(2);
 

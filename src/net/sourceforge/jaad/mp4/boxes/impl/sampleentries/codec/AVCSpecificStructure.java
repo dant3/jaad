@@ -24,7 +24,7 @@ public class AVCSpecificStructure extends CodecSpecificStructure {
 
 	private int configurationVersion, profile, level, lengthSize;
 	private byte profileCompatibility;
-	private long[] sequenceParameterSetNALUnit, pictureParameterSetNALUnit;
+	private byte[][] sequenceParameterSetNALUnit, pictureParameterSetNALUnit;
 
 	public AVCSpecificStructure() {
 		super(7); //at least 7 bytes are read
@@ -42,18 +42,20 @@ public class AVCSpecificStructure extends CodecSpecificStructure {
 		int len;
 		//3 bits reserved, 5 bits number of sequence parameter sets
 		final int sequenceParameterSets = in.read()&31;
-		sequenceParameterSetNALUnit = new long[sequenceParameterSets];
+		sequenceParameterSetNALUnit = new byte[sequenceParameterSets][];
 		for(int i = 0; i<sequenceParameterSets; i++) {
 			len = (int) in.readBytes(2);
-			sequenceParameterSetNALUnit[i] = in.readBytes(len);
+			sequenceParameterSetNALUnit[i] = new byte[len];
+			in.readBytes(sequenceParameterSetNALUnit[i]);
 			size+=len+2;
 		}
 
 		final int pictureParameterSets = in.read();
-		pictureParameterSetNALUnit = new long[pictureParameterSets];
+		pictureParameterSetNALUnit = new byte[pictureParameterSets][];
 		for(int i = 0; i<pictureParameterSets; i++) {
 			len = (int) in.readBytes(2);
-			pictureParameterSetNALUnit[i] = in.readBytes(len);
+			pictureParameterSetNALUnit[i] = new byte[len];
+			in.readBytes(pictureParameterSetNALUnit[i]);
 			size+=len+2;
 		}
 	}
@@ -103,7 +105,7 @@ public class AVCSpecificStructure extends CodecSpecificStructure {
 	 *
 	 * @return all SPS NAL units
 	 */
-	public long[] getSequenceParameterSetNALUnits() {
+	public byte[][] getSequenceParameterSetNALUnits() {
 		return sequenceParameterSetNALUnit;
 	}
 
@@ -113,7 +115,7 @@ public class AVCSpecificStructure extends CodecSpecificStructure {
 	 *
 	 * @return all PPS NAL units
 	 */
-	public long[] getPictureParameterSetNALUnits() {
+	public byte[][] getPictureParameterSetNALUnits() {
 		return pictureParameterSetNALUnit;
 	}
 }

@@ -16,6 +16,7 @@
  */
 package net.sourceforge.jaad.mp4.api;
 
+import java.io.EOFException;
 import java.util.logging.Logger;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -83,12 +84,14 @@ public abstract class Track {
 		if(dref.hasChild(BoxTypes.DATA_ENTRY_URL_BOX)) {
 			DataEntryUrlBox url = (DataEntryUrlBox) dref.getChild(BoxTypes.DATA_ENTRY_URL_BOX);
 			inFile = url.isInFile();
-			try {
-				location = new URL(url.getLocation());
-			}
-			catch(MalformedURLException e) {
-				Logger.getLogger("MP4 API").log(Level.WARNING, "Parsing URL-Box failed: {0}, url: {1}", new String[]{e.toString(), url.toString()});
-				location = null;
+			if(!inFile) {
+				try {
+					location = new URL(url.getLocation());
+				}
+				catch(MalformedURLException e) {
+					Logger.getLogger("MP4 API").log(Level.WARNING, "Parsing URL-Box failed: {0}, url: {1}", new String[]{e.toString(), url.getLocation()});
+					location = null;
+				}
 			}
 		}
 		/*else if(dref.containsChild(BoxTypes.DATA_ENTRY_URN_BOX)) {
@@ -319,15 +322,18 @@ public abstract class Track {
 			else if(diff<0) {
 				if(in.hasRandomAccess()) in.seek(frame.getOffset());
 				else {
-					Logger.getLogger("MP4 API").log(Level.WARNING, "Track.readNextFrame failed: frame {0} already skipped, offset:{1}, stream:{2}", new Object[]{currentFrame, frame.getOffset(), in.getOffset()});
+					Logger.getLogger("MP4 API").log(Level.WARNING, "readNextFrame failed: frame {0} already skipped, offset:{1}, stream:{2}", new Object[]{currentFrame, frame.getOffset(), in.getOffset()});
 					throw new IOException("frame already skipped and no random access");
 				}
 			}
 
 			final byte[] b = new byte[(int) frame.getSize()];
-			if(!in.readBytes(b)) {
-				Logger.getLogger("MP4 API").log(Level.WARNING, "Track.readNextFrame failed: tried to read {0} bytes at {1}", new Long[]{frame.getSize(), in.getOffset()});
-				throw new IOException("unexpected end of stream");
+			try {
+				in.readBytes(b);
+			}
+			catch(EOFException e) {
+				Logger.getLogger("MP4 API").log(Level.WARNING, "readNextFrame failed: tried to read {0} bytes at {1}", new Long[]{frame.getSize(), in.getOffset()});
+				throw e;
 			}
 			frame.setData(b);
 			currentFrame++;

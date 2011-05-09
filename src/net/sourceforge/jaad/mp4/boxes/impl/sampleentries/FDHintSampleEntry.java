@@ -35,7 +35,7 @@ public class FDHintSampleEntry extends SampleEntry {
 		hintTrackVersion = (int) in.readBytes(2);
 		highestCompatibleVersion = (int) in.readBytes(2);
 		partitionEntryID = (int) in.readBytes(2);
-		fecOverhead = in.readFixedPoint(2, MP4InputStream.MASK8);
+		fecOverhead = in.readFixedPoint(8, 8);
 		left -= 8;
 
 		readChildren(in);

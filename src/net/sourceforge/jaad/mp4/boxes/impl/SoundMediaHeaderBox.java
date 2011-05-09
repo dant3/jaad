@@ -39,7 +39,7 @@ public class SoundMediaHeaderBox extends FullBox {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 
-		balance = in.readFixedPoint(2, MP4InputStream.MASK8);
+		balance = in.readFixedPoint(8, 8);
 		in.skipBytes(2); //reserved
 		left -= 4;
 	}

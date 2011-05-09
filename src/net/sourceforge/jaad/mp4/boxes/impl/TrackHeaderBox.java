@@ -79,16 +79,17 @@ public class TrackHeaderBox extends FullBox {
 
 		layer = (int) in.readBytes(2);
 		alternateGroup = (int) in.readBytes(2);
-		volume = in.readFixedPoint(2, MP4InputStream.MASK8);
+		volume = in.readFixedPoint(8, 8);
 
 		in.skipBytes(2);
 
 		for(int i = 0; i<9; i++) {
-			matrix[i] = in.readFixedPoint(4, MP4InputStream.MASK16);
+			if(i<6) matrix[i] = in.readFixedPoint(16, 16);
+			else matrix[i] = in.readFixedPoint(2, 30);
 		}
 
-		width = in.readFixedPoint(4, MP4InputStream.MASK16);
-		height = in.readFixedPoint(4, MP4InputStream.MASK16);
+		width = in.readFixedPoint(16, 16);
+		height = in.readFixedPoint(16, 16);
 
 		left -= 60;
 	}

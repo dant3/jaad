@@ -67,7 +67,7 @@ public class EditListBox extends FullBox {
 
 			//int(16) mediaRate_integer;
 			//int(16) media_rate_fraction = 0;
-			mediaRate[i] = in.readFixedPoint(4, MP4InputStream.MASK16);
+			mediaRate[i] = in.readFixedPoint(16, 16);
 			left -= (2*len)+4;
 		}
 	}

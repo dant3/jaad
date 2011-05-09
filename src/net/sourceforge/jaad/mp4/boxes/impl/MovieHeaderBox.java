@@ -56,16 +56,16 @@ public class MovieHeaderBox extends FullBox {
 		}
 
 		//rate: 16.16 fixed point
-		rate = in.readFixedPoint(4, MP4InputStream.MASK16);
+		rate = in.readFixedPoint(16, 16);
 		//volume: 8.8 fixed point
-		volume = in.readFixedPoint(2, MP4InputStream.MASK8);
+		volume = in.readFixedPoint(8, 8);
 
 		in.skipBytes(2); //reserved
 		in.skipBytes(4); //reserved
 		in.skipBytes(4); //reserved
 
 		for(int i = 0; i<9; i++) {
-			matrix[i] = in.readFixedPoint(4, MP4InputStream.MASK16);
+			matrix[i] = in.readFixedPoint(16, 16);
 		}
 
 		in.skipBytes(24); //reserved
