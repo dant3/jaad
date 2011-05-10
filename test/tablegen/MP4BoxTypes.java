@@ -101,6 +101,7 @@ public class MP4BoxTypes {
 		{"CUSTOM_ITUNES_METADATA_BOX", "----", "BoxImpl", "Custom iTunes Metadata Box"},
 		{"ITUNES_METADATA_BOX", "data", "ITunesMetadataBox"},
 		{"ITUNES_METADATA_NAME_BOX", "name", "ITunesMetadataNameBox"},
+		{"ITUNES_METADATA_MEAN_BOX", "mean", "ITunesMetadataMeanBox"},
 		{"ALBUM_ARTIST_NAME_BOX", "aART", "BoxImpl", "Album Artist Name Box"},
 		{"ALBUM_ARTIST_SORT_BOX", "soaa ", "BoxImpl", "Album Artist Sort Box"},
 		{"ALBUM_NAME_BOX", "©alb", "BoxImpl", "Album Name Box"},

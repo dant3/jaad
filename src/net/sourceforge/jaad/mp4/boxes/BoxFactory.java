@@ -148,6 +148,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(CUSTOM_ITUNES_METADATA_BOX, BoxImpl.class);
 		BOX_CLASSES.put(ITUNES_METADATA_BOX, ITunesMetadataBox.class);
 		BOX_CLASSES.put(ITUNES_METADATA_NAME_BOX, ITunesMetadataNameBox.class);
+		BOX_CLASSES.put(ITUNES_METADATA_MEAN_BOX, ITunesMetadataMeanBox.class);
 		BOX_CLASSES.put(ALBUM_ARTIST_NAME_BOX, BoxImpl.class);
 		BOX_CLASSES.put(ALBUM_ARTIST_SORT_BOX, BoxImpl.class);
 		BOX_CLASSES.put(ALBUM_NAME_BOX, BoxImpl.class);
@@ -300,13 +301,20 @@ public class BoxFactory implements BoxTypes {
 		}
 
 		Logger.getLogger("MP4 Boxes").finest(typeToString(type));
+		System.out.println(typeToString(type));
 		final BoxImpl box = forType(type);
 		box.setParams(parent, size, type, offset, left);
 		box.decode(in);
 
-		//if mdat found and no random access, don't skip
 		left = box.getLeft();
-		if(left<0) LOGGER.log(Level.INFO, "BoxFactory: bytes left after reading box {0}: left: {1}, offset: {2}", new Object[]{typeToString(type), left, in.getOffset()});
+		if(left>0
+				&&!(box instanceof MediaDataBox)
+				&&!(box instanceof UnknownBox)
+				&&!(box instanceof SkipBox)
+				&&!(box instanceof FreeSpaceBox)) LOGGER.log(Level.INFO, "bytes left after reading box {0}: left: {1}, offset: {2}", new Object[]{typeToString(type), left, in.getOffset()});
+		else if(left<0) LOGGER.log(Level.INFO, "box {0} overread: {1} bytes, offset: {2}", new Object[]{typeToString(type), left, in.getOffset()});
+
+		//if mdat found and no random access, don't skip
 		if(box.getType()!=MEDIA_DATA_BOX||in.hasRandomAccess()) in.skipBytes(left);
 		return box;
 	}

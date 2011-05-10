@@ -18,7 +18,7 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.FullBox;
+import net.sourceforge.jaad.mp4.boxes.BoxImpl;
 
 /**
  * The Original Format Box contains the four-character-code of the original
@@ -26,7 +26,7 @@ import net.sourceforge.jaad.mp4.boxes.FullBox;
  *
  * @author in-somnia
  */
-public class OriginalFormatBox extends FullBox {
+public class OriginalFormatBox extends BoxImpl {
 
 	private long originalFormat;
 
@@ -36,8 +36,6 @@ public class OriginalFormatBox extends FullBox {
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
-
 		originalFormat = in.readBytes(4);
 		left -= 4;
 	}

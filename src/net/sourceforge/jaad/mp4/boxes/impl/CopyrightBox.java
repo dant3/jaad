@@ -18,6 +18,7 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
+import net.sourceforge.jaad.mp4.boxes.BoxTypes;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 
 /**
@@ -36,19 +37,21 @@ public class CopyrightBox extends FullBox {
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
+		if(parent.getType()==BoxTypes.USER_DATA_BOX) {
+			super.decode(in);
+			//1 bit padding, 5*3 bits language code (ISO-639-2/T)
+			long l = in.readBytes(2);
+			char[] c = new char[3];
+			c[0] = (char) (((l>>10)&31)+0x60);
+			c[1] = (char) (((l>>5)&31)+0x60);
+			c[2] = (char) ((l&31)+0x60);
+			languageCode = new String(c);
 
-		//1 bit padding, 5*3 bits language code (ISO-639-2/T)
-		long l = in.readBytes(2);
-		char[] c = new char[3];
-		c[0] = (char) (((l>>10)&31)+0x60);
-		c[1] = (char) (((l>>5)&31)+0x60);
-		c[2] = (char) ((l&31)+0x60);
-		languageCode = new String(c);
+			notice = in.readUTFString((int) left); //UTF8 or UTF16
 
-		notice = in.readUTFString((int) left); //UTF8 or UTF16
-
-		left -= 3+notice.length();
+			left -= 3+notice.length();
+		}
+		else if(parent.getType()==BoxTypes.ITUNES_META_LIST_BOX) readChildren(in);
 	}
 
 	/**
