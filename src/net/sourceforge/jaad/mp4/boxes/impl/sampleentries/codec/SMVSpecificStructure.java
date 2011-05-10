@@ -19,7 +19,7 @@ package net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec;
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
-class SMVSpecificStructure extends CodecSpecificStructure {
+public class SMVSpecificStructure extends CodecSpecificStructure {
 
 	private int framesPerSample;
 

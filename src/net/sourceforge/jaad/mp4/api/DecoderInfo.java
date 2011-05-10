@@ -17,8 +17,13 @@
 package net.sourceforge.jaad.mp4.api;
 
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.AMRSpecificStructure;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.AVCSpecificStructure;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.EVCRSpecificStructure;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.H263SpecificStructure;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.QCELPSpecificStructure;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.SMVSpecificStructure;
 
 public class DecoderInfo {
 
@@ -33,6 +38,26 @@ public class DecoderInfo {
 			decoderVersion = h263.getDecoderVersion();
 			level = h263.getLevel();
 			profile = h263.getProfile();
+		}
+		else if(l==BoxTypes.AMR_SPECIFIC_BOX) {
+			AMRSpecificStructure amr = (AMRSpecificStructure) css.getCodecSpecificStructure();
+			//TODO
+		}
+		else if(l==BoxTypes.EVRC_SPECIFIC_BOX) {
+			EVCRSpecificStructure evc = (EVCRSpecificStructure) css.getCodecSpecificStructure();
+			//TODO
+		}
+		else if(l==BoxTypes.QCELP_SPECIFIC_BOX) {
+			QCELPSpecificStructure qc = (QCELPSpecificStructure) css.getCodecSpecificStructure();
+			//TODO
+		}
+		else if(l==BoxTypes.SMV_SPECIFIC_BOX) {
+			SMVSpecificStructure smv = (SMVSpecificStructure) css.getCodecSpecificStructure();
+			//TODO
+		}
+		else if(l==BoxTypes.AVC_SPECIFIC_BOX) {
+			AVCSpecificStructure avc = (AVCSpecificStructure) css.getCodecSpecificStructure();
+			//TODO
 		}
 	}
 

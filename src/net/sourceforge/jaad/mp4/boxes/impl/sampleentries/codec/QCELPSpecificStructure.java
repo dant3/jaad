@@ -19,7 +19,7 @@ package net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec;
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
-class QCELPSpecificStructure extends CodecSpecificStructure {
+public class QCELPSpecificStructure extends CodecSpecificStructure {
 
 	private int framesPerSample;
 
