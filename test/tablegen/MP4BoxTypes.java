@@ -8,6 +8,7 @@ public class MP4BoxTypes {
 	private static final String[][] NAMES = {
 		{"standard boxes (ISO BMFF)"},
 		{"ADDITIONAL_METADATA_CONTAINER_BOX", "meco", "BoxImpl", "Additional Metadata Container Box"},
+		{"APPLE_LOSSLESS_BOX", "alac", "AppleLosslessBox"},
 		{"BINARY_XML_BOX", "bxml", "BinaryXMLBox"},
 		{"BIT_RATE_BOX", "btrt", "BitRateBox"},
 		{"CHAPTER_BOX", "chpl", "ChapterBox"},
@@ -150,6 +151,7 @@ public class MP4BoxTypes {
 		{"H263_SAMPLE_ENTRY", "s263", "VideoSampleEntry"},
 		{"AVC_SAMPLE_ENTRY", "avc1", "VideoSampleEntry"},
 		{"MP4A_SAMPLE_ENTRY", "mp4a", "AudioSampleEntry"},
+		{"DRMS_SAMPLE_ENTRY", "drms", "AudioSampleEntry"},
 		{"AMR_SAMPLE_ENTRY", "samr", "AudioSampleEntry"},
 		{"AMR_WB_SAMPLE_ENTRY", "sawb", "AudioSampleEntry"},
 		{"EVRC_SAMPLE_ENTRY", "sevc", "AudioSampleEntry"},
@@ -169,7 +171,9 @@ public class MP4BoxTypes {
 		{"AMR_SPECIFIC_BOX", "damr", "CodecSpecificBox"},
 		{"EVRC_SPECIFIC_BOX", "devc", "CodecSpecificBox"},
 		{"QCELP_SPECIFIC_BOX", "dqcp", "CodecSpecificBox"},
-		{"SMV_SPECIFIC_BOX", "dsmv", "CodecSpecificBox"}
+		{"SMV_SPECIFIC_BOX", "dsmv", "CodecSpecificBox"},
+		{"OMA DRM"},
+		{"OMA_DRM_COMMON_HEADERS_BOX", "ohdr", "OMACommonHeadersBox"}
 	};
 
 	public static void main(String[] args) {

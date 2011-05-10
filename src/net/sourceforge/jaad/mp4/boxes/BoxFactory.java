@@ -28,6 +28,7 @@ import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.impl.*;
 import net.sourceforge.jaad.mp4.boxes.impl.fd.*;
 import net.sourceforge.jaad.mp4.boxes.impl.meta.*;
+import net.sourceforge.jaad.mp4.boxes.impl.oma.*;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.*;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
 import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
@@ -40,6 +41,7 @@ import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
 public class BoxFactory implements BoxTypes {
 
 	private static final Logger LOGGER = Logger.getLogger("MP4 Boxes");
+
 	static {
 		for(Handler h : LOGGER.getHandlers()) {
 			LOGGER.removeHandler(h);
@@ -56,8 +58,10 @@ public class BoxFactory implements BoxTypes {
 	static {
 		//classes
 		BOX_CLASSES.put(ADDITIONAL_METADATA_CONTAINER_BOX, BoxImpl.class);
+		BOX_CLASSES.put(APPLE_LOSSLESS_BOX, AppleLosslessBox.class);
 		BOX_CLASSES.put(BINARY_XML_BOX, BinaryXMLBox.class);
 		BOX_CLASSES.put(BIT_RATE_BOX, BitRateBox.class);
+		BOX_CLASSES.put(CHAPTER_BOX, ChapterBox.class);
 		BOX_CLASSES.put(CHUNK_OFFSET_BOX, ChunkOffsetBox.class);
 		BOX_CLASSES.put(CHUNK_LARGE_OFFSET_BOX, ChunkOffsetBox.class);
 		BOX_CLASSES.put(CLEAN_APERTURE_BOX, CleanApertureBox.class);
@@ -193,6 +197,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(H263_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(AVC_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(MP4A_SAMPLE_ENTRY, AudioSampleEntry.class);
+		BOX_CLASSES.put(DRMS_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(AMR_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(AMR_WB_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(EVRC_SAMPLE_ENTRY, AudioSampleEntry.class);
@@ -210,6 +215,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(EVRC_SPECIFIC_BOX, CodecSpecificBox.class);
 		BOX_CLASSES.put(QCELP_SPECIFIC_BOX, CodecSpecificBox.class);
 		BOX_CLASSES.put(SMV_SPECIFIC_BOX, CodecSpecificBox.class);
+		BOX_CLASSES.put(OMA_DRM_COMMON_HEADERS_BOX, OMACommonHeadersBox.class);
 		//parameter
 		PARAMETER.put(ADDITIONAL_METADATA_CONTAINER_BOX, new String[]{"Additional Metadata Container Box"});
 		PARAMETER.put(DATA_INFORMATION_BOX, new String[]{"Data Information Box"});
