@@ -5,17 +5,71 @@ AAC decoder
 
 MP4 boxes
 =========
+- problem: 3gpp meta boxes use the same 4CC as itunes but have different content
+  (rtng, cprt, gnre) -> either the factory or the iTunes boxes need to differ 
+  (last case would be confusing when it is no iTunes box)
 - implement IPMP descriptors
 - mp3 also uses 'mp4a' (probably all kinds of MPEG audio) -> how to identify?
 - boxes to implement:
+    gsst, gstd, gssd, gspu, gspm, gshh
 	rash, mpod, wide, m4ds, btrt, avcp, avss, avll, sdep
-	alac (apple lossless), 
-	albm (album title & track number (user-data)),
-	auth (media author name (user-data)),
+    bpcc (bits per component),
 	buff (buffering information),
-	ccid (OMA DRM Content ID),
 	cdef (type and ordering of the components within the codestream),
 	clsf (Media classification (user-data)),
+    cslg (Composition to decode timeline mapping,
+    dcfD (Marlin DCF Duration, user-data atom type),
+    dsgd (DVB Sample Group Description Box),
+    dstg (DVB Sample to Group Box),
+    feci (FEC Information),
+    fecr (FEC Reservoir),
+    ihdr (Image Header),
+    mvcg (Multiview group),
+    mvci (Multiview Information),
+    mvra (Multiview Relation Attribute),
+    swtc (Multiview Group Relation),
+    vwdi (Multiview Scene Information),
+    pclr (color palette),
+    resc (Grid resolution),
+    resd (display grid resolution),
+    tibr (Tier Bit rate"),
+    tiri (Tier Information),
+    uinf (provides access to additional information associated with a UUID),
+    ulst (A list of UUID's),
+
+    user data:
+	albm (album title & track number (user-data)),
+	auth (media author name (user-data)),
+    dscp (Media description (user-data)),
+    kywd (Media keywords (user-data)),
+    loci (Media location information (user-data)),
+    perf (Media performer name (user-data)),
+    rtng (Media rating (user-data)),
+    titl (Media title (user-data)),
+    yrrc (Year when media was recorded (user-data)),
+
+    DRM:
+    mdri (Mutable DRM information),
+
+    OMA:
+    ccid (OMA DRM Content ID),
+    cvru (OMA DRM Cover URI),
+    grpi (OMA DRM Group ID),
+    icnu (OMA DRM Icon URI),
+    infu (OMA DRM Info URL),
+    lrcu (OMA DRM Lyrics URI),
+    odaf (OMA DRM Access Unit Format),
+    odda (OMA DRM Content Object),
+    odhe (OMA DRM Discrete Media Headers),
+    odrb (OMA DRM Rights Object),
+    odrm (OMA DRM Container),
+    odtt (OMA DRM Transaction Tracking),
+
+    JPEG2000:
+    jp2c (JPEG 2000 contiguous codestream),
+    jp2h (Header),
+    jp2i (Intellectual property information),
+
 - implement more codecs boxes: e.g. ac3
 - why are the ObjectDescriptor tags different in 14496-1 8.3.12 (table 8-12)?
 - change samplegroup structures to the one used for sampleentries
@@ -31,3 +85,4 @@ MP4 API
 - what is 'track selection'?
 - add itunes tags for 'account' and 'account type'
 - use more tags from ID3
+- support DRM

@@ -1,7 +1,7 @@
 package tablegen;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class MP4BoxTypes {
 
@@ -147,6 +147,16 @@ public class MP4BoxTypes {
 		{"TV_SEASON_BOX", "tvsn", "BoxImpl", "TV Season Box"},
 		{"TV_SHOW_BOX", "tvsh", "BoxImpl", "TV Show Box"},
 		{"TV_SHOW_SORT_BOX", "sosn", "BoxImpl", "TV Show Sort Box"},
+		{"metadata: 3gpp"},
+		{"THREE_GPP_ALBUM_BOX", "albm", "ThreeGPPAlbumBox"},
+		{"THREE_GPP_AUTHOR_BOX", "auth", "ThreeGPPMetadataBox"},
+		{"THREE_GPP_CLASSIFICATION_BOX", "clsf", "ThreeGPPMetadataBox"},
+		{"THREE_GPP_DESCRIPTION_BOX", "dscp", "ThreeGPPMetadataBox"},
+		{"THREE_GPP_KEYWORDS_BOX", "kywd", "ThreeGPPKeywordsBox"},
+		{"THREE_GPP_LOCATION_INFORMATION_BOX", "loci", "ThreeGPPLocationBox"},
+		{"THREE_GPP_PERFORMER_BOX", "perf", "ThreeGPPMetadataBox"},
+		{"THREE_GPP_RECORDING_YEAR_BOX", "yrrc", "ThreeGPPMetadataBox"},
+		{"THREE_GPP_TITLE_BOX", "titl", "ThreeGPPMetadataBox"},
 		{"sample entries"},
 		{"MP4V_SAMPLE_ENTRY", "mp4v", "VideoSampleEntry"},
 		{"H263_SAMPLE_ENTRY", "s263", "VideoSampleEntry"},
@@ -179,28 +189,29 @@ public class MP4BoxTypes {
 
 	public static void main(String[] args) {
 		System.out.println("long EXTENDED_TYPE = "+toLong("uuid")+";");
-		List<String> classes = new ArrayList<String>(0);
-		List<String[]> params = new ArrayList<String[]>(0);
 
+		Map<String, String> classes = new LinkedHashMap<String, String>();
+		Map<String, String> params = new LinkedHashMap<String, String>();
 		for(int i = 0; i<NAMES.length; i++) {
 			if(NAMES[i].length==1) System.out.println("\t//"+NAMES[i][0]);
 			else {
 				System.out.println("long "+NAMES[i][0]+" = "+toLong(NAMES[i][1])+"l; //"+NAMES[i][1]);
-				classes.add(NAMES[i][0]+", "+NAMES[i][2]);
-				if(NAMES[i].length>3) params.add(new String[]{NAMES[i][0], NAMES[i][3]});
+				classes.put(NAMES[i][0], NAMES[i][2]);
+				if(NAMES[i].length>3) params.put(NAMES[i][0], NAMES[i][3]);
 			}
 		}
 
+		//print class list
 		System.out.println("\n\nstatic {");
 		System.out.println("\t\t//classes");
-		for(int i = 0; i<classes.size(); i++) {
-			System.out.println("BOX_CLASSES.put("+classes.get(i)+".class);");
+		for(String key : classes.keySet()) {
+			System.out.println("BOX_CLASSES.put("+key+", "+classes.get(key)+".class);");
 		}
+
+		//print parameter list
 		System.out.println("\t\t//parameter");
-		String[] s;
-		for(int i = 0; i<params.size(); i++) {
-			s = params.get(i);
-			System.out.println("PARAMETER.put("+s[0]+", new String[]{\""+s[1]+"\"});");
+		for(String key : params.keySet()) {
+			System.out.println("PARAMETER.put("+key+", new String[]{\""+params.get(key)+"\"});");
 		}
 		System.out.println("}");
 	}

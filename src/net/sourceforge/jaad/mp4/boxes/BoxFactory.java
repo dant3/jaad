@@ -53,6 +53,7 @@ public class BoxFactory implements BoxTypes {
 		LOGGER.addHandler(h);
 	}
 	private static final Map<Long, Class<? extends BoxImpl>> BOX_CLASSES = new HashMap<Long, Class<? extends BoxImpl>>();
+	private static final Map<Long, Class<? extends BoxImpl>[]> BOX_MULTIPLE_CLASSES = new HashMap<Long, Class<? extends BoxImpl>[]>();
 	private static final Map<Long, String[]> PARAMETER = new HashMap<Long, String[]>();
 
 	static {
@@ -194,6 +195,15 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(TV_SEASON_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TV_SHOW_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TV_SHOW_SORT_BOX, BoxImpl.class);
+		BOX_CLASSES.put(THREE_GPP_ALBUM_BOX, ThreeGPPAlbumBox.class);
+		BOX_CLASSES.put(THREE_GPP_AUTHOR_BOX, ThreeGPPMetadataBox.class);
+		BOX_CLASSES.put(THREE_GPP_CLASSIFICATION_BOX, ThreeGPPMetadataBox.class);
+		BOX_CLASSES.put(THREE_GPP_DESCRIPTION_BOX, ThreeGPPMetadataBox.class);
+		BOX_CLASSES.put(THREE_GPP_KEYWORDS_BOX, ThreeGPPKeywordsBox.class);
+		BOX_CLASSES.put(THREE_GPP_LOCATION_INFORMATION_BOX, ThreeGPPLocationBox.class);
+		BOX_CLASSES.put(THREE_GPP_PERFORMER_BOX, ThreeGPPMetadataBox.class);
+		BOX_CLASSES.put(THREE_GPP_RECORDING_YEAR_BOX, ThreeGPPMetadataBox.class);
+		BOX_CLASSES.put(THREE_GPP_TITLE_BOX, ThreeGPPMetadataBox.class);
 		BOX_CLASSES.put(MP4V_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(H263_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(AVC_SAMPLE_ENTRY, VideoSampleEntry.class);

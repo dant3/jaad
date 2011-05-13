@@ -19,6 +19,7 @@ package net.sourceforge.jaad.mp4.boxes.impl.meta;
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
+import net.sourceforge.jaad.mp4.boxes.Utils;
 
 //TODO: use nio ByteBuffer instead of array
 public class ID3TagBox extends FullBox {
@@ -34,13 +35,7 @@ public class ID3TagBox extends FullBox {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 
-		//1 bit padding, 5*3 bits language code (ISO-639-2/T)
-		final long l = in.readBytes(2);
-		char[] c = new char[3];
-		c[0] = (char) (((l>>10)&31)+0x60);
-		c[1] = (char) (((l>>5)&31)+0x60);
-		c[2] = (char) ((l&31)+0x60);
-		language = new String(c);
+		language = Utils.getLanguageCode(in.readBytes(2));
 		left -= 2;
 
 		id3Data = new byte[(int) left];
@@ -52,6 +47,10 @@ public class ID3TagBox extends FullBox {
 		return id3Data;
 	}
 
+	/**
+	 * The language code for the following text. See ISO 639-2/T for the set of
+	 * three character codes.
+	 */
 	public String getLanguage() {
 		return language;
 	}
