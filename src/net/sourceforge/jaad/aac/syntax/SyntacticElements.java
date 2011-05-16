@@ -74,7 +74,7 @@ public class SyntacticElements implements Constants {
 		Element prev = null;
 		boolean content = true;
 		if(!config.getProfile().isErrorResilientProfile()) {
-			while(content&&(type = in.readBits(3))!=-1) {
+			while(content&&(type = in.readBits(3))!=ELEMENT_END) {
 				switch(type) {
 					case ELEMENT_SCE:
 					case ELEMENT_LFE:
@@ -105,13 +105,11 @@ public class SyntacticElements implements Constants {
 						decodeFIL(in, prev);
 						prev = null;
 						break;
-					case ELEMENT_END:
-						LOGGER.finest("END");
-						content = false;
-						prev = null;
-						break;
 				}
 			}
+			LOGGER.finest("END");
+			content = false;
+			prev = null;
 		}
 		else {
 			//error resilient raw data block

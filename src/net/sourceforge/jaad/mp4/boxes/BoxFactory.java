@@ -311,7 +311,6 @@ public class BoxFactory implements BoxTypes {
 		}
 
 		Logger.getLogger("MP4 Boxes").finest(typeToString(type));
-		System.out.println(typeToString(type));
 		final BoxImpl box = forType(type);
 		box.setParams(parent, size, type, offset, left);
 		box.decode(in);

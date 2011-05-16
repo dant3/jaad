@@ -78,10 +78,6 @@ public class Decoder implements Constants {
 
 		in = new BitStream();
 
-		printLog();
-	}
-
-	private void printLog() {
 		LOGGER.log(Level.FINE, "profile: {0}", config.getProfile());
 		LOGGER.log(Level.FINE, "sf: {0}", config.getSampleFrequency().getFrequency());
 		LOGGER.log(Level.FINE, "channels: {0}", config.getChannelConfiguration().getDescription());

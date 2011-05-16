@@ -30,6 +30,7 @@ import net.sourceforge.jaad.aac.syntax.SectionData;
  * Decodes spectral data for ICStreams if error resilience is used for
  * section data.
  */
+//TODO: needs decodeSpectralDataER() in BitStream
 public class HCR implements Constants {
 
 	private static class Codeword {
@@ -187,7 +188,7 @@ public class HCR implements Constants {
 												segment[segmentsCount].readSegment(segwidth, in);
 												bitsread += segwidth;
 
-												Huffman.decodeSpectralDataER(segment[segmentsCount], thisSectCB, spectralData, sp);
+												//Huffman.decodeSpectralDataER(segment[segmentsCount], thisSectCB, spectralData, sp);
 
 												//keep leftover bits
 												segment[segmentsCount].rewindReverse();
@@ -254,14 +255,14 @@ public class HCR implements Constants {
 						if(codeword[codewordID].bits.len!=0) segment[segmentID].concatBits(codeword[codewordID].bits);
 
 						int tmplen = segment[segmentID].len;
-						int ret = Huffman.decodeSpectralDataER(segment[segmentID], codeword[codewordID].cb,
+						/*int ret = Huffman.decodeSpectralDataER(segment[segmentID], codeword[codewordID].cb,
 								spectralData, codeword[codewordID].sp_offset);
 
 						if(ret>=0) codeword[codewordID].decoded = 1;
 						else {
 							codeword[codewordID].bits = segment[segmentID];
 							codeword[codewordID].bits.len = tmplen;
-						}
+						}*/
 
 					}
 				}

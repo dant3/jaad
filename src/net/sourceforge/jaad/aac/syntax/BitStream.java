@@ -86,7 +86,6 @@ public class BitStream {
 	}
 
 	public int readBits(int n) throws AACException {
-		if(getBitsLeft()<n) throw new AACException("invalid data: less than "+n+" bits left, buffer.length="+buffer.length+", pos="+pos+", bitsLeft="+bitsCached);
 		int result;
 		if(bitsCached>=n) {
 			bitsCached -= n;
@@ -105,7 +104,6 @@ public class BitStream {
 	}
 
 	public int readBit() throws AACException {
-		if(getBitsLeft()<1) throw new AACException("invalid data: less than 1 bit left, position: "+position);
 		int i;
 		if(bitsCached>0) {
 			bitsCached--;
