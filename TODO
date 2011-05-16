@@ -11,7 +11,6 @@ MP4 boxes
 - implement IPMP descriptors
 - mp3 also uses 'mp4a' (probably all kinds of MPEG audio) -> how to identify?
 - boxes to implement:
-    gsst, gstd, gssd, gspu, gspm, gshh
 	rash, mpod, wide, m4ds, btrt, avcp, avss, avll, sdep
     bpcc (bits per component),
 	buff (buffering information),
@@ -36,6 +35,9 @@ MP4 boxes
     tiri (Tier Information),
     uinf (provides access to additional information associated with a UUID),
     ulst (A list of UUID's),
+
+	youtube:
+	gsst, gstd, gssd, gspu, gspm, gshh
 
     user data:
 	albm (album title & track number (user-data)),

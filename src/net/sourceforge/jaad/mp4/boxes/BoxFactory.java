@@ -321,7 +321,7 @@ public class BoxFactory implements BoxTypes {
 				&&!(box instanceof UnknownBox)
 				&&!(box instanceof SkipBox)
 				&&!(box instanceof FreeSpaceBox)) LOGGER.log(Level.INFO, "bytes left after reading box {0}: left: {1}, offset: {2}", new Object[]{typeToString(type), left, in.getOffset()});
-		else if(left<0) LOGGER.log(Level.INFO, "box {0} overread: {1} bytes, offset: {2}", new Object[]{typeToString(type), left, in.getOffset()});
+		else if(left<0) LOGGER.log(Level.SEVERE, "box {0} overread: {1} bytes, offset: {2}", new Object[]{typeToString(type), left, in.getOffset()});
 
 		//if mdat found and no random access, don't skip
 		if(box.getType()!=MEDIA_DATA_BOX||in.hasRandomAccess()) in.skipBytes(left);

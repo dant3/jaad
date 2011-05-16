@@ -66,7 +66,7 @@ public abstract class Descriptor {
 		//skip remaining bytes
 		final long remaining = size-(in.getOffset()-desc.start);
 		if(remaining>0) {
-			Logger.getLogger("MP4 Boxes").log(Level.WARNING, "Descriptor: bytes left: {0}, offset: {1}", new Long[]{remaining, in.getOffset()});
+			Logger.getLogger("MP4 Boxes").log(Level.INFO, "Descriptor: bytes left: {0}, offset: {1}", new Long[]{remaining, in.getOffset()});
 			in.skipBytes(remaining);
 		}
 		desc.size += read; //include type and size fields
