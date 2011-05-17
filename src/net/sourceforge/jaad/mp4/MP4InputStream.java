@@ -31,8 +31,9 @@ public class MP4InputStream {
 	public static final String UTF8 = "UTF-8";
 	public static final String UTF16 = "UTF-16";
 	private static final int BYTE_ORDER_MASK = 0xFEFF;
-	private final PushbackInputStream in;
+	private final InputStream in;
 	private final RandomAccessFile fin;
+	private int peeked;
 	private long offset; //only used with InputStream
 
 	/**
@@ -43,8 +44,9 @@ public class MP4InputStream {
 	 * @param in an <code>InputStream</code> to read from
 	 */
 	MP4InputStream(InputStream in) {
-		this.in = new PushbackInputStream(in);
+		this.in = in;
 		fin = null;
+		peeked = -1;
 		offset = 0;
 	}
 
@@ -58,6 +60,7 @@ public class MP4InputStream {
 	MP4InputStream(RandomAccessFile fin) {
 		this.fin = fin;
 		in = null;
+		peeked = -1;
 	}
 
 	/**
@@ -72,7 +75,11 @@ public class MP4InputStream {
 	 */
 	public int read() throws IOException {
 		int i = 0;
-		if(in!=null) i = in.read();
+		if(peeked>=0) {
+			i = peeked;
+			peeked = -1;
+		}
+		else if(in!=null) i = in.read();
 		else if(fin!=null) i = fin.read();
 
 		if(i==-1) throw new EOFException();
@@ -99,6 +106,13 @@ public class MP4InputStream {
 	public void read(final byte[] b, int off, int len) throws IOException {
 		int read = 0;
 		int i = 0;
+
+		if(peeked>=0&&len>0) {
+			b[off] = (byte) peeked;
+			peeked = -1;
+			read++;
+		}
+
 		while(read<len) {
 			if(in!=null) i = in.read(b, off+read, len-read);
 			else if(fin!=null) i = fin.read(b, off+read, len-read);
@@ -284,10 +298,16 @@ public class MP4InputStream {
 	 */
 	public void skipBytes(final long n) throws IOException {
 		long l = 0;
+		if(peeked>=0&&n>0) {
+			peeked = -1;
+			l++;
+		}
+
 		while(l<n) {
 			if(in!=null) l += in.skip((n-l));
 			else if(fin!=null) l += fin.skipBytes((int) (n-l));
 		}
+
 		offset += l;
 	}
 
@@ -339,11 +359,11 @@ public class MP4InputStream {
 	public boolean hasLeft() throws IOException {
 		final boolean b;
 		if(fin!=null) b = fin.getFilePointer()<(fin.length()-1);
+		else if(peeked>=0) b = true;
 		else {
-			//TODO: pushback is needed to peek next -> do this any other way?
 			final int i = in.read();
 			b = (i!=-1);
-			if(b) in.unread(i);
+			if(b) peeked = i;
 		}
 		return b;
 	}
@@ -356,6 +376,7 @@ public class MP4InputStream {
 	 * @throws IOException if an I/O error occurs
 	 */
 	void close() throws IOException {
+		peeked = -1;
 		if(in!=null) in.close();
 		else if(fin!=null) fin.close();
 	}

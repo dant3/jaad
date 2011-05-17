@@ -170,6 +170,13 @@ public interface BoxTypes {
 	long THREE_GPP_PERFORMER_BOX = 1885696614l; //perf
 	long THREE_GPP_RECORDING_YEAR_BOX = 2037543523l; //yrrc
 	long THREE_GPP_TITLE_BOX = 1953068140l; //titl
+	//metadata: google/youtube
+	long GOOGLE_HOST_HEADER_BOX = 1735616616l; //gshh
+	long GOOGLE_PING_MESSAGE_BOX = 1735618669l; //gspm
+	long GOOGLE_PING_URL_BOX = 1735618677l; //gspu
+	long GOOGLE_SOURCE_DATA_BOX = 1735619428l; //gssd
+	long GOOGLE_START_TIME_BOX = 1735619444l; //gsst
+	long GOOGLE_TRACK_DURATION_BOX = 1735619684l; //gstd
 	//sample entries
 	long MP4V_SAMPLE_ENTRY = 1836070006l; //mp4v
 	long H263_SAMPLE_ENTRY = 1932670515l; //s263

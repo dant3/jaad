@@ -204,6 +204,12 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(THREE_GPP_PERFORMER_BOX, ThreeGPPMetadataBox.class);
 		BOX_CLASSES.put(THREE_GPP_RECORDING_YEAR_BOX, ThreeGPPMetadataBox.class);
 		BOX_CLASSES.put(THREE_GPP_TITLE_BOX, ThreeGPPMetadataBox.class);
+		BOX_CLASSES.put(GOOGLE_HOST_HEADER_BOX, BoxImpl.class);
+		BOX_CLASSES.put(GOOGLE_PING_MESSAGE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(GOOGLE_PING_URL_BOX, BoxImpl.class);
+		BOX_CLASSES.put(GOOGLE_SOURCE_DATA_BOX, BoxImpl.class);
+		BOX_CLASSES.put(GOOGLE_START_TIME_BOX, BoxImpl.class);
+		BOX_CLASSES.put(GOOGLE_TRACK_DURATION_BOX, BoxImpl.class);
 		BOX_CLASSES.put(MP4V_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(H263_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(AVC_SAMPLE_ENTRY, VideoSampleEntry.class);
@@ -292,6 +298,12 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(TV_SEASON_BOX, new String[]{"TV Season Box"});
 		PARAMETER.put(TV_SHOW_BOX, new String[]{"TV Show Box"});
 		PARAMETER.put(TV_SHOW_SORT_BOX, new String[]{"TV Show Sort Box"});
+		PARAMETER.put(GOOGLE_HOST_HEADER_BOX, new String[]{"Google Host Header Box"});
+		PARAMETER.put(GOOGLE_PING_MESSAGE_BOX, new String[]{"Google Ping Message Box"});
+		PARAMETER.put(GOOGLE_PING_URL_BOX, new String[]{"Google Ping URL Box"});
+		PARAMETER.put(GOOGLE_SOURCE_DATA_BOX, new String[]{"Google Source Data Box"});
+		PARAMETER.put(GOOGLE_START_TIME_BOX, new String[]{"Google Start Time Box"});
+		PARAMETER.put(GOOGLE_TRACK_DURATION_BOX, new String[]{"Google Track Duration Box"});
 	}
 
 	public static Box parseBox(Box parent, MP4InputStream in) throws IOException {

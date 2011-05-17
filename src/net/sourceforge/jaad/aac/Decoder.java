@@ -100,7 +100,6 @@ public class Decoder implements Constants {
 			decode(buffer);
 		}
 		catch(AACException e) {
-			//TODO: some MP4 frames seem to be not long enough, EOFException in Huffman!
 			if(!e.isEndOfStream()) throw e;
 			else LOGGER.warning("unexpected end of frame");
 		}

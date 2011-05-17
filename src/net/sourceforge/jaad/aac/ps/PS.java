@@ -317,14 +317,14 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		}
 
 		/* decorrelation and transient reduction
-
+		
 		PS_AP_LINKS - 1
 		-----
 		| |  (Q_FRACT_ALLPASS[k][m]*z^-link_delay[m]) - (a[m]*g_decay_slope[k])
 		H[k][z] = z^-2 * PHI_FRACT[k] * | | ----------------------------------------------------------------
 		| | 1 - (a[m]*g_decay_slope[k]*Q_FRACT_ALLPASS[k][m]*z^-link_delay[m])
 		m = 0
-
+		
 		d[k][z](out) = transient_gain_mapped[k][z] * H[k][z] * s[k][z]
 		 */
 		for(k = 0; k<ALLPASS_BANDS[use34I]; k++) {
@@ -387,7 +387,7 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		}
 	}
 
-	//utility for copying complex array; TODO: use Object.clone() instead??
+	//utility for copying complex array
 	private void copyArray(float[][] from, int fromOff, float[][] to, int toOff, int len) {
 		for(int i = 0; i<len; i++) {
 			to[toOff+i][0] = from[fromOff+i][0];

@@ -47,11 +47,11 @@ public class BoxImpl implements Box {
 	}
 
 	/**
-	 * Decodes the specified input stream by reading this box and all of its
-	 * children (if any) and returns the number of bytes left in the box (which
-	 * should be normally 0).
+	 * Decodes the given input stream by reading this box and all of its
+	 * children (if any).
+	 * 
 	 * @param in an input stream
-	 * @throws IOException if an reading error occurs
+	 * @throws IOException if an error occurs
 	 */
 	public void decode(MP4InputStream in) throws IOException {
 		readChildren(in);

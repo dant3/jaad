@@ -1,6 +1,5 @@
 AAC decoder
 ===========
-- some frames throw IOException (EOF) -> perhaps Huffman decoding not correct
 - SBR in ADTS stream has problems with sample frequency
 
 MP4 boxes
@@ -35,9 +34,6 @@ MP4 boxes
     tiri (Tier Information),
     uinf (provides access to additional information associated with a UUID),
     ulst (A list of UUID's),
-
-	youtube:
-	gsst, gstd, gssd, gspu, gspm, gshh
 
     user data:
 	albm (album title & track number (user-data)),
@@ -88,3 +84,10 @@ MP4 API
 - add itunes tags for 'account' and 'account type'
 - use more tags from ID3
 - support DRM
+- use google metadata:
+	gssh: HTTP host header
+	gsst: start time in milliseconds
+	gstd: duration in milliseconds
+	gssd: source data
+	gspm: ping message
+	gspu: ping url

@@ -266,6 +266,7 @@ public class MetaData {
 		if(meta.hasChild(BoxTypes.NERO_METADATA_TAGS_BOX)) parseNeroTags((NeroMetadataTagsBox) meta.getChild(BoxTypes.NERO_METADATA_TAGS_BOX));
 	}
 
+	//parses children of 'ilst': iTunes
 	private void parseITunesMetaData(Box ilst) {
 		final List<Box> boxes = ilst.getChildren();
 		long l;
@@ -273,6 +274,7 @@ public class MetaData {
 		for(Box box : boxes) {
 			l = box.getType();
 			data = (ITunesMetadataBox) box.getChild(BoxTypes.ITUNES_METADATA_BOX);
+
 			if(l==BoxTypes.ARTIST_NAME_BOX) put(Field.ARTIST, data.getText());
 			else if(l==BoxTypes.TRACK_NAME_BOX) put(Field.TITLE, data.getText());
 			else if(l==BoxTypes.ALBUM_ARTIST_NAME_BOX) put(Field.ALBUM_ARTIST, data.getText());
@@ -332,6 +334,7 @@ public class MetaData {
 		}
 	}
 
+	//parses children of ID3
 	private void parseID3(ID3TagBox box) {
 		try {
 			final DataInputStream in = new DataInputStream(new ByteArrayInputStream(box.getID3Data()));
@@ -400,6 +403,7 @@ public class MetaData {
 		}
 	}
 
+	//parses children of 'tags': Nero
 	private void parseNeroTags(NeroMetadataTagsBox tags) {
 		final Map<String, String> pairs = tags.getPairs();
 		String val;
