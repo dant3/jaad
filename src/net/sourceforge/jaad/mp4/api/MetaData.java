@@ -28,13 +28,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.jaad.mp4.MP4Container;
 import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
 import net.sourceforge.jaad.mp4.boxes.impl.CopyrightBox;
 import net.sourceforge.jaad.mp4.boxes.impl.meta.ID3TagBox;
 import net.sourceforge.jaad.mp4.boxes.impl.meta.ITunesMetadataBox;
 import net.sourceforge.jaad.mp4.boxes.impl.meta.NeroMetadataTagsBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ThreeGPPAlbumBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ThreeGPPLocationBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ThreeGPPMetadataBox;
 
 /**
  * This class contains the metadata for a movie. It parses different metadata
@@ -70,6 +72,7 @@ public class MetaData {
 		public static final Field<Boolean> COMPILATION = new Field<Boolean>();
 		public static final Field<List<Artwork>> COVER_ARTWORK = new Field<List<Artwork>>();
 		public static final Field<String> GROUPING = new Field<String>();
+		public static final Field<String> LOCATION = new Field<String>();
 		public static final Field<String> LYRICS = new Field<String>();
 		public static final Field<Integer> RATING = new Field<Integer>();
 		public static final Field<Integer> PODCAST = new Field<Integer>();
@@ -238,32 +241,56 @@ public class MetaData {
 		contents = new HashMap<Field<?>, Object>();
 	}
 
-	/*moov.udta.meta:
-	-ilst
-	-tags
-	--meta (no container!)
-	--tseg
-	---tshd
+	/*moov.udta:
+	 * -3gpp boxes
+	 * -meta
+	 * --ilst
+	 * --tags
+	 * --meta (no container!)
+	 * --tseg
+	 * ---tshd
 	 */
-	void parse(Box meta) {
+	void parse(Box udta, Box meta) {
 		//standard boxes
 		if(meta.hasChild(BoxTypes.COPYRIGHT_BOX)) {
 			CopyrightBox cprt = (CopyrightBox) meta.getChild(BoxTypes.COPYRIGHT_BOX);
 			put(Field.LANGUAGE, new Locale(cprt.getLanguageCode()));
 			put(Field.COPYRIGHT, cprt.getNotice());
 		}
-		//if(meta.containsChild(BoxTypes.PRIMARY_ITEM_BOX)) pitm = (PrimaryItemBox) meta.getChild(BoxTypes.PRIMARY_ITEM_BOX);
-		//if(meta.containsChild(BoxTypes.DATA_INFORMATION_BOX)) dinf = (ContainerBox) meta.getChild(BoxTypes.DATA_INFORMATION_BOX);
-		//if(meta.containsChild(BoxTypes.ITEM_LOCATION_BOX)) iloc = (ItemLocationBox) meta.getChild(BoxTypes.ITEM_LOCATION_BOX);
-		//if(meta.containsChild(BoxTypes.ITEM_PROTECTION_BOX)) ipro = (ItemProtectionBox) meta.getChild(BoxTypes.ITEM_PROTECTION_BOX);
-		//if(meta.containsChild(BoxTypes.ITEM_INFORMATION_BOX)) iinf = (ItemInformationBox) meta.getChild(BoxTypes.ITEM_INFORMATION_ENTRY);
-		//if(meta.hasChild(BoxTypes.IPMP_CONTROL_BOX));
+		//3gpp user data
+		if(udta!=null) parse3GPPData(udta);
 		//id3, TODO: can be present in different languages
 		if(meta.hasChild(BoxTypes.ID3_TAG_BOX)) parseID3((ID3TagBox) meta.getChild(BoxTypes.ID3_TAG_BOX));
 		//itunes
 		if(meta.hasChild(BoxTypes.ITUNES_META_LIST_BOX)) parseITunesMetaData(meta.getChild(BoxTypes.ITUNES_META_LIST_BOX));
 		//nero tags
 		if(meta.hasChild(BoxTypes.NERO_METADATA_TAGS_BOX)) parseNeroTags((NeroMetadataTagsBox) meta.getChild(BoxTypes.NERO_METADATA_TAGS_BOX));
+	}
+
+	//parses specific children of 'udta': 3GPP
+	//TODO: handle language codes
+	private void parse3GPPData(Box udta) {
+		if(udta.hasChild(BoxTypes.THREE_GPP_ALBUM_BOX)) {
+			ThreeGPPAlbumBox albm = (ThreeGPPAlbumBox) udta.getChild(BoxTypes.THREE_GPP_ALBUM_BOX);
+			put(Field.ALBUM, albm.getData());
+			put(Field.TRACK_NUMBER, albm.getTrackNumber());
+		}
+		//if(udta.hasChild(BoxTypes.THREE_GPP_AUTHOR_BOX));
+		//if(udta.hasChild(BoxTypes.THREE_GPP_CLASSIFICATION_BOX));
+		if(udta.hasChild(BoxTypes.THREE_GPP_DESCRIPTION_BOX)) put(Field.DESCRIPTION, ((ThreeGPPMetadataBox) udta.getChild(BoxTypes.THREE_GPP_DESCRIPTION_BOX)).getData());
+		if(udta.hasChild(BoxTypes.THREE_GPP_KEYWORDS_BOX)) put(Field.KEYWORDS, ((ThreeGPPMetadataBox) udta.getChild(BoxTypes.THREE_GPP_KEYWORDS_BOX)).getData());
+		if(udta.hasChild(BoxTypes.THREE_GPP_LOCATION_INFORMATION_BOX)) put(Field.LOCATION, ((ThreeGPPLocationBox) udta.getChild(BoxTypes.THREE_GPP_LOCATION_INFORMATION_BOX)).getPlaceName());
+		if(udta.hasChild(BoxTypes.THREE_GPP_PERFORMER_BOX)) put(Field.ARTIST, ((ThreeGPPMetadataBox) udta.getChild(BoxTypes.THREE_GPP_PERFORMER_BOX)).getData());
+		if(udta.hasChild(BoxTypes.THREE_GPP_RECORDING_YEAR_BOX)) {
+			final String value = ((ThreeGPPMetadataBox) udta.getChild(BoxTypes.THREE_GPP_RECORDING_YEAR_BOX)).getData();
+			try {
+				put(Field.RELEASE_DATE, new Date(Integer.parseInt(value)));
+			}
+			catch(NumberFormatException e) {
+				Logger.getLogger("MP4 API").log(Level.INFO, "unable to parse 3GPP metadata: recording year value: {0}", value);
+			}
+		}
+		if(udta.hasChild(BoxTypes.THREE_GPP_TITLE_BOX)) put(Field.TITLE, ((ThreeGPPMetadataBox) udta.getChild(BoxTypes.THREE_GPP_TITLE_BOX)).getData());
 	}
 
 	//parses children of 'ilst': iTunes

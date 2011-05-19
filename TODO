@@ -14,7 +14,6 @@ MP4 boxes
     bpcc (bits per component),
 	buff (buffering information),
 	cdef (type and ordering of the components within the codestream),
-	clsf (Media classification (user-data)),
     cslg (Composition to decode timeline mapping,
     dcfD (Marlin DCF Duration, user-data atom type),
     dsgd (DVB Sample Group Description Box),
@@ -34,17 +33,6 @@ MP4 boxes
     tiri (Tier Information),
     uinf (provides access to additional information associated with a UUID),
     ulst (A list of UUID's),
-
-    user data:
-	albm (album title & track number (user-data)),
-	auth (media author name (user-data)),
-    dscp (Media description (user-data)),
-    kywd (Media keywords (user-data)),
-    loci (Media location information (user-data)),
-    perf (Media performer name (user-data)),
-    rtng (Media rating (user-data)),
-    titl (Media title (user-data)),
-    yrrc (Year when media was recorded (user-data)),
 
     DRM:
     mdri (Mutable DRM information),

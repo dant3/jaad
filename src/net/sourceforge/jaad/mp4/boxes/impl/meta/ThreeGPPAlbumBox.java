@@ -13,7 +13,7 @@ public class ThreeGPPAlbumBox extends ThreeGPPMetadataBox {
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		decodeCommon(in);
+		super.decode(in);
 
 		if(left>0) {
 			trackNumber = in.read();
