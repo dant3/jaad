@@ -17,63 +17,54 @@
 package net.sourceforge.jaad.mp4.api;
 
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.AMRSpecificStructure;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.AVCSpecificStructure;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.EVCRSpecificStructure;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.H263SpecificStructure;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.QCELPSpecificStructure;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.SMVSpecificStructure;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.*;
 
+//TODO: find more common attributes or provide access to separate codec structs
 public class DecoderInfo {
 
-	private long vendor;
-	private int decoderVersion, level, profile;
+	private CodecSpecificBox css;
 
 	public DecoderInfo(CodecSpecificBox css) {
 		final long l = css.getType();
 		if(l==BoxTypes.H263_SPECIFIC_BOX) {
-			H263SpecificStructure h263 = (H263SpecificStructure) css.getCodecSpecificStructure();
-			vendor = h263.getVendor();
-			decoderVersion = h263.getDecoderVersion();
-			level = h263.getLevel();
-			profile = h263.getProfile();
+			H263SpecificBox h263 = (H263SpecificBox) css;
+			//TODO
 		}
 		else if(l==BoxTypes.AMR_SPECIFIC_BOX) {
-			AMRSpecificStructure amr = (AMRSpecificStructure) css.getCodecSpecificStructure();
+			AMRSpecificBox amr = (AMRSpecificBox) css;
 			//TODO
 		}
 		else if(l==BoxTypes.EVRC_SPECIFIC_BOX) {
-			EVCRSpecificStructure evc = (EVCRSpecificStructure) css.getCodecSpecificStructure();
+			EVRCSpecificBox evc = (EVRCSpecificBox) css;
 			//TODO
 		}
 		else if(l==BoxTypes.QCELP_SPECIFIC_BOX) {
-			QCELPSpecificStructure qc = (QCELPSpecificStructure) css.getCodecSpecificStructure();
+			QCELPSpecificBox qc = (QCELPSpecificBox) css;
 			//TODO
 		}
 		else if(l==BoxTypes.SMV_SPECIFIC_BOX) {
-			SMVSpecificStructure smv = (SMVSpecificStructure) css.getCodecSpecificStructure();
+			SMVSpecificBox smv = (SMVSpecificBox) css;
 			//TODO
 		}
 		else if(l==BoxTypes.AVC_SPECIFIC_BOX) {
-			AVCSpecificStructure avc = (AVCSpecificStructure) css.getCodecSpecificStructure();
+			AVCSpecificBox avc = (AVCSpecificBox) css;
+			//TODO
+		}
+		else if(l==BoxTypes.AC3_SPECIFIC_BOX) {
+			AC3SpecificBox ac3 = (AC3SpecificBox) css;
+			//TODO
+		}
+		else if(l==BoxTypes.EAC3_SPECIFIC_BOX) {
+			EAC3SpecificBox eac3 = (EAC3SpecificBox) css;
 			//TODO
 		}
 	}
 
 	public int getDecoderVersion() {
-		return decoderVersion;
-	}
-
-	public int getLevel() {
-		return level;
-	}
-
-	public int getProfile() {
-		return profile;
+		return css.getDecoderVersion();
 	}
 
 	public long getVendor() {
-		return vendor;
+		return css.getVendor();
 	}
 }

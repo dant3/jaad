@@ -30,8 +30,7 @@ public abstract class SampleEntry extends BoxImpl {
 
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
-		//6*8 bits reserved
-		in.skipBytes(6);
+		in.skipBytes(6); //reserved
 		dataReferenceIndex = in.readBytes(2);
 		left -= 8;
 	}

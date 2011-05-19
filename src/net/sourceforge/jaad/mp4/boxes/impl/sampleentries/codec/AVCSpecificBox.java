@@ -20,14 +20,14 @@ import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
 //defined in ISO 14496-15 as 'AVC Configuration Record'
-public class AVCSpecificStructure extends CodecSpecificStructure {
+public class AVCSpecificBox extends CodecSpecificBox {
 
 	private int configurationVersion, profile, level, lengthSize;
 	private byte profileCompatibility;
 	private byte[][] sequenceParameterSetNALUnit, pictureParameterSetNALUnit;
 
-	public AVCSpecificStructure() {
-		super(7); //at least 7 bytes are read
+	public AVCSpecificBox() {
+		super("AVC Specific Box");
 	}
 
 	@Override
@@ -42,21 +42,25 @@ public class AVCSpecificStructure extends CodecSpecificStructure {
 		int len;
 		//3 bits reserved, 5 bits number of sequence parameter sets
 		final int sequenceParameterSets = in.read()&31;
+		left -= 6;
+
 		sequenceParameterSetNALUnit = new byte[sequenceParameterSets][];
 		for(int i = 0; i<sequenceParameterSets; i++) {
 			len = (int) in.readBytes(2);
 			sequenceParameterSetNALUnit[i] = new byte[len];
 			in.readBytes(sequenceParameterSetNALUnit[i]);
-			size+=len+2;
+			left -= len+2;
 		}
 
 		final int pictureParameterSets = in.read();
+		left--;
+
 		pictureParameterSetNALUnit = new byte[pictureParameterSets][];
 		for(int i = 0; i<pictureParameterSets; i++) {
 			len = (int) in.readBytes(2);
 			pictureParameterSetNALUnit[i] = new byte[len];
 			in.readBytes(pictureParameterSetNALUnit[i]);
-			size+=len+2;
+			left -= len+2;
 		}
 	}
 

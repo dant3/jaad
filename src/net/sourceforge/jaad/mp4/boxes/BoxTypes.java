@@ -182,6 +182,8 @@ public interface BoxTypes {
 	long H263_SAMPLE_ENTRY = 1932670515l; //s263
 	long AVC_SAMPLE_ENTRY = 1635148593l; //avc1
 	long MP4A_SAMPLE_ENTRY = 1836069985l; //mp4a
+	long AC3_SAMPLE_ENTRY = 1633889587l; //ac-3
+	long EAC3_SAMPLE_ENTRY = 1700998451l; //ec-3
 	long DRMS_SAMPLE_ENTRY = 1685220723l; //drms
 	long AMR_SAMPLE_ENTRY = 1935764850l; //samr
 	long AMR_WB_SAMPLE_ENTRY = 1935767394l; //sawb
@@ -199,6 +201,8 @@ public interface BoxTypes {
 	long H263_SPECIFIC_BOX = 1681012275l; //d263
 	long AVC_SPECIFIC_BOX = 1635148611l; //avcC
 	//audio codecs
+	long AC3_SPECIFIC_BOX = 1684103987l; //dac3
+	long EAC3_SPECIFIC_BOX = 1684366131l; //dec3
 	long AMR_SPECIFIC_BOX = 1684106610l; //damr
 	long EVRC_SPECIFIC_BOX = 1684371043l; //devc
 	long QCELP_SPECIFIC_BOX = 1685152624l; //dqcp

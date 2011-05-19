@@ -30,7 +30,7 @@ import net.sourceforge.jaad.mp4.boxes.impl.fd.*;
 import net.sourceforge.jaad.mp4.boxes.impl.meta.*;
 import net.sourceforge.jaad.mp4.boxes.impl.oma.*;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.*;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.CodecSpecificBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.*;
 import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
 
 /*TODO: subtracting from 'left' could be replaced:
@@ -214,6 +214,8 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(H263_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(AVC_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(MP4A_SAMPLE_ENTRY, AudioSampleEntry.class);
+		BOX_CLASSES.put(AC3_SAMPLE_ENTRY, AudioSampleEntry.class);
+		BOX_CLASSES.put(EAC3_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(DRMS_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(AMR_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(AMR_WB_SAMPLE_ENTRY, AudioSampleEntry.class);
@@ -226,12 +228,14 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(RTP_HINT_SAMPLE_ENTRY, RTPHintSampleEntry.class);
 		BOX_CLASSES.put(FD_HINT_SAMPLE_ENTRY, FDHintSampleEntry.class);
 		BOX_CLASSES.put(ESD_BOX, ESDBox.class);
-		BOX_CLASSES.put(H263_SPECIFIC_BOX, CodecSpecificBox.class);
-		BOX_CLASSES.put(AVC_SPECIFIC_BOX, CodecSpecificBox.class);
-		BOX_CLASSES.put(AMR_SPECIFIC_BOX, CodecSpecificBox.class);
-		BOX_CLASSES.put(EVRC_SPECIFIC_BOX, CodecSpecificBox.class);
-		BOX_CLASSES.put(QCELP_SPECIFIC_BOX, CodecSpecificBox.class);
-		BOX_CLASSES.put(SMV_SPECIFIC_BOX, CodecSpecificBox.class);
+		BOX_CLASSES.put(H263_SPECIFIC_BOX, H263SpecificBox.class);
+		BOX_CLASSES.put(AVC_SPECIFIC_BOX, AVCSpecificBox.class);
+		BOX_CLASSES.put(AC3_SPECIFIC_BOX, AC3SpecificBox.class);
+		BOX_CLASSES.put(EAC3_SPECIFIC_BOX, EAC3SpecificBox.class);
+		BOX_CLASSES.put(AMR_SPECIFIC_BOX, AMRSpecificBox.class);
+		BOX_CLASSES.put(EVRC_SPECIFIC_BOX, EVRCSpecificBox.class);
+		BOX_CLASSES.put(QCELP_SPECIFIC_BOX, QCELPSpecificBox.class);
+		BOX_CLASSES.put(SMV_SPECIFIC_BOX, SMVSpecificBox.class);
 		BOX_CLASSES.put(OMA_DRM_COMMON_HEADERS_BOX, OMACommonHeadersBox.class);
 		//parameter
 		PARAMETER.put(ADDITIONAL_METADATA_CONTAINER_BOX, new String[]{"Additional Metadata Container Box"});
@@ -323,7 +327,7 @@ public class BoxFactory implements BoxTypes {
 		}
 
 		Logger.getLogger("MP4 Boxes").finest(typeToString(type));
-		final BoxImpl box = forType(type);
+		final BoxImpl box = forType(type, in.getOffset());
 		box.setParams(parent, size, type, offset, left);
 		box.decode(in);
 
@@ -374,7 +378,7 @@ public class BoxFactory implements BoxTypes {
 		return box;
 	}
 
-	private static BoxImpl forType(long type) {
+	private static BoxImpl forType(long type, long offset) {
 		BoxImpl box = null;
 
 		final Long l = Long.valueOf(type);
@@ -402,7 +406,7 @@ public class BoxFactory implements BoxTypes {
 		}
 
 		if(box==null) {
-			LOGGER.log(Level.INFO, "BoxFactory: unknown box type: {0}", typeToString(type));
+			LOGGER.log(Level.INFO, "BoxFactory: unknown box type: {0}; position: {1}", new Object[]{typeToString(type), offset});
 			box = new UnknownBox();
 		}
 		return box;

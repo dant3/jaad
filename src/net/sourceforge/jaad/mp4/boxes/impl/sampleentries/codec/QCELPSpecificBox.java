@@ -19,18 +19,20 @@ package net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec;
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
-public class SMVSpecificStructure extends CodecSpecificStructure {
+public class QCELPSpecificBox extends CodecSpecificBox {
 
 	private int framesPerSample;
 
-	SMVSpecificStructure() {
-		super(6);
+	QCELPSpecificBox() {
+		super("QCELP Specific Box");
 	}
 
 	@Override
-	void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
+	public void decode(MP4InputStream in) throws IOException {
+		decodeCommon(in);
+		
 		framesPerSample = in.read();
+		left--;
 	}
 
 	public int getFramesPerSample() {

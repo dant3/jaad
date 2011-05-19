@@ -19,31 +19,28 @@ package net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec;
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
-public class AMRSpecificStructure extends CodecSpecificStructure {
+public class H263SpecificBox extends CodecSpecificBox {
 
-	private int modeSet, modeChangePeriod, framesPerSample;
+	private int level, profile;
 
-	AMRSpecificStructure() {
-		super(9);
+	H263SpecificBox() {
+		super("H.263 Specific Box");
 	}
 
 	@Override
-	void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
-		modeSet = (int) in.readBytes(2);
-		modeChangePeriod = in.read();
-		framesPerSample = in.read();
+	public void decode(MP4InputStream in) throws IOException {
+		decodeCommon(in);
+
+		level = in.read();
+		profile = in.read();
+		left -= 2;
 	}
 
-	public int getModeSet() {
-		return modeSet;
+	public int getLevel() {
+		return level;
 	}
 
-	public int getModeChangePeriod() {
-		return modeChangePeriod;
-	}
-
-	public int getFramesPerSample() {
-		return framesPerSample;
+	public int getProfile() {
+		return profile;
 	}
 }

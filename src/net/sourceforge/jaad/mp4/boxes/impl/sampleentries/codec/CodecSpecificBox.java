@@ -19,7 +19,6 @@ package net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec;
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.BoxImpl;
-import net.sourceforge.jaad.mp4.boxes.BoxTypes;
 
 /**
  * The <code>CodecSpecificBox</code> can be used instead of an <code>ESDBox</code>
@@ -27,29 +26,26 @@ import net.sourceforge.jaad.mp4.boxes.BoxTypes;
  *
  * @author in-somnia
  */
-public class CodecSpecificBox extends BoxImpl {
+public abstract class CodecSpecificBox extends BoxImpl {
 
-	private CodecSpecificStructure struc;
+	private long vendor;
+	private int decoderVersion;
 
-	public CodecSpecificBox() {
-		super("CodecSpecificBox");
+	public CodecSpecificBox(String name) {
+		super(name);
 	}
 
-	@Override
-	public void decode(MP4InputStream in) throws IOException {
-		if(type==BoxTypes.H263_SPECIFIC_BOX) struc = new H263SpecificStructure();
-		else if(type==BoxTypes.AMR_SPECIFIC_BOX) struc = new AMRSpecificStructure();
-		else if(type==BoxTypes.EVRC_SPECIFIC_BOX) struc = new EVCRSpecificStructure();
-		else if(type==BoxTypes.QCELP_SPECIFIC_BOX) struc = new QCELPSpecificStructure();
-		else if(type==BoxTypes.SMV_SPECIFIC_BOX) struc = new SMVSpecificStructure();
-		else if(type==BoxTypes.AVC_SPECIFIC_BOX) struc = new AVCSpecificStructure();
-		else struc = new UnknownCodecSpecificStructure();
-
-		struc.decode(in);
-		left -= struc.getSize();
+	protected void decodeCommon(MP4InputStream in) throws IOException {
+		vendor = in.readBytes(4);
+		decoderVersion = in.read();
+		left -= 5;
 	}
 
-	public CodecSpecificStructure getCodecSpecificStructure() {
-		return struc;
+	public long getVendor() {
+		return vendor;
+	}
+
+	public int getDecoderVersion() {
+		return decoderVersion;
 	}
 }

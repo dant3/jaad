@@ -14,7 +14,7 @@ MP4 boxes
     bpcc (bits per component),
 	buff (buffering information),
 	cdef (type and ordering of the components within the codestream),
-    cslg (Composition to decode timeline mapping,
+    cslg (Composition to decode timeline mapping),
     dcfD (Marlin DCF Duration, user-data atom type),
     dsgd (DVB Sample Group Description Box),
     dstg (DVB Sample to Group Box),
@@ -56,7 +56,7 @@ MP4 boxes
     jp2h (Header),
     jp2i (Intellectual property information),
 
-- implement more codecs boxes: e.g. ac3
+- implement more codecs boxes
 - why are the ObjectDescriptor tags different in 14496-1 8.3.12 (table 8-12)?
 - change samplegroup structures to the one used for sampleentries
 - SLConfigDescriptor decodes wrong
@@ -79,3 +79,4 @@ MP4 API
 	gssd: source data
 	gspm: ping message
 	gspu: ping url
+- provide access to codec specific configurations

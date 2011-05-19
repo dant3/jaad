@@ -30,9 +30,11 @@ public class AudioTrack extends Track {
 	public enum AudioCodec implements Codec {
 
 		AAC,
+		AC3,
 		AMR,
 		AMR_WIDE_BAND,
 		EVRC,
+		EXTENDED_AC3,
 		QCELP,
 		SMV,
 		UNKNOWN_AUDIO_CODEC;
@@ -40,9 +42,11 @@ public class AudioTrack extends Track {
 		private static Codec forType(long type) {
 			final Codec ac;
 			if(type==BoxTypes.MP4A_SAMPLE_ENTRY) ac = AAC;
+			else if(type==BoxTypes.AC3_SAMPLE_ENTRY) ac = AC3;
 			else if(type==BoxTypes.AMR_SAMPLE_ENTRY) ac = AMR;
 			else if(type==BoxTypes.AMR_WB_SAMPLE_ENTRY) ac = AMR_WIDE_BAND;
 			else if(type==BoxTypes.EVRC_SAMPLE_ENTRY) ac = EVRC;
+			else if(type==BoxTypes.EAC3_SAMPLE_ENTRY) ac = EXTENDED_AC3;
 			else if(type==BoxTypes.QCELP_SAMPLE_ENTRY) ac = QCELP;
 			else if(type==BoxTypes.SMV_SAMPLE_ENTRY) ac = SMV;
 			else ac = UNKNOWN_AUDIO_CODEC;
