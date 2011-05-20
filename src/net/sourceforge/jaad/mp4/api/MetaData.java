@@ -21,6 +21,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,53 +51,59 @@ public class MetaData {
 
 	public static class Field<T> {
 
-		public static final Field<String> ARTIST = new Field<String>();
-		public static final Field<String> TITLE = new Field<String>();
-		public static final Field<String> ALBUM_ARTIST = new Field<String>();
-		public static final Field<String> ALBUM = new Field<String>();
-		public static final Field<Integer> TRACK_NUMBER = new Field<Integer>();
-		public static final Field<Integer> TOTAL_TRACKS = new Field<Integer>();
-		public static final Field<Integer> DISK_NUMBER = new Field<Integer>();
-		public static final Field<Integer> TOTAL_DISKS = new Field<Integer>();
-		public static final Field<String> COMPOSER = new Field<String>();
-		public static final Field<String> COMMENTS = new Field<String>();
-		public static final Field<Integer> TEMPO = new Field<Integer>();
-		public static final Field<Integer> LENGTH_IN_MILLISECONDS = new Field<Integer>();
-		public static final Field<Date> RELEASE_DATE = new Field<Date>();
-		public static final Field<String> GENRE = new Field<String>();
-		public static final Field<String> ENCODER_NAME = new Field<String>();
-		public static final Field<String> ENCODER_TOOL = new Field<String>();
-		public static final Field<Date> ENCODING_DATE = new Field<Date>();
-		public static final Field<String> COPYRIGHT = new Field<String>();
-		public static final Field<String> PUBLISHER = new Field<String>();
-		public static final Field<Boolean> COMPILATION = new Field<Boolean>();
-		public static final Field<List<Artwork>> COVER_ARTWORK = new Field<List<Artwork>>();
-		public static final Field<String> GROUPING = new Field<String>();
-		public static final Field<String> LOCATION = new Field<String>();
-		public static final Field<String> LYRICS = new Field<String>();
-		public static final Field<Integer> RATING = new Field<Integer>();
-		public static final Field<Integer> PODCAST = new Field<Integer>();
-		public static final Field<String> PODCAST_URL = new Field<String>();
-		public static final Field<String> CATEGORY = new Field<String>();
-		public static final Field<String> KEYWORDS = new Field<String>();
-		public static final Field<Integer> EPISODE_GLOBAL_UNIQUE_ID = new Field<Integer>();
-		public static final Field<String> DESCRIPTION = new Field<String>();
-		public static final Field<String> TV_SHOW = new Field<String>();
-		public static final Field<String> TV_NETWORK = new Field<String>();
-		public static final Field<String> TV_EPISODE = new Field<String>();
-		public static final Field<Integer> TV_EPISODE_NUMBER = new Field<Integer>();
-		public static final Field<Integer> TV_SEASON = new Field<Integer>();
-		public static final Field<String> INTERNET_RADIO_STATION = new Field<String>();
-		public static final Field<String> PURCHASE_DATE = new Field<String>();
-		public static final Field<String> GAPLESS_PLAYBACK = new Field<String>();
-		public static final Field<Boolean> HD_VIDEO = new Field<Boolean>();
-		public static final Field<Locale> LANGUAGE = new Field<Locale>();
+		public static final Field<String> ARTIST = new Field<String>("Artist");
+		public static final Field<String> TITLE = new Field<String>("Title");
+		public static final Field<String> ALBUM_ARTIST = new Field<String>("Album Artist");
+		public static final Field<String> ALBUM = new Field<String>("Album");
+		public static final Field<Integer> TRACK_NUMBER = new Field<Integer>("Track Number");
+		public static final Field<Integer> TOTAL_TRACKS = new Field<Integer>("Total Tracks");
+		public static final Field<Integer> DISK_NUMBER = new Field<Integer>("Disk Number");
+		public static final Field<Integer> TOTAL_DISKS = new Field<Integer>("Total disks");
+		public static final Field<String> COMPOSER = new Field<String>("Composer");
+		public static final Field<String> COMMENTS = new Field<String>("Comments");
+		public static final Field<Integer> TEMPO = new Field<Integer>("Tempo");
+		public static final Field<Integer> LENGTH_IN_MILLISECONDS = new Field<Integer>("Length in milliseconds");
+		public static final Field<Date> RELEASE_DATE = new Field<Date>("Release Date");
+		public static final Field<String> GENRE = new Field<String>("Genre");
+		public static final Field<String> ENCODER_NAME = new Field<String>("Encoder Name");
+		public static final Field<String> ENCODER_TOOL = new Field<String>("Encoder Tool");
+		public static final Field<Date> ENCODING_DATE = new Field<Date>("Encoding Date");
+		public static final Field<String> COPYRIGHT = new Field<String>("Copyright");
+		public static final Field<String> PUBLISHER = new Field<String>("Publisher");
+		public static final Field<Boolean> COMPILATION = new Field<Boolean>("Part of compilation");
+		public static final Field<List<Artwork>> COVER_ARTWORKS = new Field<List<Artwork>>("Cover Artworks");
+		public static final Field<String> GROUPING = new Field<String>("Grouping");
+		public static final Field<String> LOCATION = new Field<String>("Location");
+		public static final Field<String> LYRICS = new Field<String>("Lyrics");
+		public static final Field<Integer> RATING = new Field<Integer>("Rating");
+		public static final Field<Integer> PODCAST = new Field<Integer>("Podcast");
+		public static final Field<String> PODCAST_URL = new Field<String>("Podcast URL");
+		public static final Field<String> CATEGORY = new Field<String>("Category");
+		public static final Field<String> KEYWORDS = new Field<String>("Keywords");
+		public static final Field<Integer> EPISODE_GLOBAL_UNIQUE_ID = new Field<Integer>("Episode Global Unique ID");
+		public static final Field<String> DESCRIPTION = new Field<String>("Description");
+		public static final Field<String> TV_SHOW = new Field<String>("TV Show");
+		public static final Field<String> TV_NETWORK = new Field<String>("TV Network");
+		public static final Field<String> TV_EPISODE = new Field<String>("TV Episode");
+		public static final Field<Integer> TV_EPISODE_NUMBER = new Field<Integer>("TV Episode Number");
+		public static final Field<Integer> TV_SEASON = new Field<Integer>("TV Season");
+		public static final Field<String> INTERNET_RADIO_STATION = new Field<String>("Internet Radio Station");
+		public static final Field<String> PURCHASE_DATE = new Field<String>("Purchase Date");
+		public static final Field<String> GAPLESS_PLAYBACK = new Field<String>("Gapless Playback");
+		public static final Field<Boolean> HD_VIDEO = new Field<Boolean>("HD Video");
+		public static final Field<Locale> LANGUAGE = new Field<Locale>("Language");
 		//sorting
-		public static final Field<String> ARTIST_SORT_TEXT = new Field<String>();
-		public static final Field<String> TITLE_SORT_TEXT = new Field<String>();
-		public static final Field<String> ALBUM_SORT_TEXT = new Field<String>();
+		public static final Field<String> ARTIST_SORT_TEXT = new Field<String>("Artist Sort Text");
+		public static final Field<String> TITLE_SORT_TEXT = new Field<String>("Title Sort Text");
+		public static final Field<String> ALBUM_SORT_TEXT = new Field<String>("Album Sort Text");
+		private String name;
 
-		private Field() {
+		private Field(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
 		}
 	}
 	private static final String[] STANDARD_GENRES = {
@@ -331,11 +338,11 @@ public class MetaData {
 			else if(l==BoxTypes.COMPILATION_PART_BOX) put(Field.COMPILATION, data.getBoolean());
 			else if(l==BoxTypes.COVER_BOX) {
 				final Artwork aw = new Artwork(Artwork.Type.forDataType(data.getDataType()), data.getData());
-				if(contents.containsKey(Field.COVER_ARTWORK)) get(Field.COVER_ARTWORK).add(aw);
+				if(contents.containsKey(Field.COVER_ARTWORKS)) get(Field.COVER_ARTWORKS).add(aw);
 				else {
 					final List<Artwork> list = new ArrayList<Artwork>();
 					list.add(aw);
-					put(Field.COVER_ARTWORK, list);
+					put(Field.COVER_ARTWORKS, list);
 				}
 			}
 			else if(l==BoxTypes.GROUPING_BOX) put(Field.GROUPING, data.getText());
@@ -475,5 +482,9 @@ public class MetaData {
 	@SuppressWarnings("unchecked")
 	public <T> T get(Field<T> field) {
 		return (T) contents.get(field);
+	}
+
+	public Map<Field<?>, Object> getAll() {
+		return Collections.unmodifiableMap(contents);
 	}
 }

@@ -37,7 +37,7 @@ import java.util.List;
  */
 public class Main {
 
-	private static final String USAGE = "usage:\njaad.Main [-mp4] <infile> <outfile>\n\n\t-mp4\tinput file is in MP4 container format";
+	private static final String USAGE = "usage:\nnet.sourceforge.jaad.Main [-mp4] <infile> <outfile>\n\n\t-mp4\tinput file is in MP4 container format";
 
 	public static void main(String[] args) {
 		try {

@@ -16,8 +16,6 @@
  */
 package net.sourceforge.jaad.aac;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
@@ -27,30 +25,6 @@ import java.io.IOException;
  */
 public class AACException extends IOException {
 
-	public static void main(String[] args) {
-		try {
-			final File f = new File("C:\\Dokumente und Einstellungen\\admin\\Eigene Dateien\\NetBeansProjects\\jaad\\src");
-			scanDir(f);
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static void scanDir(File dir) throws IOException {
-		if(!dir.isHidden()) {
-			File[] fs = dir.listFiles();
-			for(File f : fs) {
-				if(f.isDirectory()) scanDir(f);
-				else {
-					FileInputStream in = new FileInputStream(f);
-					byte[] b = new byte[2];
-					in.read(b);
-					if(!new String(b).equals("/*")) System.out.println(f.getAbsolutePath());
-				}
-			}
-		}
-	}
 	private final boolean eos;
 
 	public AACException(String message) {

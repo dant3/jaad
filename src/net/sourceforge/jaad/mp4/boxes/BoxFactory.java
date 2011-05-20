@@ -322,7 +322,7 @@ public class BoxFactory implements BoxTypes {
 		long type = in.readBytes(4);
 		left -= 4;
 		if(type==EXTENDED_TYPE) {
-			type = in.readBytes(16);
+			in.skipBytes(16);
 			left -= 16;
 		}
 
@@ -357,7 +357,7 @@ public class BoxFactory implements BoxTypes {
 		long type = in.readBytes(4);
 		left -= 4;
 		if(type==EXTENDED_TYPE) {
-			type = in.readBytes(16);
+			in.skipBytes(16);
 			left -= 16;
 		}
 

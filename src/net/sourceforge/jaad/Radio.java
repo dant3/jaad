@@ -35,7 +35,7 @@ import net.sourceforge.jaad.adts.ADTSDemultiplexer;
  */
 public class Radio {
 
-	private static final String USAGE = "usage:\njaad.Radio <url>";
+	private static final String USAGE = "usage:\nnet.sourceforge.jaad.Radio <url>";
 
 	public static void main(String[] args) {
 		try {
