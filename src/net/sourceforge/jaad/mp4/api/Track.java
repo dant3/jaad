@@ -17,13 +17,14 @@
 package net.sourceforge.jaad.mp4.api;
 
 import java.io.EOFException;
+import java.io.FileOutputStream;
 import java.util.logging.Logger;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -37,7 +38,6 @@ import net.sourceforge.jaad.mp4.boxes.impl.DataReferenceBox;
 import net.sourceforge.jaad.mp4.boxes.impl.MediaHeaderBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleSizeBox;
 import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox;
-import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox.SampleToChunkEntry;
 import net.sourceforge.jaad.mp4.boxes.impl.DecodingTimeToSampleBox;
 import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
 import net.sourceforge.jaad.mp4.od.DecoderSpecificInfo;
@@ -117,57 +117,57 @@ public abstract class Track {
 
 	private void parseSampleTable(Box stbl) {
 		final double timeScale = mdhd.getTimeScale();
+		final Type type = getType();
 
-		//get tables from boxes
-		final SampleToChunkEntry[] sampleToChunks = ((SampleToChunkBox) stbl.getChild(BoxTypes.SAMPLE_TO_CHUNK_BOX)).getEntries();
+		//sample sizes
 		final long[] sampleSizes = ((SampleSizeBox) stbl.getChild(BoxTypes.SAMPLE_SIZE_BOX)).getSampleSizes();
+
+		//chunk offsets
 		final ChunkOffsetBox stco;
 		if(stbl.hasChild(BoxTypes.CHUNK_OFFSET_BOX)) stco = (ChunkOffsetBox) stbl.getChild(BoxTypes.CHUNK_OFFSET_BOX);
 		else stco = (ChunkOffsetBox) stbl.getChild(BoxTypes.CHUNK_LARGE_OFFSET_BOX);
 		final long[] chunkOffsets = stco.getChunks();
 
+		//samples to chunks
+		final SampleToChunkBox stsc = ((SampleToChunkBox) stbl.getChild(BoxTypes.SAMPLE_TO_CHUNK_BOX));
+		final long[] firstChunks = stsc.getFirstChunks();
+		final long[] samplesPerChunk = stsc.getSamplesPerChunk();
+
+		//sample durations/timestamps
 		final DecodingTimeToSampleBox stts = (DecodingTimeToSampleBox) stbl.getChild(BoxTypes.DECODING_TIME_TO_SAMPLE_BOX);
 		final long[] sampleCounts = stts.getSampleCounts();
 		final long[] sampleDeltas = stts.getSampleDeltas();
-
-		//decode sampleDurations
-		final long[] sampleDurations = new long[sampleSizes.length];
+		final long[] timeOffsets = new long[sampleSizes.length];
+		long tmp = 0;
 		int off = 0;
 		for(int i = 0; i<sampleCounts.length; i++) {
 			for(int j = 0; j<sampleCounts[i]; j++) {
-				sampleDurations[off+j] = sampleDeltas[i];
+				timeOffsets[off+j] = tmp;
+				tmp += sampleDeltas[i];
 			}
 			off += sampleCounts[i];
 		}
 
-		//create frames
-		SampleToChunkEntry entry;
-		int firstChunk, lastChunk;
-		long pos, size;
-		int j, s;
-		double timeStamp;
+		//create samples
 		int current = 0;
-
-		for(int i = 0; i<sampleToChunks.length; i++) {
-			//an entry (run) contains several chunks with the same 'samples-per-chunk' value
-			entry = sampleToChunks[i];
-			firstChunk = (int) entry.getFirstChunk();
-			//since the last chunk of a run is not specified: get it from the next run
-			if(i<sampleToChunks.length-1) lastChunk = (int) sampleToChunks[i+1].getFirstChunk()-1;
+		int lastChunk;
+		double timeStamp;
+		long offset = 0;
+		//iterate over all chunk groups
+		for(int i = 0; i<firstChunks.length; i++) {
+			if(i<firstChunks.length-1) lastChunk = (int) firstChunks[i+1]-1;
 			else lastChunk = chunkOffsets.length;
 
-			//iterate over all chunks in this run
-			for(j = firstChunk; j<=lastChunk; j++) {
-				pos = chunkOffsets[j-1];
-				//iterate over all samples in this chunk
-				for(s = 0; s<entry.getSamplesPerChunk(); s++) {
-					//create frame for sample
-					timeStamp = (sampleDurations[j-1]*current)/timeScale;
-					size = sampleSizes[current];
-					frames.add(new Frame(getType(), pos, size, timeStamp));
+			//iterate over all chunks in current group
+			for(int j = (int) firstChunks[i]-1; j<lastChunk; j++) {
+				offset = chunkOffsets[j];
 
-					//calculate sampe offset from chunk offset and sample sizes
-					pos += size;
+				//iterate over all samples in current chunk
+				for(int k = 0; k<samplesPerChunk[i]; k++) {
+					//create samples
+					timeStamp = ((double) timeOffsets[current])/timeScale;
+					frames.add(new Frame(type, offset, sampleSizes[current], timeStamp));
+					offset += sampleSizes[current];
 					current++;
 				}
 			}
@@ -175,8 +175,7 @@ public abstract class Track {
 
 		//frames need not to be time-ordered: sort by timestamp
 		//TODO: is it possible to add them to the specific position?
-		//TODO: sorting does not work correctly! why?
-		//Collections.sort(frames);
+		Collections.sort(frames);
 	}
 
 	//TODO: implement other entry descriptors

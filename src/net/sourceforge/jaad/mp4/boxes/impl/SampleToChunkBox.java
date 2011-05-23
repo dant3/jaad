@@ -22,29 +22,7 @@ import java.io.IOException;
 
 public class SampleToChunkBox extends FullBox {
 
-	public static class SampleToChunkEntry {
-
-		private final long firstChunk, samplesPerChunk, sampleDescriptionIndex;
-
-		SampleToChunkEntry(long firstChunk, long samplesPerChunk, long sampleDescriptionIndex) {
-			this.firstChunk = firstChunk;
-			this.samplesPerChunk = samplesPerChunk;
-			this.sampleDescriptionIndex = sampleDescriptionIndex;
-		}
-
-		public long getFirstChunk() {
-			return firstChunk;
-		}
-
-		public long getSampleDescriptionIndex() {
-			return sampleDescriptionIndex;
-		}
-
-		public long getSamplesPerChunk() {
-			return samplesPerChunk;
-		}
-	}
-	private SampleToChunkEntry[] entries;
+	private long[] firstChunks, samplesPerChunk, sampleDescriptionIndex;
 
 	public SampleToChunkBox() {
 		super("Sample To Chunk Box");
@@ -53,22 +31,30 @@ public class SampleToChunkBox extends FullBox {
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
-		
+
 		final int entryCount = (int) in.readBytes(4);
-		entries = new SampleToChunkEntry[entryCount];
+		firstChunks = new long[entryCount];
+		samplesPerChunk = new long[entryCount];
+		sampleDescriptionIndex = new long[entryCount];
 		left -= 4;
 
-		long firstChunk, samplesPerChunk, sampleDescriptionIndex;
 		for(int i = 0; i<entryCount; i++) {
-			firstChunk = in.readBytes(4);
-			samplesPerChunk = in.readBytes(4);
-			sampleDescriptionIndex = in.readBytes(4);
-			entries[i] = new SampleToChunkEntry(firstChunk, samplesPerChunk, sampleDescriptionIndex);
+			firstChunks[i] = in.readBytes(4);
+			samplesPerChunk[i] = in.readBytes(4);
+			sampleDescriptionIndex[i] = in.readBytes(4);
 			left -= 12;
 		}
 	}
 
-	public SampleToChunkEntry[] getEntries() {
-		return entries;
+	public long[] getFirstChunks() {
+		return firstChunks;
+	}
+
+	public long[] getSamplesPerChunk() {
+		return samplesPerChunk;
+	}
+
+	public long[] getSampleDescriptionIndex() {
+		return sampleDescriptionIndex;
 	}
 }

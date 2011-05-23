@@ -4,9 +4,6 @@ AAC decoder
 
 MP4 boxes
 =========
-- problem: 3gpp meta boxes use the same 4CC as itunes but have different content
-  (rtng, cprt, gnre) -> either the factory or the iTunes boxes need to differ 
-  (last case would be confusing when it is no iTunes box)
 - implement IPMP descriptors
 - mp3 also uses 'mp4a' (probably all kinds of MPEG audio) -> how to identify?
 - boxes to implement:
