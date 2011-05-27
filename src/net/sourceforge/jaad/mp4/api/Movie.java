@@ -32,14 +32,16 @@ public class Movie {
 	private final MP4InputStream in;
 	private final MovieHeaderBox mvhd;
 	private final List<Track> tracks;
-	private MetaData metaData;
+	private final boolean metaDataPresent;
+	private final MetaData metaData;
+	private final List<ProtectionInformation> protections;
 
-	public Movie(Box box, MP4InputStream in) {
+	public Movie(Box moov, MP4InputStream in) {
 		this.in = in;
 
 		//create tracks
-		mvhd = (MovieHeaderBox) box.getChild(BoxTypes.MOVIE_HEADER_BOX);
-		List<Box> trackBoxes = box.getChildren(BoxTypes.TRACK_BOX);
+		mvhd = (MovieHeaderBox) moov.getChild(BoxTypes.MOVIE_HEADER_BOX);
+		List<Box> trackBoxes = moov.getChildren(BoxTypes.TRACK_BOX);
 		tracks = new ArrayList<Track>(trackBoxes.size());
 		Track track;
 		for(int i = 0; i<trackBoxes.size(); i++) {
@@ -49,10 +51,27 @@ public class Movie {
 
 		//read metadata: moov.meta/moov.udta.meta
 		metaData = new MetaData();
-		if(box.hasChild(BoxTypes.META_BOX)) metaData.parse(null, box.getChild(BoxTypes.META_BOX));
-		else if(box.hasChild(BoxTypes.USER_DATA_BOX)) {
-			final Box udta = box.getChild(BoxTypes.USER_DATA_BOX);
-			if(udta.hasChild(BoxTypes.META_BOX)) metaData.parse(udta, udta.getChild(BoxTypes.META_BOX));
+		if(moov.hasChild(BoxTypes.META_BOX)) {
+			metaData.parse(null, moov.getChild(BoxTypes.META_BOX));
+			metaDataPresent = true;
+		}
+		else if(moov.hasChild(BoxTypes.USER_DATA_BOX)) {
+			final Box udta = moov.getChild(BoxTypes.USER_DATA_BOX);
+			if(udta.hasChild(BoxTypes.META_BOX)) {
+				metaData.parse(udta, udta.getChild(BoxTypes.META_BOX));
+				metaDataPresent = true;
+			}
+			else metaDataPresent = false;
+		}
+		else metaDataPresent = false;
+
+		//detect DRM
+		protections = new ArrayList<ProtectionInformation>();
+		if(moov.hasChild(BoxTypes.ITEM_PROTECTION_BOX)) {
+			Box ipro = moov.getChild(BoxTypes.ITEM_PROTECTION_BOX);
+			for(Box sinf : ipro.getChildren(BoxTypes.PROTECTION_SCHEME_INFORMATION_BOX)) {
+				protections.add(new ProtectionInformation(sinf));
+			}
 		}
 	}
 
@@ -114,12 +133,33 @@ public class Movie {
 	}
 
 	/**
+	 * Indicates if this movie contains metadata. If false the <code>MetaData</code>
+	 * object returned by <code>getMetaData()</code> will not contain any field.
+	 * 
+	 * @return true if this movie contains any metadata
+	 */
+	public boolean containsMetaData() {
+		return metaDataPresent;
+	}
+
+	/**
 	 * Returns the MetaData object for this movie.
 	 *
 	 * @return the MetaData for this movie
 	 */
 	public MetaData getMetaData() {
 		return metaData;
+	}
+
+	/**
+	 * Returns the <code>ProtectionInformation</code> objects that contains 
+	 * details about the DRM systems used. If no protection is present the 
+	 * returned list will be empty.
+	 * 
+	 * @return a list of protection informations
+	 */
+	public List<ProtectionInformation> getProtectionInformations() {
+		return Collections.unmodifiableList(protections);
 	}
 
 	//mvhd

@@ -17,10 +17,8 @@
 package net.sourceforge.jaad.mp4.api;
 
 import java.io.EOFException;
-import java.io.FileOutputStream;
 import java.util.logging.Logger;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -69,6 +67,7 @@ public abstract class Track {
 	//info structures
 	protected DecoderSpecificInfo decoderSpecificInfo;
 	protected DecoderInfo decoderInfo;
+	protected ProtectionInformation protection;
 
 	Track(Box trak, MP4InputStream in) {
 		this.in = in;
@@ -294,6 +293,18 @@ public abstract class Track {
 	 */
 	public DecoderInfo getDecoderInfo() {
 		return decoderInfo;
+	}
+
+	/**
+	 * Returns the <code>ProtectionInformation</code> object that contains 
+	 * details about the DRM system used. If no protection is present this 
+	 * method returns null.
+	 * 
+	 * @return a <code>ProtectionInformation</code> object or null if no 
+	 * protection is used
+	 */
+	public ProtectionInformation getProtectionInformation() {
+		return protection;
 	}
 
 	//reading

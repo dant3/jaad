@@ -58,7 +58,12 @@ public class VideoTrack extends Track {
 		//sample descriptions: 'mp4v' has an ESDBox, all others have a CodecSpecificBox
 		final SampleDescriptionBox stsd = (SampleDescriptionBox) stbl.getChild(BoxTypes.SAMPLE_DESCRIPTION_BOX);
 		sampleEntry = (VideoSampleEntry) stsd.getChildren().get(0);
-		if(sampleEntry.getType()==BoxTypes.MP4V_SAMPLE_ENTRY) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
+		final long type = sampleEntry.getType();
+		if(type==BoxTypes.MP4V_SAMPLE_ENTRY) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
+		else if(type==BoxTypes.ENCRYPTED_VIDEO_SAMPLE_ENTRY) {
+			findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
+			protection = new ProtectionInformation(sampleEntry.getChild(BoxTypes.PROTECTION_SCHEME_INFORMATION_BOX));
+		}
 		else decoderInfo = new DecoderInfo((CodecSpecificBox) sampleEntry.getChildren().get(0));
 
 		codec = VideoCodec.forType(sampleEntry.getType());

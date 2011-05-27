@@ -212,6 +212,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(GOOGLE_TRACK_DURATION_BOX, BoxImpl.class);
 		BOX_CLASSES.put(MP4V_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(H263_SAMPLE_ENTRY, VideoSampleEntry.class);
+		BOX_CLASSES.put(ENCRYPTED_VIDEO_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(AVC_SAMPLE_ENTRY, VideoSampleEntry.class);
 		BOX_CLASSES.put(MP4A_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(AC3_SAMPLE_ENTRY, AudioSampleEntry.class);
@@ -222,6 +223,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(EVRC_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(QCELP_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(SMV_SAMPLE_ENTRY, AudioSampleEntry.class);
+		BOX_CLASSES.put(ENCRYPTED_AUDIO_SAMPLE_ENTRY, AudioSampleEntry.class);
 		BOX_CLASSES.put(MPEG_SAMPLE_ENTRY, MPEGSampleEntry.class);
 		BOX_CLASSES.put(TEXT_METADATA_SAMPLE_ENTRY, TextMetadataSampleEntry.class);
 		BOX_CLASSES.put(XML_METADATA_SAMPLE_ENTRY, XMLMetadataSampleEntry.class);
@@ -236,7 +238,18 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(EVRC_SPECIFIC_BOX, EVRCSpecificBox.class);
 		BOX_CLASSES.put(QCELP_SPECIFIC_BOX, QCELPSpecificBox.class);
 		BOX_CLASSES.put(SMV_SPECIFIC_BOX, SMVSpecificBox.class);
-		BOX_CLASSES.put(OMA_DRM_COMMON_HEADERS_BOX, OMACommonHeadersBox.class);
+		BOX_CLASSES.put(OMA_DRM_CONTAINER_BOX, FullBox.class);
+		BOX_CLASSES.put(OMA_DISCRETE_MEDIA_HEADERS_BOX, OMADiscreteMediaHeadersBox.class);
+		BOX_CLASSES.put(OMA_COMMON_HEADERS_BOX, OMACommonHeadersBox.class);
+		BOX_CLASSES.put(OMA_CONTENT_OBJECT_BOX, OMAContentObjectBox.class);
+		BOX_CLASSES.put(OMA_MUTABLE_DRM_INFORMATION_BOX, BoxImpl.class);
+		BOX_CLASSES.put(OMA_TRANSACTION_TRACKING_BOX, OMATransactionTrackingBox.class);
+		BOX_CLASSES.put(OMA_RIGHTS_OBJECT_BOX, OMARightsObjectBox.class);
+		BOX_CLASSES.put(OMA_CONTENT_ID_BOX, OMAContentIDBox.class);
+		BOX_CLASSES.put(OMA_ICON_URI_BOX, OMAURLBox.class);
+		BOX_CLASSES.put(OMA_INFO_URL_BOX, OMAURLBox.class);
+		BOX_CLASSES.put(OMA_COVER_URI_BOX, OMAURLBox.class);
+		BOX_CLASSES.put(OMA_LYRICS_URI_BOX, OMAURLBox.class);
 		//parameter
 		PARAMETER.put(ADDITIONAL_METADATA_CONTAINER_BOX, new String[]{"Additional Metadata Container Box"});
 		PARAMETER.put(DATA_INFORMATION_BOX, new String[]{"Data Information Box"});
@@ -308,6 +321,26 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(GOOGLE_SOURCE_DATA_BOX, new String[]{"Google Source Data Box"});
 		PARAMETER.put(GOOGLE_START_TIME_BOX, new String[]{"Google Start Time Box"});
 		PARAMETER.put(GOOGLE_TRACK_DURATION_BOX, new String[]{"Google Track Duration Box"});
+		PARAMETER.put(MP4V_SAMPLE_ENTRY, new String[]{"MPEG-4 Video Sample Entry"});
+		PARAMETER.put(H263_SAMPLE_ENTRY, new String[]{"H263 Video Sample Entry"});
+		PARAMETER.put(ENCRYPTED_VIDEO_SAMPLE_ENTRY, new String[]{"Encrypted Video Sample Entry"});
+		PARAMETER.put(AVC_SAMPLE_ENTRY, new String[]{"AVC Video Sample Entry"});
+		PARAMETER.put(MP4A_SAMPLE_ENTRY, new String[]{"MPEG- 4Audio Sample Entry"});
+		PARAMETER.put(AC3_SAMPLE_ENTRY, new String[]{"AC-3 Audio Sample Entry"});
+		PARAMETER.put(EAC3_SAMPLE_ENTRY, new String[]{"Extended AC-3 Audio Sample Entry"});
+		PARAMETER.put(DRMS_SAMPLE_ENTRY, new String[]{"DRMS Audio Sample Entry"});
+		PARAMETER.put(AMR_SAMPLE_ENTRY, new String[]{"AMR Audio Sample Entry"});
+		PARAMETER.put(AMR_WB_SAMPLE_ENTRY, new String[]{"AMR-Wideband Audio Sample Entry"});
+		PARAMETER.put(EVRC_SAMPLE_ENTRY, new String[]{"EVC Audio Sample Entry"});
+		PARAMETER.put(QCELP_SAMPLE_ENTRY, new String[]{"QCELP Audio Sample Entry"});
+		PARAMETER.put(SMV_SAMPLE_ENTRY, new String[]{"SMV Audio Sample Entry"});
+		PARAMETER.put(ENCRYPTED_AUDIO_SAMPLE_ENTRY, new String[]{"Encrypted Audio Sample Entry"});
+		PARAMETER.put(OMA_DRM_CONTAINER_BOX, new String[]{"OMA DRM Container Box"});
+		PARAMETER.put(OMA_MUTABLE_DRM_INFORMATION_BOX, new String[]{"OMA DRM Mutable DRM Information Box"});
+		PARAMETER.put(OMA_ICON_URI_BOX, new String[]{"OMA DRM Icon URI Box"});
+		PARAMETER.put(OMA_INFO_URL_BOX, new String[]{"OMA DRM Info URL Box"});
+		PARAMETER.put(OMA_COVER_URI_BOX, new String[]{"OMA DRM Cover URI Box"});
+		PARAMETER.put(OMA_LYRICS_URI_BOX, new String[]{"OMA DRM Lyrics URI Box"});
 	}
 
 	public static Box parseBox(Box parent, MP4InputStream in) throws IOException {

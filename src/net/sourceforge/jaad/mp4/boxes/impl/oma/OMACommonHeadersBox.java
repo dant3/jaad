@@ -17,18 +17,21 @@
 package net.sourceforge.jaad.mp4.boxes.impl.oma;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 
+//TODO: add remaining javadoc
 public class OMACommonHeadersBox extends FullBox {
 
 	private int encryptionMethod, paddingScheme;
 	private long plaintextLength;
-	private int contentIDLength, rightsIssuerURLLength, textualHeadersLength;
-	private byte[] contentID, rightsIssuerURL, textualHeaders;
+	private byte[] contentID, rightsIssuerURL;
+	private Map<String, String> textualHeaders;
 
 	public OMACommonHeadersBox() {
-		super("OMA DMR Common Header Box");
+		super("OMA DRM Common Header Box");
 	}
 
 	@Override
@@ -38,23 +41,73 @@ public class OMACommonHeadersBox extends FullBox {
 		encryptionMethod = in.read();
 		paddingScheme = in.read();
 		plaintextLength = in.readBytes(8);
-		contentIDLength = (int) in.readBytes(2);
-		rightsIssuerURLLength = (int) in.readBytes(2);
-		textualHeadersLength = (int) in.readBytes(2);
+		final int contentIDLength = (int) in.readBytes(2);
+		final int rightsIssuerURLLength = (int) in.readBytes(2);
+		int textualHeadersLength = (int) in.readBytes(2);
+		left -= 16;
+
 		contentID = new byte[contentIDLength];
 		in.readBytes(contentID);
 		rightsIssuerURL = new byte[rightsIssuerURLLength];
 		in.readBytes(rightsIssuerURL);
-		textualHeaders = new byte[textualHeadersLength];
-		in.readBytes(textualHeaders);
+		left -= contentIDLength+rightsIssuerURLLength;
+
+		textualHeaders = new HashMap<String, String>();
+		String key, value;
+		while(textualHeadersLength>0) {
+			key = new String(in.readTerminated((int) left, ':'));
+			value = new String(in.readTerminated((int) left, 0));
+			textualHeaders.put(key, value);
+
+			textualHeadersLength -= key.length()+value.length()+2;
+			left -= key.length()+value.length()+2;
+		}
 
 		readChildren(in);
 	}
 
+	/**
+	 * The encryption method defines how the encrypted content can be decrypted.
+	 * Values for the field are defined in the following table:
+	 * 
+	 * <table>
+	 * <tr><th>Value</th><th>Algorithm</th></tr>
+	 * <tr><td>0</td><td>no encryption used</td></tr>
+	 * <tr><td>1</td><td>AES_128_CBC:<br />AES symmetric encryption as defined 
+	 * by NIST. 128 bit keys, Cipher block chaining mode (CBC). For the first 
+	 * block a 128-bit initialisation vector (IV) is used. For DCF files, the IV
+	 * is included in the OMADRMData as a prefix of the encrypted data. For 
+	 * non-streamable PDCF files, the IV is included in the IV field of the 
+	 * OMAAUHeader and the IVLength field in the OMAAUFormatBox MUST be set to
+	 * 16. Padding according to RFC 2630</td></tr>
+	 * <tr><td>2</td><td>AES_128_CTR:<br />AES symmetric encryption as defined 
+	 * by NIST. 128 bit keys, Counter mode (CTR). The counter block has a length
+	 * of 128 bits. For DCF files, the initial counter value is included in the 
+	 * OMADRMData as a prefix of the encrypted data. For non-streamable PDCF 
+	 * files, the initial counter value is included in the IV field of the 
+	 * OMAAUHeader  and the IVLength field in the OMAAUFormatBox MUST be set to 
+	 * 16. For each cipherblock the counter is incremented by 1 (modulo 2128). 
+	 * No padding.</td></tr>
+	 * </table>
+	 * 
+	 * @return the encryption method
+	 */
 	public int getEncryptionMethod() {
 		return encryptionMethod;
 	}
 
+	/**
+	 * The padding scheme defines how the last block of ciphertext is padded. 
+	 * Values of the padding scheme field are defined in the following table:
+	 * 
+	 * <table>
+	 * <tr><th>Value</th><th>Padding scheme</th></tr>
+	 * <tr><td>0</td><td>No padding (e.g. when using NULL or CTR algorithm)</td></tr>
+	 * <tr><td>1</td><td>Padding according to RFC 2630</td></tr>
+	 * </table>
+	 * 
+	 * @return the padding scheme
+	 */
 	public int getPaddingScheme() {
 		return paddingScheme;
 	}
@@ -71,7 +124,7 @@ public class OMACommonHeadersBox extends FullBox {
 		return rightsIssuerURL;
 	}
 
-	public byte[] getTextualHeaders() {
+	public Map<String, String> getTextualHeaders() {
 		return textualHeaders;
 	}
 }

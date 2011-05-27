@@ -23,8 +23,8 @@ public class AudioSampleEntry extends SampleEntry {
 
 	private int channelCount, sampleSize, sampleRate;
 
-	public AudioSampleEntry() {
-		super("Audio Sample Entry");
+	public AudioSampleEntry(String name) {
+		super(name);
 	}
 
 	@Override

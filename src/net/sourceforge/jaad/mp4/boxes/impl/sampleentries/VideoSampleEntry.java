@@ -26,8 +26,8 @@ public class VideoSampleEntry extends SampleEntry {
 	private int frameCount, depth;
 	private String compressorName;
 
-	public VideoSampleEntry() {
-		super("Video Sample Entry");
+	public VideoSampleEntry(String name) {
+		super(name);
 	}
 
 	@Override

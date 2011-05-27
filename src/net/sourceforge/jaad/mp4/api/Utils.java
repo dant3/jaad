@@ -25,13 +25,4 @@ class Utils {
 	static Date getDate(long time) {
 		return new Date(time*1000-DATE_OFFSET);
 	}
-
-	static long bytesToLong(byte[] b, int off, int len) {
-		long l = 0;
-		for(int i = 0; i<len; i++) {
-			l <<= 8;
-			l |= b[off+i];
-		}
-		return l;
-	}
 }

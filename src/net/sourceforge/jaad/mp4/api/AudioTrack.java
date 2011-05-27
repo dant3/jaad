@@ -66,10 +66,15 @@ public class AudioTrack extends Track {
 
 		final Box stbl = minf.getChild(BoxTypes.SAMPLE_TABLE_BOX);
 
-		//sample descriptions: 'mp4a' has an ESDBox, all others have a CodecSpecificBox
+		//sample descriptions: 'mp4a' and 'enca' have an ESDBox, all others have a CodecSpecificBox
 		final SampleDescriptionBox stsd = (SampleDescriptionBox) stbl.getChild(BoxTypes.SAMPLE_DESCRIPTION_BOX);
 		sampleEntry = (AudioSampleEntry) stsd.getChildren().get(0);
-		if(sampleEntry.getType()==BoxTypes.MP4A_SAMPLE_ENTRY) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
+		final long type = sampleEntry.getType();
+		if(type==BoxTypes.MP4A_SAMPLE_ENTRY) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
+		else if(type==BoxTypes.ENCRYPTED_AUDIO_SAMPLE_ENTRY) {
+			findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
+			protection = new ProtectionInformation(sampleEntry.getChild(BoxTypes.PROTECTION_SCHEME_INFORMATION_BOX));
+		}
 		else decoderInfo = new DecoderInfo((CodecSpecificBox) sampleEntry.getChildren().get(0));
 
 		codec = AudioCodec.forType(sampleEntry.getType());

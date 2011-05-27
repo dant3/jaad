@@ -203,7 +203,7 @@ public class MP4InputStream {
 	 * stream has been closed, or if some other I/O error occurs.
 	 */
 	public String readUTFString(int max, String encoding) throws IOException {
-		return new String(readNullTerminated(max), Charset.forName(encoding));
+		return new String(readTerminated(max, 0), Charset.forName(encoding));
 	}
 
 	/**
@@ -230,7 +230,7 @@ public class MP4InputStream {
 		final int i = (bom[0]<<8)|bom[1];
 
 		//read null-terminated
-		final byte[] b = readNullTerminated(max);
+		final byte[] b = readTerminated(max, 0);
 		//copy bom
 		byte[] b2 = new byte[b.length+bom.length];
 		System.arraycopy(bom, 0, b2, 0, bom.length);
@@ -240,24 +240,27 @@ public class MP4InputStream {
 	}
 
 	/**
-	 * Reads a null-terminated byte array from the input. The maximum 
-	 * number of bytes that can be read before the null must appear must be 
-	 * specified.
+	 * Reads a byte array from the input that is terminated by a specific byte 
+	 * (the 'terminator'). The maximum number of bytes that can be read before 
+	 * the terminator must appear must be specified.
+	 * 
+	 * The terminator will not be included in the returned array.
 	 * 
 	 * This method blocks until all bytes could be read, the end of the stream 
 	 * is detected, or an I/O error occurs.
 	 * 
-	 * @param max the maximum number of bytes to read, before the null-terminator
+	 * @param max the maximum number of bytes to read, before the terminator 
 	 * must appear.
+	 * @param terminator the byte that indicates the end of the array
 	 * @return the buffer into which the data is read.
 	 * @throws IOException If the end of the stream is detected, the input 
 	 * stream has been closed, or if some other I/O error occurs.
 	 */
-	public byte[] readNullTerminated(int max) throws IOException {
+	public byte[] readTerminated(int max, int terminator) throws IOException {
 		final byte[] b = new byte[max];
 		int pos = 0;
 		int i;
-		while((i = read())!=0) {
+		while((i = read())!=terminator) {
 			if(i==-1) break;
 			b[pos] = (byte) i;
 			pos++;
