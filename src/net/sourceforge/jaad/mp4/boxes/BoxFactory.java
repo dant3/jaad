@@ -169,7 +169,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(ENCODER_TOOL_BOX, BoxImpl.class);
 		BOX_CLASSES.put(EPISODE_GLOBAL_UNIQUE_ID_BOX, BoxImpl.class);
 		BOX_CLASSES.put(GAPLESS_PLAYBACK_BOX, BoxImpl.class);
-		BOX_CLASSES.put(GENRE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(GENRE_BOX, GenreBox.class);
 		BOX_CLASSES.put(GROUPING_BOX, BoxImpl.class);
 		BOX_CLASSES.put(HD_VIDEO_BOX, BoxImpl.class);
 		BOX_CLASSES.put(ITUNES_PURCHASE_ACCOUNT_BOX, BoxImpl.class);
@@ -183,7 +183,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(PODCAST_BOX, BoxImpl.class);
 		BOX_CLASSES.put(PODCAST_URL_BOX, BoxImpl.class);
 		BOX_CLASSES.put(PURCHASE_DATE_BOX, BoxImpl.class);
-		BOX_CLASSES.put(RATING_BOX, BoxImpl.class);
+		BOX_CLASSES.put(RATING_BOX, RatingBox.class);
 		BOX_CLASSES.put(RELEASE_DATE_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TEMPO_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TRACK_NAME_BOX, BoxImpl.class);
@@ -202,7 +202,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(THREE_GPP_KEYWORDS_BOX, ThreeGPPKeywordsBox.class);
 		BOX_CLASSES.put(THREE_GPP_LOCATION_INFORMATION_BOX, ThreeGPPLocationBox.class);
 		BOX_CLASSES.put(THREE_GPP_PERFORMER_BOX, ThreeGPPMetadataBox.class);
-		BOX_CLASSES.put(THREE_GPP_RECORDING_YEAR_BOX, ThreeGPPMetadataBox.class);
+		BOX_CLASSES.put(THREE_GPP_RECORDING_YEAR_BOX, ThreeGPPRecordingYearBox.class);
 		BOX_CLASSES.put(THREE_GPP_TITLE_BOX, ThreeGPPMetadataBox.class);
 		BOX_CLASSES.put(GOOGLE_HOST_HEADER_BOX, BoxImpl.class);
 		BOX_CLASSES.put(GOOGLE_PING_MESSAGE_BOX, BoxImpl.class);
@@ -289,7 +289,6 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(ENCODER_TOOL_BOX, new String[]{"Encoder Tool Box"});
 		PARAMETER.put(EPISODE_GLOBAL_UNIQUE_ID_BOX, new String[]{"Episode Global Unique ID Box"});
 		PARAMETER.put(GAPLESS_PLAYBACK_BOX, new String[]{"Gapless Playback Box"});
-		PARAMETER.put(GENRE_BOX, new String[]{"Genre Box"});
 		PARAMETER.put(GROUPING_BOX, new String[]{"Grouping Box"});
 		PARAMETER.put(HD_VIDEO_BOX, new String[]{"HD Video Box"});
 		PARAMETER.put(ITUNES_PURCHASE_ACCOUNT_BOX, new String[]{"iTunes Purchase Account Box"});
@@ -303,7 +302,6 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(PODCAST_BOX, new String[]{"Podcast Box"});
 		PARAMETER.put(PODCAST_URL_BOX, new String[]{"Podcast URL Box"});
 		PARAMETER.put(PURCHASE_DATE_BOX, new String[]{"Purchase Date Box"});
-		PARAMETER.put(RATING_BOX, new String[]{"Rating Box"});
 		PARAMETER.put(RELEASE_DATE_BOX, new String[]{"Release Date Box"});
 		PARAMETER.put(TEMPO_BOX, new String[]{"Tempo Box"});
 		PARAMETER.put(TRACK_NAME_BOX, new String[]{"Track Name Box"});
@@ -315,6 +313,11 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(TV_SEASON_BOX, new String[]{"TV Season Box"});
 		PARAMETER.put(TV_SHOW_BOX, new String[]{"TV Show Box"});
 		PARAMETER.put(TV_SHOW_SORT_BOX, new String[]{"TV Show Sort Box"});
+		PARAMETER.put(THREE_GPP_AUTHOR_BOX, new String[]{"3GPP Author Box"});
+		PARAMETER.put(THREE_GPP_CLASSIFICATION_BOX, new String[]{"3GPP Classification Box"});
+		PARAMETER.put(THREE_GPP_DESCRIPTION_BOX, new String[]{"3GPP Description Box"});
+		PARAMETER.put(THREE_GPP_PERFORMER_BOX, new String[]{"3GPP Performer Box"});
+		PARAMETER.put(THREE_GPP_TITLE_BOX, new String[]{"3GPP Title Box"});
 		PARAMETER.put(GOOGLE_HOST_HEADER_BOX, new String[]{"Google Host Header Box"});
 		PARAMETER.put(GOOGLE_PING_MESSAGE_BOX, new String[]{"Google Ping Message Box"});
 		PARAMETER.put(GOOGLE_PING_URL_BOX, new String[]{"Google Ping URL Box"});
@@ -347,13 +350,12 @@ public class BoxFactory implements BoxTypes {
 		final long offset = in.getOffset();
 
 		long size = in.readBytes(4);
-		long left = size-4;
+		long type = in.readBytes(4);
+		long left = size-8;
 		if(size==1) {
 			size = in.readBytes(8);
-			left -= 8;
+			left = size-16;
 		}
-		long type = in.readBytes(4);
-		left -= 4;
 		if(type==EXTENDED_TYPE) {
 			in.skipBytes(16);
 			left -= 16;
@@ -364,13 +366,18 @@ public class BoxFactory implements BoxTypes {
 		box.setParams(parent, size, type, offset, left);
 		box.decode(in);
 
+		//if box doesn't contain data it only contains children
+		final Class<?> cl = box.getClass();
+		if(cl==BoxImpl.class||cl==FullBox.class) box.readChildren(in);
+
+		//check bytes left
 		left = box.getLeft();
 		if(left>0
 				&&!(box instanceof MediaDataBox)
 				&&!(box instanceof UnknownBox)
 				&&!(box instanceof SkipBox)
 				&&!(box instanceof FreeSpaceBox)) LOGGER.log(Level.INFO, "bytes left after reading box {0}: left: {1}, offset: {2}", new Object[]{typeToString(type), left, in.getOffset()});
-		else if(left<0) LOGGER.log(Level.SEVERE, "box {0} overread: {1} bytes, offset: {2}", new Object[]{typeToString(type), left, in.getOffset()});
+		else if(left<0) LOGGER.log(Level.SEVERE, "box {0} overread: {1} bytes, offset: {2}", new Object[]{typeToString(type), -left, in.getOffset()});
 
 		//if mdat found and no random access, don't skip
 		if(box.getType()!=MEDIA_DATA_BOX||in.hasRandomAccess()) in.skipBytes(left);

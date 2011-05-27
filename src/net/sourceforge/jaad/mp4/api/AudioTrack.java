@@ -39,7 +39,7 @@ public class AudioTrack extends Track {
 		SMV,
 		UNKNOWN_AUDIO_CODEC;
 
-		private static Codec forType(long type) {
+		static Codec forType(long type) {
 			final Codec ac;
 			if(type==BoxTypes.MP4A_SAMPLE_ENTRY) ac = AAC;
 			else if(type==BoxTypes.AC3_SAMPLE_ENTRY) ac = AC3;

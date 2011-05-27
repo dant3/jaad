@@ -23,6 +23,7 @@ public class ThreeGPPKeywordsBox extends ThreeGPPMetadataBox {
 		for(int i = 0; i<count; i++) {
 			len = in.read();
 			keywords[i] = in.readUTFString(len);
+			left -= len+1;
 		}
 	}
 

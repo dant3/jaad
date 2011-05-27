@@ -51,10 +51,9 @@ public class BoxImpl implements Box {
 	 * children (if any).
 	 * 
 	 * @param in an input stream
-	 * @throws IOException if an error occurs
+	 * @throws IOException if an error occurs while reading
 	 */
 	public void decode(MP4InputStream in) throws IOException {
-		readChildren(in);
 	}
 
 	public long getType() {

@@ -19,7 +19,6 @@ package net.sourceforge.jaad.mp4;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PushbackInputStream;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -227,10 +226,11 @@ public class MP4InputStream {
 		//read byte order mask
 		final byte[] bom = new byte[2];
 		read(bom, 0, 2);
+		if(bom[0]==0||bom[1]==0) return new String();
 		final int i = (bom[0]<<8)|bom[1];
 
 		//read null-terminated
-		final byte[] b = readTerminated(max, 0);
+		final byte[] b = readTerminated(max-2, 0);
 		//copy bom
 		byte[] b2 = new byte[b.length+bom.length];
 		System.arraycopy(bom, 0, b2, 0, bom.length);

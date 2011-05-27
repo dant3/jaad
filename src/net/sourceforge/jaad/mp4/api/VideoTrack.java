@@ -34,7 +34,7 @@ public class VideoTrack extends Track {
 		MP4_ASP,
 		UNKNOWN_VIDEO_CODEC;
 
-		private static Codec forType(long type) {
+		static Codec forType(long type) {
 			final Codec ac;
 			if(type==BoxTypes.AVC_SAMPLE_ENTRY) ac = AVC;
 			else if(type==BoxTypes.H263_SAMPLE_ENTRY) ac = H263;

@@ -27,6 +27,8 @@ public class OMADiscreteMediaHeadersBox extends FullBox {
 		final int len = in.read();
 		contentType = in.readString(len);
 		left -= len+1;
+		
+		readChildren(in);
 	}
 
 	/**

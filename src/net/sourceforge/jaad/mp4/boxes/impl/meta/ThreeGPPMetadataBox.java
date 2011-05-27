@@ -9,11 +9,7 @@ public class ThreeGPPMetadataBox extends FullBox {
 
 	private String languageCode, data;
 
-	public ThreeGPPMetadataBox() {
-		super("3GPP Metadata Box");
-	}
-
-	protected ThreeGPPMetadataBox(String name) {
+	public ThreeGPPMetadataBox(String name) {
 		super(name);
 	}
 
