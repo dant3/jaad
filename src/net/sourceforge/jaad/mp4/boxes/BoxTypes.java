@@ -103,6 +103,7 @@ public interface BoxTypes {
 	long TRACK_SELECTION_BOX = 1953719660l; //tsel
 	long USER_DATA_BOX = 1969517665l; //udta
 	long VIDEO_MEDIA_HEADER_BOX = 1986881636l; //vmhd
+	long WIDE_BOX = 2003395685l; //wide
 	long XML_BOX = 2020437024l; //xml 
 	//mp4 extension
 	long OBJECT_DESCRIPTOR_BOX = 1768907891l; //iods
@@ -150,6 +151,7 @@ public interface BoxTypes {
 	long PURCHASE_DATE_BOX = 1886745188l; //purd
 	long RATING_BOX = 1920233063l; //rtng
 	long RELEASE_DATE_BOX = 2841928057l; //©day
+	long REQUIREMENT_BOX = 2842846577l; //©req
 	long TEMPO_BOX = 1953329263l; //tmpo
 	long TRACK_NAME_BOX = 2842583405l; //©nam
 	long TRACK_NUMBER_BOX = 1953655662l; //trkn

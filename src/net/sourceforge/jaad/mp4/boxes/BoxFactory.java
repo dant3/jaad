@@ -126,7 +126,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(SCHEME_TYPE_BOX, SchemeTypeBox.class);
 		BOX_CLASSES.put(SCHEME_INFORMATION_BOX, BoxImpl.class);
 		BOX_CLASSES.put(SHADOW_SYNC_SAMPLE_BOX, ShadowSyncSampleBox.class);
-		BOX_CLASSES.put(SKIP_BOX, SkipBox.class);
+		BOX_CLASSES.put(SKIP_BOX, FreeSpaceBox.class);
 		BOX_CLASSES.put(SOUND_MEDIA_HEADER_BOX, SoundMediaHeaderBox.class);
 		BOX_CLASSES.put(SUB_SAMPLE_INFORMATION_BOX, SubSampleInformationBox.class);
 		BOX_CLASSES.put(SYNC_SAMPLE_BOX, SyncSampleBox.class);
@@ -141,6 +141,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(TRACK_SELECTION_BOX, TrackSelectionBox.class);
 		BOX_CLASSES.put(USER_DATA_BOX, BoxImpl.class);
 		BOX_CLASSES.put(VIDEO_MEDIA_HEADER_BOX, VideoMediaHeaderBox.class);
+		BOX_CLASSES.put(WIDE_BOX, FreeSpaceBox.class);
 		BOX_CLASSES.put(XML_BOX, XMLBox.class);
 		BOX_CLASSES.put(OBJECT_DESCRIPTOR_BOX, ObjectDescriptorBox.class);
 		BOX_CLASSES.put(SAMPLE_DEPENDENCY_BOX, SampleDependencyBox.class);
@@ -165,8 +166,8 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(CUSTOM_GENRE_BOX, BoxImpl.class);
 		BOX_CLASSES.put(DESCRIPTION_BOX, BoxImpl.class);
 		BOX_CLASSES.put(DISK_NUMBER_BOX, BoxImpl.class);
-		BOX_CLASSES.put(ENCODER_NAME_BOX, BoxImpl.class);
-		BOX_CLASSES.put(ENCODER_TOOL_BOX, BoxImpl.class);
+		BOX_CLASSES.put(ENCODER_NAME_BOX, EncoderBox.class);
+		BOX_CLASSES.put(ENCODER_TOOL_BOX, EncoderBox.class);
 		BOX_CLASSES.put(EPISODE_GLOBAL_UNIQUE_ID_BOX, BoxImpl.class);
 		BOX_CLASSES.put(GAPLESS_PLAYBACK_BOX, BoxImpl.class);
 		BOX_CLASSES.put(GENRE_BOX, GenreBox.class);
@@ -185,6 +186,7 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(PURCHASE_DATE_BOX, BoxImpl.class);
 		BOX_CLASSES.put(RATING_BOX, RatingBox.class);
 		BOX_CLASSES.put(RELEASE_DATE_BOX, BoxImpl.class);
+		BOX_CLASSES.put(REQUIREMENT_BOX, RequirementBox.class);
 		BOX_CLASSES.put(TEMPO_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TRACK_NAME_BOX, BoxImpl.class);
 		BOX_CLASSES.put(TRACK_NUMBER_BOX, BoxImpl.class);
@@ -285,8 +287,6 @@ public class BoxFactory implements BoxTypes {
 		PARAMETER.put(CUSTOM_GENRE_BOX, new String[]{"Custom Genre Box"});
 		PARAMETER.put(DESCRIPTION_BOX, new String[]{"Description Cover Box"});
 		PARAMETER.put(DISK_NUMBER_BOX, new String[]{"Disk Number Box"});
-		PARAMETER.put(ENCODER_NAME_BOX, new String[]{"Encoder Name Box"});
-		PARAMETER.put(ENCODER_TOOL_BOX, new String[]{"Encoder Tool Box"});
 		PARAMETER.put(EPISODE_GLOBAL_UNIQUE_ID_BOX, new String[]{"Episode Global Unique ID Box"});
 		PARAMETER.put(GAPLESS_PLAYBACK_BOX, new String[]{"Gapless Playback Box"});
 		PARAMETER.put(GROUPING_BOX, new String[]{"Grouping Box"});
@@ -354,6 +354,12 @@ public class BoxFactory implements BoxTypes {
 		if(size==1) size = in.readBytes(8);
 		if(type==EXTENDED_TYPE) in.skipBytes(16);
 
+		//error protection
+		if(parent!=null) {
+			final long parentLeft = (parent.getOffset()+parent.getSize())-offset;
+			if(size>parentLeft) throw new IOException("error while decoding box'"+typeToString(type)+"' at offset "+offset+": box too large for parent");
+		}
+
 		Logger.getLogger("MP4 Boxes").finest(typeToString(type));
 		final BoxImpl box = forType(type, in.getOffset());
 		box.setParams(parent, size, type, offset);
@@ -368,7 +374,6 @@ public class BoxFactory implements BoxTypes {
 		if(left>0
 				&&!(box instanceof MediaDataBox)
 				&&!(box instanceof UnknownBox)
-				&&!(box instanceof SkipBox)
 				&&!(box instanceof FreeSpaceBox)) LOGGER.log(Level.INFO, "bytes left after reading box {0}: left: {1}, offset: {2}", new Object[]{typeToString(type), left, in.getOffset()});
 		else if(left<0) LOGGER.log(Level.SEVERE, "box {0} overread: {1} bytes, offset: {2}", new Object[]{typeToString(type), -left, in.getOffset()});
 
