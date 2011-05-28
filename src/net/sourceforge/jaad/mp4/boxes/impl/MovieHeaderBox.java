@@ -40,39 +40,25 @@ public class MovieHeaderBox extends FullBox {
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
-		if(version==1) {
-			creationTime = in.readBytes(8);
-			modificationTime = in.readBytes(8);
-			timeScale = in.readBytes(4);
-			duration = in.readBytes(8);
-			left -= 28;
-		}
-		else {
-			creationTime = in.readBytes(4);
-			modificationTime = in.readBytes(4);
-			timeScale = in.readBytes(4);
-			duration = in.readBytes(4);
-			left -= 16;
-		}
+		final int len = (version==1) ? 8 : 4;
+		creationTime = in.readBytes(len);
+		modificationTime = in.readBytes(len);
+		timeScale = in.readBytes(4);
+		duration = in.readBytes(len);
 
-		//rate: 16.16 fixed point
 		rate = in.readFixedPoint(16, 16);
-		//volume: 8.8 fixed point
 		volume = in.readFixedPoint(8, 8);
 
-		in.skipBytes(2); //reserved
-		in.skipBytes(4); //reserved
-		in.skipBytes(4); //reserved
+		in.skipBytes(10); //reserved
 
 		for(int i = 0; i<9; i++) {
-			matrix[i] = in.readFixedPoint(16, 16);
+			if(i<6) matrix[i] = in.readFixedPoint(16, 16);
+			else matrix[i] = in.readFixedPoint(2, 30);
 		}
 
 		in.skipBytes(24); //reserved
 
 		nextTrackID = in.readBytes(4);
-
-		left -= 80;
 	}
 
 	/**

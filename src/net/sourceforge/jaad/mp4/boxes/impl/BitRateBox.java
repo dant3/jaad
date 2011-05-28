@@ -33,7 +33,6 @@ public class BitRateBox extends BoxImpl {
 		decodingBufferSize = in.readBytes(4);
 		maxBitrate = in.readBytes(4);
 		avgBitrate = in.readBytes(4);
-		left -= 12;
 	}
 
 	/**

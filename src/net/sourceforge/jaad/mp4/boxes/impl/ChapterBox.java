@@ -45,7 +45,6 @@ public class ChapterBox extends FullBox {
 		in.skipBytes(4); //??
 
 		final int count = in.read();
-		left -= 5;
 
 		long timestamp;
 		int len;
@@ -55,7 +54,6 @@ public class ChapterBox extends FullBox {
 			len = in.read();
 			name = in.readString(len);
 			chapters.put(timestamp, name);
-			left -= 9+name.length();
 		}
 	}
 

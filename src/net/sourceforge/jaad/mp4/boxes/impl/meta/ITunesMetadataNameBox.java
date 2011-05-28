@@ -38,8 +38,7 @@ public class ITunesMetadataNameBox extends FullBox {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 
-		metaName = in.readString((int) left);
-		left-=metaName.length();
+		metaName = in.readString((int) getLeft(in));
 	}
 
 	public String getMetaName() {

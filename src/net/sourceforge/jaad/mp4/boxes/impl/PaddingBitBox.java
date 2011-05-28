@@ -41,7 +41,6 @@ public class PaddingBitBox extends FullBox {
 		super.decode(in);
 
 		final int sampleCount = (int) (in.readBytes(4)+1)/2;
-		left -= 4;
 		pad1 = new int[sampleCount];
 		pad2 = new int[sampleCount];
 
@@ -55,7 +54,6 @@ public class PaddingBitBox extends FullBox {
 			//3 bits pad2
 			pad2[i] = b&7;
 		}
-		left -= sampleCount;
 	}
 
 	/**

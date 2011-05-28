@@ -38,7 +38,6 @@ public abstract class CodecSpecificBox extends BoxImpl {
 	protected void decodeCommon(MP4InputStream in) throws IOException {
 		vendor = in.readBytes(4);
 		decoderVersion = in.read();
-		left -= 5;
 	}
 
 	public long getVendor() {

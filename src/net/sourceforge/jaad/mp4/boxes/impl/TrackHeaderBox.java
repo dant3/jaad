@@ -57,31 +57,20 @@ public class TrackHeaderBox extends FullBox {
 		inMovie = (flags&2)==2;
 		inPreview = (flags&4)==4;
 
-		if(version==1) {
-			creationTime = in.readBytes(8);
-			modificationTime = in.readBytes(8);
-			trackID = (int) in.readBytes(4);
-			in.skipBytes(4); //reserved
-			duration = in.readBytes(8);
-			left -= 32;
-		}
-		else {
-			creationTime = in.readBytes(4);
-			modificationTime = in.readBytes(4);
-			trackID = (int) in.readBytes(4);
-			in.skipBytes(4); //reserved
-			duration = in.readBytes(4);
-			left -= 20;
-		}
+		final int len = (version==1) ? 8 : 4;
+		creationTime = in.readBytes(len);
+		modificationTime = in.readBytes(len);
+		trackID = (int) in.readBytes(4);
+		in.skipBytes(4); //reserved
+		duration = in.readBytes(len);
 
-		in.skipBytes(4); //reserved
-		in.skipBytes(4); //reserved
+		in.skipBytes(8); //reserved
 
 		layer = (int) in.readBytes(2);
 		alternateGroup = (int) in.readBytes(2);
 		volume = in.readFixedPoint(8, 8);
 
-		in.skipBytes(2);
+		in.skipBytes(2); //reserved
 
 		for(int i = 0; i<9; i++) {
 			if(i<6) matrix[i] = in.readFixedPoint(16, 16);
@@ -90,8 +79,6 @@ public class TrackHeaderBox extends FullBox {
 
 		width = in.readFixedPoint(16, 16);
 		height = in.readFixedPoint(16, 16);
-
-		left -= 60;
 	}
 
 	/**

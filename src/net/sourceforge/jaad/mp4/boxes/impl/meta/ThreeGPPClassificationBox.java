@@ -18,7 +18,6 @@ public class ThreeGPPClassificationBox extends ThreeGPPMetadataBox {
 
 		entity = in.readBytes(4);
 		table = (int) in.readBytes(2);
-		left -= 6;
 	}
 
 	public long getEntity() {

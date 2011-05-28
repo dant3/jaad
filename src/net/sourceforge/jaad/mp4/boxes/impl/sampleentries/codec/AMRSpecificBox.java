@@ -34,7 +34,6 @@ public class AMRSpecificBox extends CodecSpecificBox {
 		modeSet = (int) in.readBytes(2);
 		modeChangePeriod = in.read();
 		framesPerSample = in.read();
-		left -= 4;
 	}
 
 	public int getModeSet() {

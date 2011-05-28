@@ -35,17 +35,14 @@ public class ThreeGPPLocationBox extends ThreeGPPMetadataBox {
 	public void decode(MP4InputStream in) throws IOException {
 		decodeCommon(in);
 
-		placeName = in.readUTFString((int) left);
+		placeName = in.readUTFString((int) getLeft(in));
 		role = in.read();
 		longitude = in.readFixedPoint(16, 16);
 		latitude = in.readFixedPoint(16, 16);
 		altitude = in.readFixedPoint(16, 16);
-		left -= 13;
 
-		astronomicalBody = in.readUTFString((int) left);
-		left -= astronomicalBody.length()+1;
-		additionalNotes = in.readUTFString((int) left);
-		left -= additionalNotes.length()+1;
+		astronomicalBody = in.readUTFString((int) getLeft(in));
+		additionalNotes = in.readUTFString((int) getLeft(in));
 	}
 
 	/**

@@ -51,7 +51,6 @@ public class SubSampleInformationBox extends FullBox {
 
 		final int len = (version==1) ? 4 : 2;
 		final int entryCount = (int) in.readBytes(4);
-		left -= 4;
 		sampleDelta = new long[entryCount];
 		subsampleSize = new long[entryCount][];
 		subsamplePriority = new int[entryCount][];
@@ -61,7 +60,6 @@ public class SubSampleInformationBox extends FullBox {
 		for(int i = 0; i<entryCount; i++) {
 			sampleDelta[i] = in.readBytes(4);
 			subsampleCount = (int) in.readBytes(2);
-			left -= 6;
 			subsampleSize[i] = new long[subsampleCount];
 			subsamplePriority[i] = new int[subsampleCount];
 			discardable[i] = new boolean[subsampleCount];
@@ -71,7 +69,6 @@ public class SubSampleInformationBox extends FullBox {
 				subsamplePriority[i][j] = in.read();
 				discardable[i][j] = (in.read()&1)==1;
 				in.skipBytes(4); //reserved
-				left -= len+6;
 			}
 		}
 	}

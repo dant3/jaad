@@ -44,23 +44,20 @@ public class OMACommonHeadersBox extends FullBox {
 		final int contentIDLength = (int) in.readBytes(2);
 		final int rightsIssuerURLLength = (int) in.readBytes(2);
 		int textualHeadersLength = (int) in.readBytes(2);
-		left -= 16;
 
 		contentID = new byte[contentIDLength];
 		in.readBytes(contentID);
 		rightsIssuerURL = new byte[rightsIssuerURLLength];
 		in.readBytes(rightsIssuerURL);
-		left -= contentIDLength+rightsIssuerURLLength;
 
 		textualHeaders = new HashMap<String, String>();
 		String key, value;
 		while(textualHeadersLength>0) {
-			key = new String(in.readTerminated((int) left, ':'));
-			value = new String(in.readTerminated((int) left, 0));
+			key = new String(in.readTerminated((int) getLeft(in), ':'));
+			value = new String(in.readTerminated((int) getLeft(in), 0));
 			textualHeaders.put(key, value);
 
 			textualHeadersLength -= key.length()+value.length()+2;
-			left -= key.length()+value.length()+2;
 		}
 
 		readChildren(in);

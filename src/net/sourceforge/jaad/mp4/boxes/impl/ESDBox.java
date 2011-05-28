@@ -42,7 +42,6 @@ public class ESDBox extends FullBox {
 		super.decode(in);
 		
 		esd = (ESDescriptor) ObjectDescriptor.createDescriptor(in);
-		left -= esd.getSize();
 	}
 
 	public ESDescriptor getEntryDescriptor() {

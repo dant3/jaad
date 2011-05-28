@@ -37,7 +37,6 @@ public class OriginalFormatBox extends BoxImpl {
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		originalFormat = in.readBytes(4);
-		left -= 4;
 	}
 
 	/**

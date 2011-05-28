@@ -33,7 +33,6 @@ public class H263SpecificBox extends CodecSpecificBox {
 
 		level = in.read();
 		profile = in.read();
-		left -= 2;
 	}
 
 	public int getLevel() {

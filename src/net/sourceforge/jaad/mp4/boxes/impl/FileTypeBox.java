@@ -46,11 +46,9 @@ public class FileTypeBox extends BoxImpl {
 	public void decode(MP4InputStream in) throws IOException {
 		majorBrand = in.readString(4);
 		minorVersion = in.readString(4);
-		left -= 8;
-		compatibleBrands = new String[(int) left/4];
+		compatibleBrands = new String[(int) getLeft(in)/4];
 		for(int i = 0; i<compatibleBrands.length; i++) {
 			compatibleBrands[i] = in.readString(4);
-			left -= 4;
 		}
 	}
 

@@ -49,39 +49,19 @@ public class TrackFragmentHeaderBox extends FullBox {
 
 		//optional fields
 		baseDataOffsetPresent = ((flags&1)==1);
-		if(baseDataOffsetPresent) {
-			baseDataOffset = in.readBytes(8);
-			left -= 8;
-		}
-		else baseDataOffset = 0;
+		baseDataOffset = baseDataOffsetPresent ? in.readBytes(8) : 0;
 
 		sampleDescriptionIndexPresent = ((flags&2)==2);
-		if(sampleDescriptionIndexPresent) {
-			sampleDescriptionIndex = in.readBytes(4);
-			left -= 4;
-		}
-		else sampleDescriptionIndex = 0;
+		sampleDescriptionIndex = sampleDescriptionIndexPresent ? in.readBytes(4) : 0;
 
 		defaultSampleDurationPresent = ((flags&8)==8);
-		if(defaultSampleDurationPresent) {
-			defaultSampleDuration = defaultSampleDurationPresent ? in.readBytes(4) : 0;
-			left -= 4;
-		}
-		else defaultSampleDuration = 0;
+		defaultSampleDuration = defaultSampleDurationPresent ? in.readBytes(4) : 0;
 
 		defaultSampleSizePresent = ((flags&16)==16);
-		if(defaultSampleSizePresent) {
-			defaultSampleSize = defaultSampleSizePresent ? in.readBytes(4) : 0;
-			left -= 4;
-		}
-		else defaultSampleSize = 0;
-		
+		defaultSampleSize = defaultSampleSizePresent ? in.readBytes(4) : 0;
+
 		defaultSampleFlagsPresent = ((flags&32)==32);
-		if(defaultSampleFlagsPresent) {
-			defaultSampleFlags = defaultSampleFlagsPresent ? in.readBytes(4) : 0;
-			left -= 4;
-		}
-		else defaultSampleFlags = 0;
+		defaultSampleFlags = defaultSampleFlagsPresent ? in.readBytes(4) : 0;
 
 		durationIsEmpty = ((flags&0x10000)==0x10000);
 	}

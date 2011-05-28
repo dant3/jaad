@@ -41,13 +41,7 @@ public class SchemeTypeBox extends FullBox {
 
 		schemeType = in.readBytes(4);
 		schemeVersion = in.readBytes(4);
-		left -= 8;
-
-		if((flags&1)==1) {
-			schemeURI = in.readUTFString((int) left, MP4InputStream.UTF8);
-			left -= schemeURI.length()+1;
-		}
-		else schemeURI = null;
+		schemeURI = ((flags&1)==1) ? in.readUTFString((int) getLeft(in), MP4InputStream.UTF8) : null;
 	}
 
 	/**

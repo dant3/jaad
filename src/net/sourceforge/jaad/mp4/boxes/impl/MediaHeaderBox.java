@@ -37,26 +37,16 @@ public class MediaHeaderBox extends FullBox {
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
-		if(version==1) {
-			creationTime = in.readBytes(8);
-			modificationTime = in.readBytes(8);
-			timeScale = in.readBytes(4);
-			duration = in.readBytes(8);
-			left -= 28;
-		}
-		else {
-			creationTime = in.readBytes(4);
-			modificationTime = in.readBytes(4);
-			timeScale = in.readBytes(4);
-			duration = in.readBytes(4);
-			left -= 16;
-		}
+		
+		final int len = (version==1) ? 8 : 4;
+		creationTime = in.readBytes(len);
+		modificationTime = in.readBytes(len);
+		timeScale = in.readBytes(4);
+		duration = in.readBytes(len);
 
 		language = Utils.getLanguageCode(in.readBytes(2));
 
 		in.skipBytes(2); //pre-defined: 0
-
-		left -= 4;
 	}
 
 	/**

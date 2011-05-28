@@ -27,7 +27,6 @@ public class OMAContentIDBox extends FullBox {
 
 		final int len = (int) in.readBytes(2);
 		contentID = in.readString(len);
-		left -= len+2;
 	}
 
 	/**

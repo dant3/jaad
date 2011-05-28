@@ -51,15 +51,12 @@ public class IPMPControlBox extends FullBox {
 		super.decode(in);
 
 		toolList = /*(IPMPToolListDescriptor)*/ Descriptor.createDescriptor(in);
-		left -= toolList.getSize();
 
 		final int count = in.read();
-		left--;
 
 		ipmpDescriptors = new Descriptor[count];
 		for(int i = 0; i<count; i++) {
 			ipmpDescriptors[i] = /*(IPMPDescriptor)*/ Descriptor.createDescriptor(in);
-			left -= ipmpDescriptors[i].getSize();
 		}
 	}
 

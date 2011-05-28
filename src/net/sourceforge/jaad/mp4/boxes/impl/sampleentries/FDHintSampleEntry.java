@@ -36,7 +36,6 @@ public class FDHintSampleEntry extends SampleEntry {
 		highestCompatibleVersion = (int) in.readBytes(2);
 		partitionEntryID = (int) in.readBytes(2);
 		fecOverhead = in.readFixedPoint(8, 8);
-		left -= 8;
 
 		readChildren(in);
 	}

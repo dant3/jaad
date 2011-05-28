@@ -34,10 +34,7 @@ public class DataEntryUrlBox extends FullBox {
 		super.decode(in);
 
 		inFile = (flags&1)==1;
-		if(!inFile) {
-			location = in.readUTFString((int) left, MP4InputStream.UTF8);
-			left -= location.length()+1;
-		}
+		if(!inFile) location = in.readUTFString((int) getLeft(in), MP4InputStream.UTF8);
 	}
 
 	public boolean isInFile() {

@@ -36,7 +36,6 @@ public class SampleDescriptionBox extends FullBox {
 		super.decode(in);
 
 		final int entryCount = (int) in.readBytes(4);
-		left -= 4;
 
 		readChildren(in, entryCount);
 	}

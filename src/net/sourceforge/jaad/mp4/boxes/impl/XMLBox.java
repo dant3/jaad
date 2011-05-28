@@ -41,8 +41,7 @@ public class XMLBox extends FullBox {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 
-		content = in.readUTFString((int) left);
-		left -= content.length();
+		content = in.readUTFString((int) getLeft(in));
 	}
 
 	/**

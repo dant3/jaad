@@ -17,15 +17,13 @@ public class ThreeGPPMetadataBox extends FullBox {
 	public void decode(MP4InputStream in) throws IOException {
 		decodeCommon(in);
 
-		data = in.readUTFString((int) left);
-		left -= data.length()+1;
+		data = in.readUTFString((int) getLeft(in));
 	}
 
 	//called directly by subboxes that don't contain the 'data' string
 	protected void decodeCommon(MP4InputStream in) throws IOException {
 		super.decode(in);
 		languageCode = Utils.getLanguageCode(in.readBytes(2));
-		left -= 2;
 	}
 
 	/**

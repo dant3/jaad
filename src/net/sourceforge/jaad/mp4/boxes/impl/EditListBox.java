@@ -54,7 +54,6 @@ public class EditListBox extends FullBox {
 		super.decode(in);
 
 		final int entryCount = (int) in.readBytes(4);
-		left -= 4;
 		final int len = (version==1) ? 8 : 4;
 
 		segmentDuration = new long[entryCount];
@@ -68,7 +67,6 @@ public class EditListBox extends FullBox {
 			//int(16) mediaRate_integer;
 			//int(16) media_rate_fraction = 0;
 			mediaRate[i] = in.readFixedPoint(16, 16);
-			left -= (2*len)+4;
 		}
 	}
 

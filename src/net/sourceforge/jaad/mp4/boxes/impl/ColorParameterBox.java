@@ -20,6 +20,7 @@ import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 
+//TODO: check decoding, add get-methods
 public class ColorParameterBox extends FullBox {
 
 	private long colorParameterType;
@@ -37,6 +38,5 @@ public class ColorParameterBox extends FullBox {
 		primariesIndex = (int) in.readBytes(2);
 		transferFunctionIndex = (int) in.readBytes(2);
 		matrixIndex = (int) in.readBytes(2);
-		left -= 10;
 	}
 }

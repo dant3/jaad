@@ -72,11 +72,9 @@ public class TrackSelectionBox extends FullBox {
 		super.decode(in);
 
 		switchGroup = in.readBytes(4);
-		left -= 4;
 
-		while(left>3) {
+		while(getLeft(in)>3) {
 			attributes.add(in.readBytes(4));
-			left -= 4;
 		}
 	}
 

@@ -92,11 +92,9 @@ public class ITunesMetadataBox extends FullBox {
 		dataType = DataType.forInt(flags);
 
 		in.skipBytes(4); //padding?
-		left -= 4;
 
-		data = new byte[(int) left];
+		data = new byte[(int) getLeft(in)];
 		in.readBytes(data);
-		left = 0;
 	}
 
 	public DataType getDataType() {

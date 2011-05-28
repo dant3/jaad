@@ -47,11 +47,10 @@ public class ProgressiveDownloadInformationBox extends FullBox {
 		super.decode(in);
 
 		long rate, initialDelay;
-		while(left>0) {
+		while(getLeft(in)>0) {
 			rate = in.readBytes(4);
 			initialDelay = in.readBytes(4);
 			pairs.put(rate, initialDelay);
-			left -= 8;
 		}
 	}
 

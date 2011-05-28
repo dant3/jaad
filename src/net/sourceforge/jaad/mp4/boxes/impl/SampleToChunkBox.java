@@ -36,13 +36,11 @@ public class SampleToChunkBox extends FullBox {
 		firstChunks = new long[entryCount];
 		samplesPerChunk = new long[entryCount];
 		sampleDescriptionIndex = new long[entryCount];
-		left -= 4;
 
 		for(int i = 0; i<entryCount; i++) {
 			firstChunks[i] = in.readBytes(4);
 			samplesPerChunk[i] = in.readBytes(4);
 			sampleDescriptionIndex[i] = in.readBytes(4);
-			left -= 12;
 		}
 	}
 

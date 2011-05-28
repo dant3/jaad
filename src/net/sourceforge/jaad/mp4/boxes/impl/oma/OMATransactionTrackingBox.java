@@ -23,7 +23,6 @@ public class OMATransactionTrackingBox extends FullBox {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 		transactionID = in.readString(16);
-		left -= 16;
 	}
 
 	/**

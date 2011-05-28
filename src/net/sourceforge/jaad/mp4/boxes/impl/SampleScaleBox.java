@@ -63,7 +63,6 @@ public class SampleScaleBox extends FullBox {
 		scaleMethod = in.read();
 		displayCenterX = (int) in.readBytes(2);
 		displayCenterY = (int) in.readBytes(2);
-		left -= 6;
 	}
 
 	/**

@@ -22,9 +22,8 @@ public class OMARightsObjectBox extends FullBox {
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
-		data = new byte[(int) left];
+		data = new byte[(int) getLeft(in)];
 		in.readBytes(data);
-		left = 0;
 	}
 
 	/**

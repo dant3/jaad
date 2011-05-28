@@ -45,7 +45,6 @@ public class CleanApertureBox extends BoxImpl {
 		horizOffD = in.readBytes(4);
 		vertOffN = in.readBytes(4);
 		vertOffD = in.readBytes(4);
-		left -= 32;
 	}
 
 	public long getCleanApertureWidthN() {

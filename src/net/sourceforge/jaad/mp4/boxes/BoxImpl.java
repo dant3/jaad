@@ -25,7 +25,7 @@ import net.sourceforge.jaad.mp4.MP4InputStream;
 public class BoxImpl implements Box {
 
 	private final String name;
-	protected long size, type, left, offset;
+	protected long size, type, offset;
 	protected Box parent;
 	protected final List<Box> children;
 
@@ -35,15 +35,15 @@ public class BoxImpl implements Box {
 		children = new ArrayList<Box>(4);
 	}
 
-	public void setParams(Box parent, long size, long type, long offset, long left) {
+	public void setParams(Box parent, long size, long type, long offset) {
 		this.size = size;
 		this.type = type;
 		this.parent = parent;
-		this.left = left;
+		this.offset = offset;
 	}
 
-	long getLeft() {
-		return left;
+	protected long getLeft(MP4InputStream in) throws IOException {
+		return (offset+size)-in.getOffset();
 	}
 
 	/**
@@ -122,9 +122,8 @@ public class BoxImpl implements Box {
 
 	protected void readChildren(MP4InputStream in) throws IOException {
 		Box box;
-		while(left>0) {
+		while(in.getOffset()<(offset+size)) {
 			box = BoxFactory.parseBox(this, in);
-			left -= box.getSize();
 			children.add(box);
 		}
 	}
@@ -133,7 +132,6 @@ public class BoxImpl implements Box {
 		Box box;
 		for(int i = 0; i<len; i++) {
 			box = BoxFactory.parseBox(this, in);
-			left -= box.getSize();
 			children.add(box);
 		}
 	}

@@ -15,11 +15,7 @@ public class ThreeGPPAlbumBox extends ThreeGPPMetadataBox {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 
-		if(left>0) {
-			trackNumber = in.read();
-			left--;
-		}
-		else trackNumber = -1;
+		trackNumber = (getLeft(in)>0) ? in.read() : -1;
 	}
 
 	/**

@@ -55,8 +55,6 @@ public class VideoSampleEntry extends SampleEntry {
 		depth = (int) in.readBytes(2);
 		in.skipBytes(2); //pre-defined: -1
 
-		left -= 70;
-
 		readChildren(in);
 	}
 

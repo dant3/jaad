@@ -55,7 +55,7 @@ public class ItemInformationBox extends FullBox {
 		super.decode(in);
 
 		final int protectionCount = (int) in.readBytes(2);
-		left -= 0;
+
 		readChildren(in, protectionCount);
 	}
 }

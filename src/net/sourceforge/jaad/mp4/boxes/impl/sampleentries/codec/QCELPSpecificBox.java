@@ -32,7 +32,6 @@ public class QCELPSpecificBox extends CodecSpecificBox {
 		decodeCommon(in);
 		
 		framesPerSample = in.read();
-		left--;
 	}
 
 	public int getFramesPerSample() {

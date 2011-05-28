@@ -31,8 +31,7 @@ abstract class MetadataSampleEntry extends SampleEntry {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 
-		contentEncoding = in.readUTFString((int) left, MP4InputStream.UTF8);
-		left -= contentEncoding.length()+1;
+		contentEncoding = in.readUTFString((int) getLeft(in), MP4InputStream.UTF8);
 	}
 
 	/**

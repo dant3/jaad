@@ -36,11 +36,9 @@ public class ID3TagBox extends FullBox {
 		super.decode(in);
 
 		language = Utils.getLanguageCode(in.readBytes(2));
-		left -= 2;
 
-		id3Data = new byte[(int) left];
+		id3Data = new byte[(int) getLeft(in)];
 		in.readBytes(id3Data);
-		left = 0;
 	}
 
 	public byte[] getID3Data() {

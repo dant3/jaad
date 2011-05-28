@@ -45,7 +45,6 @@ public class MetaBoxRelationBox extends FullBox {
 		firstMetaboxHandlerType = in.readBytes(4);
 		secondMetaboxHandlerType = in.readBytes(4);
 		metaboxRelation = in.read();
-		left -= 9;
 	}
 
 	/**

@@ -351,19 +351,12 @@ public class BoxFactory implements BoxTypes {
 
 		long size = in.readBytes(4);
 		long type = in.readBytes(4);
-		long left = size-8;
-		if(size==1) {
-			size = in.readBytes(8);
-			left = size-16;
-		}
-		if(type==EXTENDED_TYPE) {
-			in.skipBytes(16);
-			left -= 16;
-		}
+		if(size==1) size = in.readBytes(8);
+		if(type==EXTENDED_TYPE) in.skipBytes(16);
 
 		Logger.getLogger("MP4 Boxes").finest(typeToString(type));
 		final BoxImpl box = forType(type, in.getOffset());
-		box.setParams(parent, size, type, offset, left);
+		box.setParams(parent, size, type, offset);
 		box.decode(in);
 
 		//if box doesn't contain data it only contains children
@@ -371,7 +364,7 @@ public class BoxFactory implements BoxTypes {
 		if(cl==BoxImpl.class||cl==FullBox.class) box.readChildren(in);
 
 		//check bytes left
-		left = box.getLeft();
+		final long left = (box.getOffset()+box.getSize())-in.getOffset();
 		if(left>0
 				&&!(box instanceof MediaDataBox)
 				&&!(box instanceof UnknownBox)
@@ -389,17 +382,9 @@ public class BoxFactory implements BoxTypes {
 		final long offset = in.getOffset();
 
 		long size = in.readBytes(4);
-		long left = size-4;
-		if(size==1) {
-			size = in.readBytes(8);
-			left -= 8;
-		}
 		long type = in.readBytes(4);
-		left -= 4;
-		if(type==EXTENDED_TYPE) {
-			in.skipBytes(16);
-			left -= 16;
-		}
+		if(size==1) size = in.readBytes(8);
+		if(type==EXTENDED_TYPE) in.skipBytes(16);
 
 		BoxImpl box = null;
 		try {
@@ -411,9 +396,10 @@ public class BoxFactory implements BoxTypes {
 		}
 
 		if(box!=null) {
-			box.setParams(null, size, type, offset, left);
+			box.setParams(null, size, type, offset);
 			box.decode(in);
-			in.skipBytes(box.getLeft());
+			final long left = (box.getOffset()+box.getSize())-in.getOffset();
+			in.skipBytes(left);
 		}
 		return box;
 	}

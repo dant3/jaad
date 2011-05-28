@@ -47,14 +47,12 @@ public class CompositionTimeToSampleBox extends FullBox {
 		super.decode(in);
 		
 		final int entryCount = (int) in.readBytes(4);
-		left -= 4;
 		sampleCounts = new long[entryCount];
 		sampleOffsets = new long[entryCount];
 
 		for(int i = 0; i<entryCount; i++) {
 			sampleCounts[i] = in.readBytes(4);
 			sampleOffsets[i] = in.readBytes(4);
-			left -= 8;
 		}
 	}
 

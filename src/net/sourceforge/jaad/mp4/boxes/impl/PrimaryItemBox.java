@@ -44,7 +44,6 @@ public class PrimaryItemBox extends FullBox {
 		super.decode(in);
 
 		itemID = (int) in.readBytes(2);
-		left -= 2;
 	}
 
 	/**

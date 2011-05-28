@@ -34,21 +34,18 @@ public class NeroMetadataTagsBox extends BoxImpl {
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		in.skipBytes(12); //meta box
-		left -= 12;
 
 		String key, val;
 		int len;
 		//TODO: what are the other skipped fields for?
-		while(left>0&&in.read()==0x80) {
+		while(getLeft(in)>0&&in.read()==0x80) {
 			in.skipBytes(2); //x80 x00 x06/x05
-			key = in.readUTFString((int) left, MP4InputStream.UTF8);
+			key = in.readUTFString((int) getLeft(in), MP4InputStream.UTF8);
 			in.skipBytes(4); //0x00 0x01 0x00 0x00 0x00
 			len = in.read();
 			val = in.readString(len);
 			pairs.put(key, val);
-			left -= 9+key.length()+val.length();
 		}
-		if(left>0) left--;
 	}
 
 	public Map<String, String> getPairs() {

@@ -46,7 +46,6 @@ public class SampleSizeBox extends FullBox {
 
 		sampleCount = in.readBytes(4);
 		sampleSizes = new long[(int) sampleCount];
-		left -= 8;
 
 		if(compact) {
 			//compact: sampleSize can be 4, 8 or 16 bits
@@ -57,7 +56,6 @@ public class SampleSizeBox extends FullBox {
 					sampleSizes[i] = (x>>4)&0xF;
 					sampleSizes[i+1] = x&0xF;
 				}
-				left -= sampleCount/2;
 			}
 			else readSizes(in, sampleSize/8);
 		}
@@ -69,7 +67,6 @@ public class SampleSizeBox extends FullBox {
 		for(int i = 0; i<sampleCount; i++) {
 			sampleSizes[i] = in.readBytes(len);
 		}
-		left -= sampleCount*len;
 	}
 
 	public int getSampleCount() {

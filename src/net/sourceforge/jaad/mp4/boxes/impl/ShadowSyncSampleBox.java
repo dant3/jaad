@@ -66,13 +66,11 @@ public class ShadowSyncSampleBox extends FullBox {
 		
 		final int entryCount = (int) in.readBytes(4);
 		sampleNumbers = new long[entryCount][2];
-		left -= 4;
 
 		for(int i = 0; i<entryCount; i++) {
 			sampleNumbers[i][0] = in.readBytes(4); //shadowedSampleNumber;
 			sampleNumbers[i][1] = in.readBytes(4); //syncSampleNumber;
 		}
-		left -= entryCount*8;
 	}
 
 	/**

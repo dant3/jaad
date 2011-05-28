@@ -17,7 +17,6 @@ public class ThreeGPPRecordingYearBox extends FullBox {
 		super.decode(in);
 
 		year = (int) in.readBytes(2);
-		left -= 2;
 	}
 
 	public int getYear() {

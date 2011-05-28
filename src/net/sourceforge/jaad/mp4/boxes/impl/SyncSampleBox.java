@@ -45,8 +45,6 @@ public class SyncSampleBox extends FullBox {
 		for(int i = 0; i<entryCount; i++) {
 			sampleNumbers[i] = in.readBytes(4);
 		}
-
-		left -= (entryCount+1)*4;
 	}
 
 	/**

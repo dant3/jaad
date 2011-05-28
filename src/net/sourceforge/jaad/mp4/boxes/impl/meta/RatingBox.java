@@ -23,11 +23,8 @@ public class RatingBox extends FullBox {
 			//TODO: what to do with both?
 			final long entity = in.readBytes(4);
 			final long criteria = in.readBytes(4);
-			left -= 8;
 			languageCode = Utils.getLanguageCode(in.readBytes(2));
-			left -= 2;
-			final byte[] b = in.readTerminated((int) left, 0);
-			left -= b.length+1;
+			final byte[] b = in.readTerminated((int) getLeft(in), 0);
 			rating = new String(b, MP4InputStream.UTF8);
 		}
 		else readChildren(in);

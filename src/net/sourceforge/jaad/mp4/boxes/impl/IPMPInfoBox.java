@@ -65,9 +65,8 @@ public class IPMPInfoBox extends FullBox {
 
 		ipmpDescriptors = new ArrayList</*IPMP*/Descriptor>();
 		/*IPMP*/Descriptor desc;
-		while(left>0) {
+		while(getLeft(in)>0) {
 			desc = (/*IPMP*/Descriptor) ObjectDescriptor.createDescriptor(in);
-			left -= desc.getSize();
 			ipmpDescriptors.add(desc);
 		}
 	}

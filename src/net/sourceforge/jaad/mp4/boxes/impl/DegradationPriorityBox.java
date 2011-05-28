@@ -47,7 +47,6 @@ public class DegradationPriorityBox extends FullBox {
 		for(int i = 0; i<sampleCount; i++) {
 			priorities[i] = (int) in.readBytes(2);
 		}
-		left -= 2*sampleCount;
 	}
 
 	/**

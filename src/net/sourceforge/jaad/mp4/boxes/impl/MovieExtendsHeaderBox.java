@@ -41,7 +41,6 @@ public class MovieExtendsHeaderBox extends FullBox {
 
 		final int len = (version==1) ? 8 : 4;
 		fragmentDuration = in.readBytes(len);
-		left -= len;
 	}
 
 	/**

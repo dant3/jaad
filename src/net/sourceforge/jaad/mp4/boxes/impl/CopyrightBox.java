@@ -42,11 +42,8 @@ public class CopyrightBox extends FullBox {
 			super.decode(in);
 			//1 bit padding, 5*3 bits language code (ISO-639-2/T)
 			languageCode = Utils.getLanguageCode(in.readBytes(2));
-			left-=2;
 
-			notice = in.readUTFString((int) left); //UTF8 or UTF16
-
-			left -= notice.length()+1;
+			notice = in.readUTFString((int) getLeft(in));
 		}
 		else if(parent.getType()==BoxTypes.ITUNES_META_LIST_BOX) readChildren(in);
 	}

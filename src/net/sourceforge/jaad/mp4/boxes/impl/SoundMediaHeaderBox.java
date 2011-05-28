@@ -41,7 +41,6 @@ public class SoundMediaHeaderBox extends FullBox {
 
 		balance = in.readFixedPoint(8, 8);
 		in.skipBytes(2); //reserved
-		left -= 4;
 	}
 
 	/**

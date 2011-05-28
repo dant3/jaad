@@ -40,7 +40,6 @@ public class MovieFragmentHeaderBox extends FullBox {
 		super.decode(in);
 
 		sequenceNumber = in.readBytes(4);
-		left -= 4;
 	}
 
 	/**

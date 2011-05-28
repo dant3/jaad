@@ -83,7 +83,6 @@ public class ItemLocationBox extends FullBox {
 		final int baseOffsetSize = (int) (l>>4)&0xF;
 
 		final int itemCount = (int) in.readBytes(2);
-		left -= 4;
 		dataReferenceIndex = new int[itemCount];
 		baseOffset = new long[itemCount];
 		extentOffset = new long[itemCount][];
@@ -96,14 +95,12 @@ public class ItemLocationBox extends FullBox {
 			baseOffset[i] = in.readBytes(baseOffsetSize);
 
 			extentCount = (int) in.readBytes(2);
-			left -= 6+baseOffsetSize;
 			extentOffset[i] = new long[extentCount];
 			extentLength[i] = new long[extentCount];
 
 			for(j = 0; j<extentCount; j++) {
 				extentOffset[i][j] = in.readBytes(offsetSize);
 				extentLength[i][j] = in.readBytes(lengthSize);
-				left -= offsetSize+lengthSize;
 			}
 		}
 	}

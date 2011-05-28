@@ -16,14 +16,12 @@ public class ThreeGPPKeywordsBox extends ThreeGPPMetadataBox {
 		decodeCommon(in);
 
 		final int count = in.read();
-		left--;
 		keywords = new String[count];
 
 		int len;
 		for(int i = 0; i<count; i++) {
 			len = in.read();
 			keywords[i] = in.readUTFString(len);
-			left -= len+1;
 		}
 	}
 

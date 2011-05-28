@@ -50,7 +50,6 @@ public class SampleDependencyBox extends FullBox {
 			for(j = 0; j<dependencyCount[i]; j++) {
 				relativeSampleNumber[i][j] = (int) in.readBytes(2);
 			}
-			left -= (dependencyCount[i]+1)*2;
 		}
 	}
 

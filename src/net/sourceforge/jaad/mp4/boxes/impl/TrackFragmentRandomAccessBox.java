@@ -41,7 +41,6 @@ public class TrackFragmentRandomAccessBox extends FullBox {
 		final int trunNumberLen = (int) ((l>>2)&0x3)+1;
 		final int sampleNumberLen = (int) (l&0x3)+1;
 		entryCount = (int) in.readBytes(4);
-		left -= 12;
 
 		final int len = (version==1) ? 8 : 4;
 
@@ -52,7 +51,6 @@ public class TrackFragmentRandomAccessBox extends FullBox {
 			trunNumbers[i] = in.readBytes(trunNumberLen);
 			sampleNumbers[i] = in.readBytes(sampleNumberLen);
 		}
-		left -= (entryCount*len*2)+(entryCount*trafNumberLen)+(entryCount*trunNumberLen)+(entryCount*sampleNumberLen);
 	}
 
 	/**

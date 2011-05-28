@@ -16,8 +16,7 @@ public class ITunesMetadataMeanBox extends FullBox {
 	public void decode(MP4InputStream in) throws IOException {
 		super.decode(in);
 
-		domain = in.readString((int) left);
-		left = 0;
+		domain = in.readString((int) getLeft(in));
 	}
 
 	public String getDomain() {

@@ -35,7 +35,6 @@ public class RTPHintSampleEntry extends SampleEntry {
 		hintTrackVersion = (int) in.readBytes(2);
 		highestCompatibleVersion = (int) in.readBytes(2);
 		maxPacketSize = in.readBytes(4);
-		left -= 8;
 	}
 
 	/**

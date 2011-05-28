@@ -52,19 +52,13 @@ public class TrackFragmentRunBox extends FullBox {
 		super.decode(in);
 
 		sampleCount = (int) in.readBytes(4);
-		left -= 4;
 
 		//optional fields
 		dataOffsetPresent = ((flags&1)==1);
-		if(dataOffsetPresent) {
-			dataOffset = in.readBytes(4);
-			left -= 4;
-		}
+		if(dataOffsetPresent) dataOffset = in.readBytes(4);
+
 		firstSampleFlagsPresent = ((flags&4)==4);
-		if(firstSampleFlagsPresent) {
-			firstSampleFlags = in.readBytes(4);
-			left -= 4;
-		}
+		if(firstSampleFlagsPresent) firstSampleFlags = in.readBytes(4);
 
 		//all fields are optional
 		sampleDurationPresent = ((flags&0x100)==0x100);
@@ -76,23 +70,11 @@ public class TrackFragmentRunBox extends FullBox {
 		sampleCompositionTimeOffsetPresent = ((flags&0x800)==0x800);
 		if(sampleCompositionTimeOffsetPresent) sampleCompositionTimeOffset = new long[sampleCount];
 
-		for(int i = 0; i<sampleCount&&left>0; i++) {
-			if(sampleDurationPresent) {
-				sampleDuration[i] = in.readBytes(4);
-				left -= 4;
-			}
-			if(sampleSizePresent) {
-				sampleSize[i] = in.readBytes(4);
-				left -= 4;
-			}
-			if(sampleFlagsPresent) {
-				sampleFlags[i] = in.readBytes(4);
-				left -= 4;
-			}
-			if(sampleCompositionTimeOffsetPresent) {
-				sampleCompositionTimeOffset[i] = in.readBytes(4);
-				left -= 4;
-			}
+		for(int i = 0; i<sampleCount&&getLeft(in)>0; i++) {
+			if(sampleDurationPresent) sampleDuration[i] = in.readBytes(4);
+			if(sampleSizePresent) sampleSize[i] = in.readBytes(4);
+			if(sampleFlagsPresent) sampleFlags[i] = in.readBytes(4);
+			if(sampleCompositionTimeOffsetPresent) sampleCompositionTimeOffset[i] = in.readBytes(4);
 		}
 	}
 

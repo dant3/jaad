@@ -31,6 +31,5 @@ public class FullBox extends BoxImpl {
 	public void decode(MP4InputStream in) throws IOException {
 		version = in.read();
 		flags = (int) in.readBytes(3);
-		left -= 4;
 	}
 }

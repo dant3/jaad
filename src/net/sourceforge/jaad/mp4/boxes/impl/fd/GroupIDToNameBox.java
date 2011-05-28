@@ -40,7 +40,7 @@ public class GroupIDToNameBox extends FullBox {
 		String name;
 		for(int i = 0; i<entryCount; i++) {
 			id = in.readBytes(4);
-			name = in.readUTFString((int) left, MP4InputStream.UTF8);
+			name = in.readUTFString((int) getLeft(in), MP4InputStream.UTF8);
 			map.put(id, name);
 		}
 	}

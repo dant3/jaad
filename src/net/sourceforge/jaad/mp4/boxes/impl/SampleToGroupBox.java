@@ -57,8 +57,6 @@ public class SampleToGroupBox extends FullBox {
 			sampleCount[i] = in.readBytes(4);
 			groupDescriptionIndex[i] = in.readBytes(4);
 		}
-
-		left -= (entryCount+1)*8;
 	}
 
 	/**

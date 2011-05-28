@@ -19,7 +19,6 @@ public class OMAContentObjectBox extends FullBox {
 		final int len = (int) in.readBytes(4);
 		data = new byte[len];
 		in.readBytes(data);
-		left -= len+4;
 	}
 
 	/**

@@ -72,10 +72,7 @@ public class MP4Info {
 		for(int i = 0; i<level; i++) {
 			sb.append("  ");
 		}
-		sb.append(box.getName());
-		sb.append(" (");
-		sb.append(BoxFactory.typeToString(box.getType()));
-		sb.append(")");
+		sb.append(box.toString());
 		System.out.println(sb.toString());
 
 		for(Box child : box.getChildren()) {

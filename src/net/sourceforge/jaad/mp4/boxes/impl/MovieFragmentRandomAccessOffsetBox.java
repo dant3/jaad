@@ -44,7 +44,6 @@ public class MovieFragmentRandomAccessOffsetBox extends FullBox {
 		super.decode(in);
 
 		byteSize = in.readBytes(4);
-		left -= 4;
 	}
 
 	public long getByteSize() {

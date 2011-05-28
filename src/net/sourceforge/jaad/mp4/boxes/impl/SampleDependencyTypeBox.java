@@ -18,7 +18,6 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 
@@ -88,7 +87,6 @@ public class SampleDependencyTypeBox extends FullBox {
 			sampleIsDependedOn[i] = (b>>2)&3;
 			sampleDependsOn[i] = (b>>4)&3;
 		}
-		left -= sampleCount;
 	}
 
 	/**
