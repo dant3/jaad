@@ -64,7 +64,7 @@ public class VideoTrack extends Track {
 			findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
 			protection = new ProtectionInformation(sampleEntry.getChild(BoxTypes.PROTECTION_SCHEME_INFORMATION_BOX));
 		}
-		else decoderInfo = new DecoderInfo((CodecSpecificBox) sampleEntry.getChildren().get(0));
+		else decoderInfo = DecoderInfo.forBox((CodecSpecificBox) sampleEntry.getChildren().get(0));
 
 		codec = VideoCodec.forType(sampleEntry.getType());
 	}

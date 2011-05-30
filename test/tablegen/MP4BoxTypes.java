@@ -199,22 +199,24 @@ public class MP4BoxTypes {
 		{"QCELP_SPECIFIC_BOX", "dqcp", "QCELPSpecificBox"},
 		{"SMV_SPECIFIC_BOX", "dsmv", "SMVSpecificBox"},
 		{"OMA DRM"},
-		{"OMA_DRM_CONTAINER_BOX", "odrm", "FullBox", "OMA DRM Container Box"},
-		{"OMA_DISCRETE_MEDIA_HEADERS_BOX", "odhe", "OMADiscreteMediaHeadersBox"},
+		{"OMA_ACCESS_UNIT_FORMAT_BOX", "odaf", "OMAAccessUnitFormatBox"},
 		{"OMA_COMMON_HEADERS_BOX", "ohdr", "OMACommonHeadersBox"},
-		{"OMA_CONTENT_OBJECT_BOX", "odda", "OMAContentObjectBox"},
-		{"OMA_MUTABLE_DRM_INFORMATION_BOX", "mdri", "BoxImpl", "OMA DRM Mutable DRM Information Box"},
-		{"OMA_TRANSACTION_TRACKING_BOX", "odtt", "OMATransactionTrackingBox"},
-		{"OMA_RIGHTS_OBJECT_BOX", "odrb", "OMARightsObjectBox"},
 		{"OMA_CONTENT_ID_BOX", "ccid", "OMAContentIDBox"},
+		{"OMA_CONTENT_OBJECT_BOX", "odda", "OMAContentObjectBox"},
+		{"OMA_COVER_URI_BOX", "cvru", "OMAURLBox", "OMA DRM Cover URI Box"},
+		{"OMA_DISCRETE_MEDIA_HEADERS_BOX", "odhe", "OMADiscreteMediaHeadersBox"},
+		{"OMA_DRM_CONTAINER_BOX", "odrm", "FullBox", "OMA DRM Container Box"},
 		{"OMA_ICON_URI_BOX", "icnu", "OMAURLBox", "OMA DRM Icon URI Box"},
 		{"OMA_INFO_URL_BOX", "infu", "OMAURLBox", "OMA DRM Info URL Box"},
-		{"OMA_COVER_URI_BOX", "cvru", "OMAURLBox", "OMA DRM Cover URI Box"},
-		{"OMA_LYRICS_URI_BOX", "lrcu", "OMAURLBox", "OMA DRM Lyrics URI Box"}
+		{"OMA_LYRICS_URI_BOX", "lrcu", "OMAURLBox", "OMA DRM Lyrics URI Box"},
+		{"OMA_MUTABLE_DRM_INFORMATION_BOX", "mdri", "BoxImpl", "OMA DRM Mutable DRM Information Box"},
+		{"OMA_KEY_MANAGEMENT_BOX", "odkm", "FullBox"},
+		{"OMA_RIGHTS_OBJECT_BOX", "odrb", "OMARightsObjectBox"},
+		{"OMA_TRANSACTION_TRACKING_BOX", "odtt", "OMATransactionTrackingBox"}
 	};
 
 	public static void main(String[] args) {
-		System.out.println("long EXTENDED_TYPE = "+toLong("uuid")+";");
+		System.out.println("long EXTENDED_TYPE = "+toLong("uuid")+"; //uuid");
 
 		Map<String, String> classes = new LinkedHashMap<String, String>();
 		Map<String, String> params = new LinkedHashMap<String, String>();

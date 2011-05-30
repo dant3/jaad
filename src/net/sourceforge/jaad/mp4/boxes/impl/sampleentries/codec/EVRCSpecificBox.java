@@ -30,7 +30,7 @@ public class EVRCSpecificBox extends CodecSpecificBox {
 	@Override
 	public void decode(MP4InputStream in) throws IOException {
 		decodeCommon(in);
-		
+
 		framesPerSample = in.read();
 	}
 

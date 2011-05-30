@@ -16,15 +16,11 @@
  */
 package net.sourceforge.jaad.mp4.boxes;
 
-import java.io.IOException;
 import java.util.List;
-import net.sourceforge.jaad.mp4.MP4InputStream;
 
 public interface Box {
 
 	Box getParent();
-
-	void decode(MP4InputStream in) throws IOException;
 
 	/**
 	 * Returns the size of this box including its header.

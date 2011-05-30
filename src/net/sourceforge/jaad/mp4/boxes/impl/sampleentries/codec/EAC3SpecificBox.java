@@ -3,6 +3,14 @@ package net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec;
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 
+/**
+ * This box contains parameters for Extended AC-3 decoders. For more information
+ * see the AC-3 specification "<code>ETSI TS 102 366 V1.2.1 (2008-08)</code>" at 
+ * <a href="http://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.02.01_60/ts_102366v010201p.pdf>
+ * http://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.02.01_60/ts_102366v010201p.pdf</a>.
+ * 
+ * @author in-somnia
+ */
 public class EAC3SpecificBox extends CodecSpecificBox {
 
 	private int dataRate, independentSubstreamCount;
