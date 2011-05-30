@@ -68,10 +68,10 @@ public class MP4Container {
 		for(Handler h : log.getHandlers()) {
 			log.removeHandler(h);
 		}
-		log.setLevel(Level.ALL);
+		log.setLevel(Level.WARNING);
 
 		final ConsoleHandler h = new ConsoleHandler();
-		h.setLevel(Level.WARNING);
+		h.setLevel(Level.ALL);
 		log.addHandler(h);
 	}
 	private final MP4InputStream in;

@@ -36,10 +36,10 @@ public class Decoder implements Constants {
 		for(Handler h : LOGGER.getHandlers()) {
 			LOGGER.removeHandler(h);
 		}
-		LOGGER.setLevel(Level.ALL);
+		LOGGER.setLevel(Level.WARNING);
 
 		final ConsoleHandler h = new ConsoleHandler();
-		h.setLevel(Level.OFF);
+		h.setLevel(Level.ALL);
 		LOGGER.addHandler(h);
 	}
 	private final DecoderConfig config;

@@ -70,14 +70,15 @@ public class AudioTrack extends Track {
 		final SampleDescriptionBox stsd = (SampleDescriptionBox) stbl.getChild(BoxTypes.SAMPLE_DESCRIPTION_BOX);
 		sampleEntry = (AudioSampleEntry) stsd.getChildren().get(0);
 		final long type = sampleEntry.getType();
-		if(type==BoxTypes.MP4A_SAMPLE_ENTRY) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
-		else if(type==BoxTypes.ENCRYPTED_AUDIO_SAMPLE_ENTRY) {
-			findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
-			protection = new ProtectionInformation(sampleEntry.getChild(BoxTypes.PROTECTION_SCHEME_INFORMATION_BOX));
-		}
-		else decoderInfo = DecoderInfo.forBox((CodecSpecificBox) sampleEntry.getChildren().get(0));
+		if(sampleEntry.hasChild(BoxTypes.ESD_BOX)) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
+		else decoderInfo = DecoderInfo.parse((CodecSpecificBox) sampleEntry.getChildren().get(0));
 
-		codec = AudioCodec.forType(sampleEntry.getType());
+		if(type==BoxTypes.ENCRYPTED_AUDIO_SAMPLE_ENTRY||type==BoxTypes.DRMS_SAMPLE_ENTRY) {
+			findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
+			protection = Protection.parse(sampleEntry.getChild(BoxTypes.PROTECTION_SCHEME_INFORMATION_BOX));
+			codec = protection.getOriginalFormat();
+		}
+		else codec = AudioCodec.forType(sampleEntry.getType());
 	}
 
 	@Override

@@ -37,7 +37,7 @@ import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.*;
  */
 public abstract class DecoderInfo {
 
-	static DecoderInfo forBox(CodecSpecificBox css) {
+	static DecoderInfo parse(CodecSpecificBox css) {
 		final long l = css.getType();
 
 		final DecoderInfo info;

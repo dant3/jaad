@@ -212,7 +212,13 @@ public class MP4BoxTypes {
 		{"OMA_MUTABLE_DRM_INFORMATION_BOX", "mdri", "BoxImpl", "OMA DRM Mutable DRM Information Box"},
 		{"OMA_KEY_MANAGEMENT_BOX", "odkm", "FullBox"},
 		{"OMA_RIGHTS_OBJECT_BOX", "odrb", "OMARightsObjectBox"},
-		{"OMA_TRANSACTION_TRACKING_BOX", "odtt", "OMATransactionTrackingBox"}
+		{"OMA_TRANSACTION_TRACKING_BOX", "odtt", "OMATransactionTrackingBox"},
+		{"iTunes DRM (FairPlay)"},
+		{"FAIRPLAY_USER_ID_BOX", "user", "FairPlayDataBox"},
+		{"FAIRPLAY_USER_NAME_BOX", "name", "FairPlayDataBox"},
+		{"FAIRPLAY_USER_KEY_BOX", "key ", "FairPlayDataBox"},
+		{"FAIRPLAY_IV_BOX", "iviv", "FairPlayDataBox"},
+		{"FAIRPLAY_PRIVATE_KEY_BOX", "priv", "FairPlayDataBox"}
 	};
 
 	public static void main(String[] args) {

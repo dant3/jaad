@@ -34,7 +34,7 @@ public class Movie {
 	private final List<Track> tracks;
 	private final boolean metaDataPresent;
 	private final MetaData metaData;
-	private final List<ProtectionInformation> protections;
+	private final List<Protection> protections;
 
 	public Movie(Box moov, MP4InputStream in) {
 		this.in = in;
@@ -66,11 +66,11 @@ public class Movie {
 		else metaDataPresent = false;
 
 		//detect DRM
-		protections = new ArrayList<ProtectionInformation>();
+		protections = new ArrayList<Protection>();
 		if(moov.hasChild(BoxTypes.ITEM_PROTECTION_BOX)) {
 			Box ipro = moov.getChild(BoxTypes.ITEM_PROTECTION_BOX);
 			for(Box sinf : ipro.getChildren(BoxTypes.PROTECTION_SCHEME_INFORMATION_BOX)) {
-				protections.add(new ProtectionInformation(sinf));
+				protections.add(Protection.parse(sinf));
 			}
 		}
 	}
@@ -158,7 +158,7 @@ public class Movie {
 	 * 
 	 * @return a list of protection informations
 	 */
-	public List<ProtectionInformation> getProtectionInformations() {
+	public List<Protection> getProtections() {
 		return Collections.unmodifiableList(protections);
 	}
 

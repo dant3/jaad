@@ -67,7 +67,7 @@ public abstract class Track {
 	//info structures
 	protected DecoderSpecificInfo decoderSpecificInfo;
 	protected DecoderInfo decoderInfo;
-	protected ProtectionInformation protection;
+	protected Protection protection;
 
 	Track(Box trak, MP4InputStream in) {
 		this.in = in;
@@ -303,7 +303,7 @@ public abstract class Track {
 	 * @return a <code>ProtectionInformation</code> object or null if no 
 	 * protection is used
 	 */
-	public ProtectionInformation getProtectionInformation() {
+	public Protection getProtection() {
 		return protection;
 	}
 

@@ -32,12 +32,8 @@ import net.sourceforge.jaad.mp4.boxes.impl.oma.*;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.*;
 import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.*;
 import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
+import net.sourceforge.jaad.mp4.boxes.impl.drm.FairPlayDataBox;
 
-/*TODO: subtracting from 'left' could be replaced:
- * skipping in factory -> calculate from inputstream offset
- * in boxes (e.g. to call readUTF) -> protected int getLeft() in BoxImpl that
- * subtracts from box-offset
- */
 public class BoxFactory implements BoxTypes {
 
 	private static final Logger LOGGER = Logger.getLogger("MP4 Boxes");
@@ -46,10 +42,10 @@ public class BoxFactory implements BoxTypes {
 		for(Handler h : LOGGER.getHandlers()) {
 			LOGGER.removeHandler(h);
 		}
-		LOGGER.setLevel(Level.ALL);
+		LOGGER.setLevel(Level.WARNING);
 
 		final ConsoleHandler h = new ConsoleHandler();
-		h.setLevel(Level.WARNING);
+		h.setLevel(Level.ALL);
 		LOGGER.addHandler(h);
 	}
 	private static final Map<Long, Class<? extends BoxImpl>> BOX_CLASSES = new HashMap<Long, Class<? extends BoxImpl>>();
@@ -254,6 +250,11 @@ public class BoxFactory implements BoxTypes {
 		BOX_CLASSES.put(OMA_KEY_MANAGEMENT_BOX, FullBox.class);
 		BOX_CLASSES.put(OMA_RIGHTS_OBJECT_BOX, OMARightsObjectBox.class);
 		BOX_CLASSES.put(OMA_TRANSACTION_TRACKING_BOX, OMATransactionTrackingBox.class);
+		BOX_CLASSES.put(FAIRPLAY_USER_ID_BOX, FairPlayDataBox.class);
+		BOX_CLASSES.put(FAIRPLAY_USER_NAME_BOX, FairPlayDataBox.class);
+		BOX_CLASSES.put(FAIRPLAY_USER_KEY_BOX, FairPlayDataBox.class);
+		BOX_CLASSES.put(FAIRPLAY_IV_BOX, FairPlayDataBox.class);
+		BOX_CLASSES.put(FAIRPLAY_PRIVATE_KEY_BOX, FairPlayDataBox.class);
 		//parameter
 		PARAMETER.put(ADDITIONAL_METADATA_CONTAINER_BOX, new String[]{"Additional Metadata Container Box"});
 		PARAMETER.put(DATA_INFORMATION_BOX, new String[]{"Data Information Box"});

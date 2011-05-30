@@ -6,9 +6,9 @@ import java.util.Map;
 import net.sourceforge.jaad.mp4.MP4Container;
 import net.sourceforge.jaad.mp4.api.MetaData;
 import net.sourceforge.jaad.mp4.api.Movie;
+import net.sourceforge.jaad.mp4.api.Protection;
 import net.sourceforge.jaad.mp4.api.Track;
 import net.sourceforge.jaad.mp4.boxes.Box;
-import net.sourceforge.jaad.mp4.boxes.BoxFactory;
 
 public class MP4Info {
 
@@ -36,18 +36,33 @@ public class MP4Info {
 				for(int i = 0; i<tracks.size(); i++) {
 					t = tracks.get(i);
 					System.out.println("\tTrack "+i+": "+t.getCodec()+" (language: "+t.getLanguage()+", created: "+t.getCreationTime()+")");
+
+					final Protection p = t.getProtection();
+					if(p!=null) System.out.println("\t\tprotection: "+p.getScheme());
 				}
 
 				final MetaData meta = movie.getMetaData();
-				System.out.println("\tMetadata:");
 				if(movie.containsMetaData()) {
+					System.out.println("\tMetadata:");
 					final Map<MetaData.Field<?>, Object> data = meta.getAll();
 					for(MetaData.Field<?> key : data.keySet()) {
-						System.out.println("\t\t"+key.getName()+" = "+data.get(key));
+						if(key.equals(MetaData.Field.COVER_ARTWORKS)) {
+							final List<?> l = (List<?>) data.get(MetaData.Field.COVER_ARTWORKS);
+							System.out.println("\t\t"+l.size()+" Cover Artworks present");
+						}
+						else System.out.println("\t\t"+key.getName()+" = "+data.get(key));
 					}
 				}
-				else System.out.println("\t\tnone");
 
+				final List<Protection> protections = movie.getProtections();
+				if(protections.size()>0) {
+					System.out.println("\tprotections:");
+					for(Protection p : protections) {
+						System.out.println("\t\t"+p.getScheme());
+					}
+				}
+
+				//print all boxes
 				if(boxes) {
 					System.out.println("================================");
 					for(Box box : cont.getBoxes()) {
