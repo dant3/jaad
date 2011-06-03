@@ -16,6 +16,7 @@
  */
 package net.sourceforge.jaad.mp4.api;
 
+import java.util.List;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.Box;
 import net.sourceforge.jaad.mp4.boxes.BoxTypes;
@@ -57,16 +58,22 @@ public class VideoTrack extends Track {
 
 		//sample descriptions: 'mp4v' has an ESDBox, all others have a CodecSpecificBox
 		final SampleDescriptionBox stsd = (SampleDescriptionBox) stbl.getChild(BoxTypes.SAMPLE_DESCRIPTION_BOX);
-		sampleEntry = (VideoSampleEntry) stsd.getChildren().get(0);
-		final long type = sampleEntry.getType();
-		if(type==BoxTypes.MP4V_SAMPLE_ENTRY) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
-		else if(type==BoxTypes.ENCRYPTED_VIDEO_SAMPLE_ENTRY||type==BoxTypes.DRMS_SAMPLE_ENTRY) {
-			findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
-			protection = Protection.parse(sampleEntry.getChild(BoxTypes.PROTECTION_SCHEME_INFORMATION_BOX));
-		}
-		else decoderInfo = DecoderInfo.parse((CodecSpecificBox) sampleEntry.getChildren().get(0));
+		if(stsd.getChildren().get(0) instanceof VideoSampleEntry) {
+			sampleEntry = (VideoSampleEntry) stsd.getChildren().get(0);
+			final long type = sampleEntry.getType();
+			if(type==BoxTypes.MP4V_SAMPLE_ENTRY) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
+			else if(type==BoxTypes.ENCRYPTED_VIDEO_SAMPLE_ENTRY||type==BoxTypes.DRMS_SAMPLE_ENTRY) {
+				findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
+				protection = Protection.parse(sampleEntry.getChild(BoxTypes.PROTECTION_SCHEME_INFORMATION_BOX));
+			}
+			else decoderInfo = DecoderInfo.parse((CodecSpecificBox) sampleEntry.getChildren().get(0));
 
-		codec = VideoCodec.forType(sampleEntry.getType());
+			codec = VideoCodec.forType(sampleEntry.getType());
+		}
+		else {
+			sampleEntry = null;
+			codec = VideoCodec.UNKNOWN_VIDEO_CODEC;
+		}
 	}
 
 	@Override
@@ -80,31 +87,31 @@ public class VideoTrack extends Track {
 	}
 
 	public int getWidth() {
-		return sampleEntry.getWidth();
+		return (sampleEntry!=null) ? sampleEntry.getWidth() : 0;
 	}
 
 	public int getHeight() {
-		return sampleEntry.getHeight();
+		return (sampleEntry!=null) ? sampleEntry.getHeight() : 0;
 	}
 
 	public double getHorizontalResolution() {
-		return sampleEntry.getHorizontalResolution();
+		return (sampleEntry!=null) ? sampleEntry.getHorizontalResolution() : 0;
 	}
 
 	public double getVerticalResolution() {
-		return sampleEntry.getVerticalResolution();
+		return (sampleEntry!=null) ? sampleEntry.getVerticalResolution() : 0;
 	}
 
 	public int getFrameCount() {
-		return sampleEntry.getFrameCount();
+		return (sampleEntry!=null) ? sampleEntry.getFrameCount() : 0;
 	}
 
 	public String getCompressorName() {
-		return sampleEntry.getCompressorName();
+		return (sampleEntry!=null) ? sampleEntry.getCompressorName() : "";
 	}
 
 	public int getDepth() {
-		return sampleEntry.getDepth();
+		return (sampleEntry!=null) ? sampleEntry.getDepth() : 0;
 	}
 
 	public int getLayer() {

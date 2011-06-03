@@ -40,6 +40,7 @@ import net.sourceforge.jaad.mp4.boxes.impl.DecodingTimeToSampleBox;
 import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
 import net.sourceforge.jaad.mp4.od.DecoderSpecificInfo;
 import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.SampleEntry;
 import net.sourceforge.jaad.mp4.od.Descriptor;
 
 /**
@@ -51,7 +52,7 @@ import net.sourceforge.jaad.mp4.od.Descriptor;
  *
  * @author in-somnia
  */
-//TODO: expand javadoc
+//TODO: expand javadoc; use generics for subclasses?
 public abstract class Track {
 
 	public interface Codec {
@@ -192,6 +193,22 @@ public abstract class Track {
 						break;
 				}
 			}
+		}
+	}
+
+	protected <T> void parseSampleEntry(Box sampleEntry, Class<T> clazz) {
+		T type;
+		try {
+			type = clazz.newInstance();
+			if(sampleEntry.getClass().isInstance(type)) {
+				System.out.println("true");
+			}
+		}
+		catch(InstantiationException ex) {
+			ex.printStackTrace();
+		}
+		catch(IllegalAccessException ex) {
+			ex.printStackTrace();
 		}
 	}
 

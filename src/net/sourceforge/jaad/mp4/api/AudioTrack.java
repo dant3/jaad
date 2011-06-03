@@ -68,17 +68,23 @@ public class AudioTrack extends Track {
 
 		//sample descriptions: 'mp4a' and 'enca' have an ESDBox, all others have a CodecSpecificBox
 		final SampleDescriptionBox stsd = (SampleDescriptionBox) stbl.getChild(BoxTypes.SAMPLE_DESCRIPTION_BOX);
-		sampleEntry = (AudioSampleEntry) stsd.getChildren().get(0);
-		final long type = sampleEntry.getType();
-		if(sampleEntry.hasChild(BoxTypes.ESD_BOX)) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
-		else decoderInfo = DecoderInfo.parse((CodecSpecificBox) sampleEntry.getChildren().get(0));
+		if(stsd.getChildren().get(0) instanceof AudioSampleEntry) {
+			sampleEntry = (AudioSampleEntry) stsd.getChildren().get(0);
+			final long type = sampleEntry.getType();
+			if(sampleEntry.hasChild(BoxTypes.ESD_BOX)) findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
+			else decoderInfo = DecoderInfo.parse((CodecSpecificBox) sampleEntry.getChildren().get(0));
 
-		if(type==BoxTypes.ENCRYPTED_AUDIO_SAMPLE_ENTRY||type==BoxTypes.DRMS_SAMPLE_ENTRY) {
-			findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
-			protection = Protection.parse(sampleEntry.getChild(BoxTypes.PROTECTION_SCHEME_INFORMATION_BOX));
-			codec = protection.getOriginalFormat();
+			if(type==BoxTypes.ENCRYPTED_AUDIO_SAMPLE_ENTRY||type==BoxTypes.DRMS_SAMPLE_ENTRY) {
+				findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
+				protection = Protection.parse(sampleEntry.getChild(BoxTypes.PROTECTION_SCHEME_INFORMATION_BOX));
+				codec = protection.getOriginalFormat();
+			}
+			else codec = AudioCodec.forType(sampleEntry.getType());
 		}
-		else codec = AudioCodec.forType(sampleEntry.getType());
+		else {
+			sampleEntry = null;
+			codec = AudioCodec.UNKNOWN_AUDIO_CODEC;
+		}
 	}
 
 	@Override

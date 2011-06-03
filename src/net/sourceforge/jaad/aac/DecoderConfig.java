@@ -153,10 +153,7 @@ public class DecoderConfig implements Constants {
 			config.profile = readProfile(in);
 
 			int sf = in.readBits(4);
-			if(sf==0xF) {
-				throw new AACException("sample rate specified explicitly, not supported yet!");
-				//bits.readBits(24);
-			}
+			if(sf==0xF) config.sampleFrequency = SampleFrequency.forFrequency(in.readBits(24));
 			else config.sampleFrequency = SampleFrequency.forInt(sf);
 			config.channelConfiguration = ChannelConfiguration.forInt(in.readBits(4));
 
@@ -165,10 +162,8 @@ public class DecoderConfig implements Constants {
 					config.extProfile = config.profile;
 					config.sbrPresent = true;
 					sf = in.readBits(4);
-					if(sf==0xF) {
-						throw new AACException("extended sample rate specified explicitly, not supported yet!");
-						//bits.readBits(24);
-					}
+					//TODO: 24 bits already read; read again?
+					//if(sf==0xF) config.sampleFrequency = SampleFrequency.forFrequency(in.readBits(24));
 					//if sample frequencies are the same: downsample SBR
 					config.downSampledSBR = config.sampleFrequency.getIndex()==sf;
 					config.sampleFrequency = SampleFrequency.forInt(sf);
@@ -209,7 +204,7 @@ public class DecoderConfig implements Constants {
 						config.channelConfiguration = ChannelConfiguration.forInt(pce.getChannelCount());
 					}
 
-					if(in.getBitsLeft()>0) readSyncExtension(in, config);
+					if(in.getBitsLeft()>10) readSyncExtension(in, config);
 					break;
 				default:
 					throw new AACException("profile not supported: "+config.profile.getIndex());
@@ -223,9 +218,7 @@ public class DecoderConfig implements Constants {
 
 	private static Profile readProfile(BitStream in) throws AACException {
 		int i = in.readBits(5);
-		if(i==31) {
-			i = 32+in.readBits(6);
-		}
+		if(i==31) i = 32+in.readBits(6);
 		return Profile.forInt(i);
 	}
 
