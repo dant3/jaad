@@ -17,12 +17,13 @@
 package net.sourceforge.jaad.aac;
 
 /**
- * All possible sample frequencies AAC data can have.
+ * An enumeration that represents all possible sample frequencies AAC data can 
+ * have.
+ * 
  * @author in-somnia
  */
 public enum SampleFrequency {
 
-	SAMPLE_FREQUENCY_NONE(-1, 0, new int[]{0, 0}, new int[]{0, 0}),
 	SAMPLE_FREQUENCY_96000(0, 96000, new int[]{33, 512}, new int[]{31, 9}),
 	SAMPLE_FREQUENCY_88200(1, 88200, new int[]{33, 512}, new int[]{31, 9}),
 	SAMPLE_FREQUENCY_64000(2, 64000, new int[]{38, 664}, new int[]{34, 10}),
@@ -34,7 +35,8 @@ public enum SampleFrequency {
 	SAMPLE_FREQUENCY_16000(8, 16000, new int[]{37, 664}, new int[]{42, 14}),
 	SAMPLE_FREQUENCY_12000(9, 12000, new int[]{37, 664}, new int[]{42, 14}),
 	SAMPLE_FREQUENCY_11025(10, 11025, new int[]{37, 664}, new int[]{42, 14}),
-	SAMPLE_FREQUENCY_8000(11, 8000, new int[]{34, 664}, new int[]{39, 14});
+	SAMPLE_FREQUENCY_8000(11, 8000, new int[]{34, 664}, new int[]{39, 14}),
+	SAMPLE_FREQUENCY_NONE(-1, 0, new int[]{0, 0}, new int[]{0, 0});
 
 	/**
 	 * Returns a sample frequency instance for the given index. If the index
@@ -42,47 +44,21 @@ public enum SampleFrequency {
 	 * @return a sample frequency with the given index
 	 */
 	public static SampleFrequency forInt(int i) {
-		SampleFrequency freq;
-		switch(i) {
-			case 0:
-				freq = SAMPLE_FREQUENCY_96000;
-				break;
-			case 1:
-				freq = SAMPLE_FREQUENCY_88200;
-				break;
-			case 2:
-				freq = SAMPLE_FREQUENCY_64000;
-				break;
-			case 3:
-				freq = SAMPLE_FREQUENCY_48000;
-				break;
-			case 4:
-				freq = SAMPLE_FREQUENCY_44100;
-				break;
-			case 5:
-				freq = SAMPLE_FREQUENCY_32000;
-				break;
-			case 6:
-				freq = SAMPLE_FREQUENCY_24000;
-				break;
-			case 7:
-				freq = SAMPLE_FREQUENCY_22050;
-				break;
-			case 8:
-				freq = SAMPLE_FREQUENCY_16000;
-				break;
-			case 9:
-				freq = SAMPLE_FREQUENCY_12000;
-				break;
-			case 10:
-				freq = SAMPLE_FREQUENCY_11025;
-				break;
-			case 11:
-				freq = SAMPLE_FREQUENCY_8000;
-				break;
-			default:
-				freq = SAMPLE_FREQUENCY_NONE;
+		final SampleFrequency freq;
+		if(i>=0&&i<12) freq = values()[i];
+		else freq = SAMPLE_FREQUENCY_NONE;
+		return freq;
+	}
+
+	public static SampleFrequency forFrequency(int i) {
+		final SampleFrequency[] all = values();
+
+		SampleFrequency freq = null;
+		for(int j = 0; freq==null&&j<12; j++) {
+			if(i==all[j].frequency) freq = all[j];
 		}
+
+		if(freq==null) freq = SAMPLE_FREQUENCY_NONE;
 		return freq;
 	}
 	private final int index, frequency;
