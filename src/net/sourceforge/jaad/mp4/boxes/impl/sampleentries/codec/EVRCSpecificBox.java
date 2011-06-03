@@ -23,7 +23,7 @@ public class EVRCSpecificBox extends CodecSpecificBox {
 
 	private int framesPerSample;
 
-	EVRCSpecificBox() {
+	public EVRCSpecificBox() {
 		super("EVCR Specific Box");
 	}
 

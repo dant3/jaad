@@ -32,7 +32,6 @@ public class Movie {
 	private final MP4InputStream in;
 	private final MovieHeaderBox mvhd;
 	private final List<Track> tracks;
-	private final boolean metaDataPresent;
 	private final MetaData metaData;
 	private final List<Protection> protections;
 
@@ -51,19 +50,11 @@ public class Movie {
 
 		//read metadata: moov.meta/moov.udta.meta
 		metaData = new MetaData();
-		if(moov.hasChild(BoxTypes.META_BOX)) {
-			metaData.parse(null, moov.getChild(BoxTypes.META_BOX));
-			metaDataPresent = true;
-		}
+		if(moov.hasChild(BoxTypes.META_BOX)) metaData.parse(null, moov.getChild(BoxTypes.META_BOX));
 		else if(moov.hasChild(BoxTypes.USER_DATA_BOX)) {
 			final Box udta = moov.getChild(BoxTypes.USER_DATA_BOX);
-			if(udta.hasChild(BoxTypes.META_BOX)) {
-				metaData.parse(udta, udta.getChild(BoxTypes.META_BOX));
-				metaDataPresent = true;
-			}
-			else metaDataPresent = false;
+			if(udta.hasChild(BoxTypes.META_BOX)) metaData.parse(udta, udta.getChild(BoxTypes.META_BOX));
 		}
-		else metaDataPresent = false;
 
 		//detect DRM
 		protections = new ArrayList<Protection>();
@@ -139,7 +130,7 @@ public class Movie {
 	 * @return true if this movie contains any metadata
 	 */
 	public boolean containsMetaData() {
-		return metaDataPresent;
+		return metaData.containsMetaData();
 	}
 
 	/**

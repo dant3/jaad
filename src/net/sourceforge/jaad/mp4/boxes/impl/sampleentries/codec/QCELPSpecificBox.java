@@ -23,7 +23,7 @@ public class QCELPSpecificBox extends CodecSpecificBox {
 
 	private int framesPerSample;
 
-	QCELPSpecificBox() {
+	public QCELPSpecificBox() {
 		super("QCELP Specific Box");
 	}
 

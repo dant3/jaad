@@ -259,11 +259,10 @@ public class MP4InputStream {
 	public byte[] readTerminated(int max, int terminator) throws IOException {
 		final byte[] b = new byte[max];
 		int pos = 0;
-		int i;
-		while((i = read())!=terminator) {
-			if(i==-1) break;
-			b[pos] = (byte) i;
-			pos++;
+		int i = 0;
+		while(pos<max&&i!=-1) {
+			i = read();
+			if(i!=-1) b[pos++] = (byte) i;
 		}
 		return Arrays.copyOf(b, pos);
 	}

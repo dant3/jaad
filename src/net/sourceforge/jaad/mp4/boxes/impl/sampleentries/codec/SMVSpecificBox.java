@@ -23,7 +23,7 @@ public class SMVSpecificBox extends CodecSpecificBox {
 
 	private int framesPerSample;
 
-	SMVSpecificBox() {
+	public SMVSpecificBox() {
 		super("SMV Specific Structure");
 	}
 

@@ -360,7 +360,7 @@ public class BoxFactory implements BoxTypes {
 		//error protection
 		if(parent!=null) {
 			final long parentLeft = (parent.getOffset()+parent.getSize())-offset;
-			if(size>parentLeft) throw new IOException("error while decoding box'"+typeToString(type)+"' at offset "+offset+": box too large for parent");
+			if(size>parentLeft) throw new IOException("error while decoding box '"+typeToString(type)+"' at offset "+offset+": box too large for parent");
 		}
 
 		Logger.getLogger("MP4 Boxes").finest(typeToString(type));

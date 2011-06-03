@@ -41,7 +41,11 @@ public class VideoMediaHeaderBox extends FullBox {
 
 		graphicsMode = in.readBytes(2);
 		//6 byte RGB color
-		color = new Color(in.readBytes(2), in.readBytes(2), in.readBytes(2));
+		final int[] c = new int[3];
+		for(int i = 0; i<3; i++) {
+			c[i] = (in.read()&0xFF)|((in.read()<<8)&0xFF);
+		}
+		color = new Color(c[0], c[1], c[2]);
 	}
 
 	/**

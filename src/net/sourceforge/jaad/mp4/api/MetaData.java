@@ -479,6 +479,10 @@ public class MetaData {
 		contents.put(field, value);
 	}
 
+	boolean containsMetaData() {
+		return !contents.isEmpty();
+	}
+
 	@SuppressWarnings("unchecked")
 	public <T> T get(Field<T> field) {
 		return (T) contents.get(field);

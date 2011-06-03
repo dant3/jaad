@@ -41,10 +41,9 @@ public class MP4Info {
 					if(p!=null) System.out.println("\t\tprotection: "+p.getScheme());
 				}
 
-				final MetaData meta = movie.getMetaData();
 				if(movie.containsMetaData()) {
 					System.out.println("\tMetadata:");
-					final Map<MetaData.Field<?>, Object> data = meta.getAll();
+					final Map<MetaData.Field<?>, Object> data = movie.getMetaData().getAll();
 					for(MetaData.Field<?> key : data.keySet()) {
 						if(key.equals(MetaData.Field.COVER_ARTWORKS)) {
 							final List<?> l = (List<?>) data.get(MetaData.Field.COVER_ARTWORKS);

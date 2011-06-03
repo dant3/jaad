@@ -23,7 +23,7 @@ public class AMRSpecificBox extends CodecSpecificBox {
 
 	private int modeSet, modeChangePeriod, framesPerSample;
 
-	AMRSpecificBox() {
+	public AMRSpecificBox() {
 		super("AMR Specific Box");
 	}
 

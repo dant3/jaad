@@ -23,7 +23,7 @@ public class H263SpecificBox extends CodecSpecificBox {
 
 	private int level, profile;
 
-	H263SpecificBox() {
+	public H263SpecificBox() {
 		super("H.263 Specific Box");
 	}
 
