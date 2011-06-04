@@ -19,6 +19,7 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
+import net.sourceforge.jaad.mp4.boxes.Utils;
 
 /**
  * The movie header box defines overall information which is media-independent,
@@ -44,7 +45,7 @@ public class MovieHeaderBox extends FullBox {
 		creationTime = in.readBytes(len);
 		modificationTime = in.readBytes(len);
 		timeScale = in.readBytes(4);
-		duration = in.readBytes(len);
+		duration = Utils.detectUndetermined(in.readBytes(len));
 
 		rate = in.readFixedPoint(16, 16);
 		volume = in.readFixedPoint(8, 8);
@@ -94,7 +95,8 @@ public class MovieHeaderBox extends FullBox {
 	 * The duration is an integer that declares length of the presentation (in
 	 * the indicated timescale). This property is derived from the
 	 * presentation's tracks: the value of this field corresponds to the
-	 * duration of the longest track in the presentation. 
+	 * duration of the longest track in the presentation. If the duration cannot
+	 * be determined then duration is set to -1.
 	 * @return the duration of the longest track
 	 */
 	public long getDuration() {

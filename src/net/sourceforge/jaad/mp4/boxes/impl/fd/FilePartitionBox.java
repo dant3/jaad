@@ -161,9 +161,12 @@ public class FilePartitionBox extends FullBox {
 	}
 
 	/**
-	 * A block size indicates the size of a block (in bytes). A block size that
-	 * is not a multiple of the encoding symbol length indicates that the last
-	 * source symbol includes padding that is not stored in the item.
+	 * A block size indicates the size of a block (in bytes). A block_size that 
+	 * is not a multiple of the encoding symbol length indicates with Compact 
+	 * No-Code FEC that the last source symbols includes padding that is not 
+	 * stored in the item. With MBMS FEC (3GPP TS 26.346) the padding may extend
+	 * across multiple symbols but the size of padding should never be more than
+	 * the encoding symbol length.
 	 *
 	 * @return all block sizes
 	 */

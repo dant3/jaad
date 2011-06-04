@@ -19,6 +19,7 @@ package net.sourceforge.jaad.mp4.boxes.impl;
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import java.io.IOException;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
+import net.sourceforge.jaad.mp4.boxes.Utils;
 
 /**
  * This box specifies the characteristics of a single track. Exactly one Track
@@ -62,7 +63,7 @@ public class TrackHeaderBox extends FullBox {
 		modificationTime = in.readBytes(len);
 		trackID = (int) in.readBytes(4);
 		in.skipBytes(4); //reserved
-		duration = in.readBytes(len);
+		duration = Utils.detectUndetermined(in.readBytes(len));
 
 		in.skipBytes(8); //reserved
 
@@ -136,11 +137,13 @@ public class TrackHeaderBox extends FullBox {
 	}
 
 	/**
-	 * The duration is an integer that declares length of the presentation (in
-	 * the indicated timescale). This property is derived from the
-	 * presentation's tracks: the value of this field corresponds to the
-	 * duration of the longest track in the presentation.
-	 * @return the duration of the longest track
+	 * The duration is an integer that indicates the duration of this track (in 
+	 * the timescale indicated in the Movie Header Box). The value of this field
+	 * is equal to the sum of the durations of all of the track's edits. If 
+	 * there is no edit list, then the duration is the sum of the sample 
+	 * durations, converted into the timescale in the Movie Header Box. If the 
+	 * duration of this track cannot be determined then this value is -1.
+	 * @return the duration this track
 	 */
 	public long getDuration() {
 		return duration;

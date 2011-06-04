@@ -42,7 +42,7 @@ public class MediaHeaderBox extends FullBox {
 		creationTime = in.readBytes(len);
 		modificationTime = in.readBytes(len);
 		timeScale = in.readBytes(4);
-		duration = in.readBytes(len);
+		duration = Utils.detectUndetermined(in.readBytes(len));
 
 		language = Utils.getLanguageCode(in.readBytes(2));
 
@@ -79,11 +79,10 @@ public class MediaHeaderBox extends FullBox {
 	}
 
 	/**
-	 * The duration is an integer that declares length of the presentation (in
-	 * the indicated timescale). This property is derived from the
-	 * presentation's tracks: the value of this field corresponds to the
-	 * duration of the longest track in the presentation.
-	 * @return the duration of the longest track
+	 * The duration is an integer that declares the duration of this media (in 
+	 * the scale of the timescale). If the duration cannot be determined then 
+	 * duration is set to -1.
+	 * @return the duration of this media
 	 */
 	public long getDuration() {
 		return duration;
