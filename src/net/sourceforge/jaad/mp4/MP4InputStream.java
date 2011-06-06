@@ -217,7 +217,6 @@ public class MP4InputStream {
 	 * 
 	 * @param max the maximum number of bytes to read, before the null-terminator
 	 * must appear.
-	 * @param encoding the charset used to encode the String
 	 * @return the decoded String
 	 * @throws IOException If the end of the stream is detected, the input 
 	 * stream has been closed, or if some other I/O error occurs.

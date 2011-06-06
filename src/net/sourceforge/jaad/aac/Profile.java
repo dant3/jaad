@@ -98,7 +98,7 @@ public enum Profile {
 	/**
 	 * Returns a boolean, indicating if this profile can be decoded by the
 	 * <code>Decoder</code>.
-	 * @see Decoder#canDecode(jaad.Profile) 
+	 * @see Decoder#canDecode(net.sourceforge.jaad.aac.Profile) 
 	 * @return true if the profile is supported
 	 */
 	public boolean isDecodingSupported() {

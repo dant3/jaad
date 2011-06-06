@@ -16,6 +16,7 @@
  */
 package net.sourceforge.jaad.aac.huffman;
 
+//codebooks: {bit length, codeword, values...}
 interface Codebooks {
 
 	int[][] HCB1 = {

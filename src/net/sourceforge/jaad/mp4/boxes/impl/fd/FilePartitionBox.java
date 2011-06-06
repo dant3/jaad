@@ -141,10 +141,11 @@ public class FilePartitionBox extends FullBox {
 	}
 
 	/**
-	 * The scheme specific info is a base64-encoded null-terminated string of the scheme-specific object
-	transfer information (FEC-OTI-Scheme-Specific-Info). The definition of the information depends on the
-	FEC encoding ID.
-	 * @return
+	 * The scheme specific info is a String of the scheme-specific object 
+	 * transfer information (FEC-OTI-Scheme-Specific-Info). The definition of 
+	 * the information depends on the EC encoding ID.
+	 * 
+	 * @return the scheme specific info
 	 */
 	public String getSchemeSpecificInfo() {
 		return schemeSpecificInfo;

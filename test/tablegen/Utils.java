@@ -20,22 +20,22 @@ class Utils {
 
 	//1D float
 	public static void printTable(float[] f, String name) {
-		System.out.println("float[] "+name+" =");
-		System.out.println("{");
-		StringBuilder sb;
+		final StringBuilder sb = new StringBuilder();
+		sb.append("float[] ");
+		sb.append(name);
+		sb.append(" = {");
 		for(int i = 0; i<f.length; i++) {
-			sb = new StringBuilder();
-			sb.append(f[i]).append("f");
-			if(i<f.length-1) sb.append(",");
-			System.out.println(sb.toString());
+			sb.append(f[i]);
+			sb.append('f');
+			if(i<f.length-1) sb.append(", ");
 		}
-		System.out.println("};");
+		sb.append("};");
+		System.out.println(sb.toString());
 	}
 
 	//2D float
 	public static void printTable(float[][] f, String name) {
-		System.out.println("float[][] "+name+" =");
-		System.out.println("{");
+		System.out.println("float[][] "+name+" = {");
 		StringBuilder sb;
 		for(int i = 0; i<f.length; i++) {
 			sb = new StringBuilder();
@@ -53,8 +53,7 @@ class Utils {
 
 	//3D float
 	public static void printTable(float[][][] f, String name) {
-		System.out.println("float[][][] "+name+" =");
-		System.out.println("{");
+		System.out.println("float[][][] "+name+" = {");
 		StringBuilder sb;
 		for(int i = 0; i<f.length; i++) {
 			sb = new StringBuilder();
@@ -77,8 +76,7 @@ class Utils {
 
 	//4D float
 	public static void printTable(float[][][][] f, String name) {
-		System.out.println("float[][][][] "+name+" =");
-		System.out.println("{");
+		System.out.println("float[][][][] "+name+" = {");
 		StringBuilder sb;
 		for(int i = 0; i<f.length; i++) {
 			sb = new StringBuilder();
@@ -104,17 +102,35 @@ class Utils {
 		System.out.println("};");
 	}
 
-	//1D int
-	public static void printTable(int[] table, String name) {
-		System.out.println("int[] "+name+" =");
-		System.out.println("{");
+	//2D int
+	public static void printTable(int[][] table, String name) {
+		System.out.println("int[][] "+name+" = {");
 		StringBuilder sb;
 		for(int i = 0; i<table.length; i++) {
 			sb = new StringBuilder();
-			sb.append(table[i]);
+			sb.append("{");
+			for(int j = 0; j<table[i].length; j++) {
+				if(j>0) sb.append(", ");
+				sb.append(table[i][j]);
+			}
+			sb.append("}");
 			if(i<table.length-1) sb.append(",");
 			System.out.println(sb.toString());
 		}
 		System.out.println("};");
+	}
+	//1D int
+
+	public static void printTable(int[] table, String name) {
+		final StringBuilder sb = new StringBuilder();
+		sb.append("int[] ");
+		sb.append(name);
+		sb.append(" = {");
+		for(int i = 0; i<table.length; i++) {
+			sb.append(table[i]);
+			if(i<table.length-1) sb.append(", ");
+		}
+		sb.append("};");
+		System.out.println(sb.toString());
 	}
 }

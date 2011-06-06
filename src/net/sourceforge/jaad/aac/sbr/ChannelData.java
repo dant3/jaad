@@ -26,7 +26,7 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	//read
 	int frameClass;
 	int pointer;
-	boolean addHarmonicFlag, addHarmonicFlagPrev;
+	private boolean addHarmonicFlag, addHarmonicFlagPrev;
 	boolean[] addHarmonic, addHarmonicPrev;
 	private int[] relBord, relBord0, relBord1;
 	private int rel0, rel1;
@@ -238,13 +238,13 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	}
 
 	/* ================= huffman ================= */
-	void decodeEnvelope(BitStream in, SBR sbr, int ch, boolean ampRes) throws AACException {
+	void decodeEnvelope(BitStream in, SBR sbr, int ch, boolean coupling, boolean ampRes) throws AACException {
 		ampRes = ((L_E==1)&&(frameClass==FIXFIX)) ? false : ampRes;
-		final int bits = 7-((sbr.coupling&&(ch==1)) ? 1 : 0)-(ampRes ? 1 : 0);
+		final int bits = 7-((coupling&&(ch==1)) ? 1 : 0)-(ampRes ? 1 : 0);
 
 		int delta;
 		int[][] huffT, huffF;
-		if(sbr.coupling&&(ch==1)) {
+		if(coupling&&(ch==1)) {
 			delta = 1;
 			if(ampRes) {
 				huffT = T_HUFFMAN_ENV_BAL_3_0DB;
@@ -286,10 +286,10 @@ class ChannelData implements SBRConstants, HuffmanTables {
 		extractEnvelopeData(sbr);
 	}
 
-	void decodeNoise(BitStream in, SBR sbr, int ch) throws AACException {
+	void decodeNoise(BitStream in, SBR sbr, int ch, boolean coupling) throws AACException {
 		int delta;
 		int[][] huffT, huffF;
-		if(sbr.coupling&&(ch==1)) {
+		if(coupling&&(ch==1)) {
 			delta = 1;
 			huffT = T_HUFFMAN_NOISE_BAL_3_0DB;
 			huffF = F_HUFFMAN_ENV_BAL_3_0DB;
@@ -327,6 +327,11 @@ class ChannelData implements SBRConstants, HuffmanTables {
 			index = table[index][bit];
 		}
 		return index+HUFFMAN_OFFSET;
+	}
+
+	/* ================== gets ================== */
+	public boolean hasHarmonicPrev() {
+		return addHarmonicFlagPrev;
 	}
 
 	/* ================= computation ================= */

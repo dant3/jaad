@@ -32,7 +32,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 	//header
 	private final SBRHeader header;
 	//read
-	boolean coupling;
+	private boolean coupling;
 	int extensionID, extensionData;
 	//calculated
 	int k0; //first band (=f_master[0])
@@ -104,6 +104,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 		}
 
 		if(in.readBool()) header.decode(in);
+		
 
 		if(reset) calculateTables();
 
@@ -295,8 +296,8 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 		cd[0].decodeGrid(in);
 		cd[0].decodeDTDF(in);
 		cd[0].decodeInvfMode(in, N_Q);
-		cd[0].decodeEnvelope(in, this, 0, header.getAmpRes());
-		cd[0].decodeNoise(in, this, 0);
+		cd[0].decodeEnvelope(in, this, 0, coupling, header.getAmpRes());
+		cd[0].decodeNoise(in, this, 0, coupling);
 		cd[0].decodeSinusoidalCoding(in, N_high);
 
 		dequantEnvelopeNoise(0);
@@ -313,12 +314,10 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 			cd[1].decodeDTDF(in);
 			cd[0].decodeInvfMode(in, N_Q);
 			cd[1].copyInvfMode(cd[0], N_Q);
-			cd[0].decodeEnvelope(in, this, 0, ampRes);
-			cd[0].decodeNoise(in, this, 0);
-			cd[1].decodeEnvelope(in, this, 1, ampRes);
-			cd[1].decodeNoise(in, this, 1);
-			cd[0].decodeSinusoidalCoding(in, N_high);
-			cd[1].decodeSinusoidalCoding(in, N_high);
+			cd[0].decodeEnvelope(in, this, 0, coupling, ampRes);
+			cd[0].decodeNoise(in, this, 0, coupling);
+			cd[1].decodeEnvelope(in, this, 1, coupling, ampRes);
+			cd[1].decodeNoise(in, this, 1, coupling);
 		}
 		else {
 			cd[0].decodeGrid(in);
@@ -327,13 +326,14 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 			cd[1].decodeDTDF(in);
 			cd[0].decodeInvfMode(in, N_Q);
 			cd[1].decodeInvfMode(in, N_Q);
-			cd[0].decodeEnvelope(in, this, 0, ampRes);
-			cd[1].decodeEnvelope(in, this, 1, ampRes);
-			cd[0].decodeNoise(in, this, 0);
-			cd[1].decodeNoise(in, this, 1);
-			cd[0].decodeSinusoidalCoding(in, N_high);
-			cd[1].decodeSinusoidalCoding(in, N_high);
+			cd[0].decodeEnvelope(in, this, 0, coupling, ampRes);
+			cd[1].decodeEnvelope(in, this, 1, coupling, ampRes);
+			cd[0].decodeNoise(in, this, 0, coupling);
+			cd[1].decodeNoise(in, this, 1, coupling);
 		}
+
+		cd[0].decodeSinusoidalCoding(in, N_high);
+		cd[1].decodeSinusoidalCoding(in, N_high);
 
 		dequantEnvelopeNoise(0);
 		dequantEnvelopeNoise(1);

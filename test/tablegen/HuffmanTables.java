@@ -53,7 +53,6 @@ public class HuffmanTables implements HuffmanTableData {
 		Arrays.sort(table, new TableComparator());
 
 		System.out.println("int[][] "+name+" = {");
-		int[] tmp;
 		StringBuilder sb;
 		for(int i = 0; i<table.length; i++) {
 			sb = new StringBuilder();

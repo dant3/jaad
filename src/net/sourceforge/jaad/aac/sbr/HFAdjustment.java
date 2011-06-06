@@ -176,7 +176,7 @@ class HFAdjustment implements SBRConstants, NoiseTable {
 
 					//find sIndexMapped
 					sIndexMapped = false;
-					if((i>=cd.l_A)||(cd.addHarmonicPrev[currHiResBand]&&cd.addHarmonicFlagPrev)
+					if((i>=cd.l_A)||(cd.addHarmonicPrev[currHiResBand]&&cd.hasHarmonicPrev())
 							&&((k+sbr.kx)==(sbr.ftRes[HI_RES][currHiResBand+1]+sbr.ftRes[HI_RES][currHiResBand])>>1)) {
 						sIndexMapped = cd.addHarmonic[currHiResBand];
 					}
@@ -225,9 +225,10 @@ class HFAdjustment implements SBRConstants, NoiseTable {
 	}
 
 	private boolean getSMapped(ChannelData cd, int l, int currentBand) {
+		final boolean previousHarmonic = cd.hasHarmonicPrev();
 		if((cd.f[l] ? 1 : 0)==HI_RES) {
 			//ftRes[HIGH]: just 1 to 1 mapping from addHarmonic[l][k]
-			if((l>=cd.l_A)||(cd.addHarmonicPrev[currentBand]&&cd.addHarmonicFlagPrev)) {
+			if((l>=cd.l_A)||(cd.addHarmonicPrev[currentBand]&&previousHarmonic)) {
 				return cd.addHarmonic[currentBand];
 			}
 		}
@@ -242,7 +243,7 @@ class HFAdjustment implements SBRConstants, NoiseTable {
 
 			//check all HI_RES bands in current LO_RES band for sinusoid
 			for(int b = lb; b<ub; b++) {
-				if(((l>=cd.l_A)||(cd.addHarmonicPrev[b]&&cd.addHarmonicFlagPrev))&&cd.addHarmonic[b]) return true;
+				if(((l>=cd.l_A)||(cd.addHarmonicPrev[b]&&previousHarmonic))&&cd.addHarmonic[b]) return true;
 			}
 		}
 
