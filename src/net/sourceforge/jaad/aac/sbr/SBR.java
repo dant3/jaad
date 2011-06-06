@@ -30,17 +30,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 	int sampleRate;
 	boolean reset;
 	//header
-	private int headerCount;
-	boolean ampRes;
-	private int startFrequency, startFrequencyPrev;
-	private int stopFrequency, stopFrequencyPrev;
-	private int xOverBand, xOverBandPrev;
-	private int frequencyScale, frequencyScalePrev;
-	private boolean alterScale, alterScalePrev;
-	private int noiseBands, noiseBandsPrev;
-	int limiterBands, limiterGains;
-	boolean interpolFrequency;
-	boolean smoothingMode;
+	private final SBRHeader header;
 	//read
 	boolean coupling;
 	int extensionID, extensionData;
@@ -99,19 +89,9 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 		ftLim = new int[4][64];
 
 		//header defaults
-		frequencyScale = 2;
-		alterScale = true;
-		noiseBands = 2;
-		limiterBands = 2;
-		limiterGains = 2;
-		interpolFrequency = true;
-		smoothingMode = true;
-		startFrequency = 5;
-		ampRes = true;
+		header = new SBRHeader();
 
 		Mprev = 0;
-
-		startFrequencyPrev = -1; //forces reset
 	}
 
 	/* ================== decoding ================== */
@@ -123,12 +103,12 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 			in.skipBits(10); //TODO: implement crc check
 		}
 
-		if(in.readBool()) decodeHeader(in);
+		if(in.readBool()) header.decode(in);
 
-		reset();
+		if(reset) calculateTables();
 
-		//first frame should have a header
-		if(headerCount>0) decodeData(in, stereo);
+		//can't decode before the first header
+		if(header.isDecoded()) decodeData(in, stereo);
 		//else LOGGER.warning("no SBR header found");
 
 		final int len = in.getPosition()-pos;
@@ -139,47 +119,10 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 		in.skipBits(bitsLeft);
 	}
 
-	private void decodeHeader(BitStream in) throws AACException {
-		headerCount++;
-
-		ampRes = in.readBool();
-		startFrequency = in.readBits(4);
-		stopFrequency = in.readBits(4);
-		xOverBand = in.readBits(3);
-		in.skipBits(2); //reserved
-
-		final boolean extraHeader1 = in.readBool();
-		final boolean extraHeader2 = in.readBool();
-
-		if(extraHeader1) {
-			frequencyScale = in.readBits(2);
-			alterScale = in.readBool();
-			noiseBands = in.readBits(2);
-		}
-		else {
-			frequencyScale = 2;
-			alterScale = true;
-			noiseBands = 2;
-		}
-
-		if(extraHeader2) {
-			limiterBands = in.readBits(2);
-			limiterGains = in.readBits(2);
-			interpolFrequency = in.readBool();
-			smoothingMode = in.readBool();
-		}
-		else {
-			limiterBands = 2;
-			limiterGains = 2;
-			interpolFrequency = true;
-			smoothingMode = true;
-		}
-	}
-
 	//calculates the master frequency table
 	private void calculateTables() throws AACException {
-		k0 = Calculation.getStartChannel(startFrequency, sampleRate);
-		final int k2 = Calculation.getStopChannel(stopFrequency, sampleRate, k0);
+		k0 = Calculation.getStartChannel(header.getStartFrequency(false), sampleRate);
+		final int k2 = Calculation.getStopChannel(header.getStopFrequency(false), sampleRate, k0);
 
 		//check k0 and k2 (MFT length)
 		final int len = k2-k0;
@@ -190,8 +133,8 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 
 		if(len<=maxLen) {
 			int[] table;
-			if(frequencyScale==0) table = Calculation.calculateMasterFrequencyTableFS0(k0, k2, alterScale);
-			else table = Calculation.calculateMasterFrequencyTable(k0, k2, frequencyScale, alterScale);
+			if(header.getFrequencyScale(false)==0) table = Calculation.calculateMasterFrequencyTableFS0(k0, k2, header.isAlterScale(false));
+			else table = Calculation.calculateMasterFrequencyTable(k0, k2, header.getFrequencyScale(false), header.isAlterScale(false));
 			if(table!=null) {
 				mft = table;
 				N_master = table.length-1;
@@ -204,6 +147,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 
 	//calculates the derived frequency border table from the master table
 	private void calculateDerivedFrequencyTable(int k2) throws AACException {
+		final int xOverBand = header.getXOverBand(false);
 		if(N_master<=xOverBand) throw new AACException("SBR: derived frequency table: N_master="+N_master+", xOverBand="+xOverBand);
 		int i;
 
@@ -231,6 +175,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 			ftRes[LO_RES][i] = ftRes[HI_RES][x];
 		}
 
+		final int noiseBands = header.getNoiseBands(false);
 		if(noiseBands==0) N_Q = 1;
 		else N_Q = Math.min(5, Math.max(1, Calculation.findBands(false, noiseBands, kx, k2)));
 
@@ -350,7 +295,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 		cd[0].decodeGrid(in);
 		cd[0].decodeDTDF(in);
 		cd[0].decodeInvfMode(in, N_Q);
-		cd[0].decodeEnvelope(in, this, 0);
+		cd[0].decodeEnvelope(in, this, 0, header.getAmpRes());
 		cd[0].decodeNoise(in, this, 0);
 		cd[0].decodeSinusoidalCoding(in, N_high);
 
@@ -360,6 +305,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 	private void decodeChannelPairElement(BitStream in) throws AACException {
 		if(in.readBool()) in.skipBits(8); //reserved
 
+		final boolean ampRes = header.getAmpRes();
 		if(coupling = in.readBool()) {
 			cd[0].decodeGrid(in);
 			cd[1].copyGrid(cd[0]);
@@ -367,9 +313,9 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 			cd[1].decodeDTDF(in);
 			cd[0].decodeInvfMode(in, N_Q);
 			cd[1].copyInvfMode(cd[0], N_Q);
-			cd[0].decodeEnvelope(in, this, 0);
+			cd[0].decodeEnvelope(in, this, 0, ampRes);
 			cd[0].decodeNoise(in, this, 0);
-			cd[1].decodeEnvelope(in, this, 1);
+			cd[1].decodeEnvelope(in, this, 1, ampRes);
 			cd[1].decodeNoise(in, this, 1);
 			cd[0].decodeSinusoidalCoding(in, N_high);
 			cd[1].decodeSinusoidalCoding(in, N_high);
@@ -381,8 +327,8 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 			cd[1].decodeDTDF(in);
 			cd[0].decodeInvfMode(in, N_Q);
 			cd[1].decodeInvfMode(in, N_Q);
-			cd[0].decodeEnvelope(in, this, 0);
-			cd[1].decodeEnvelope(in, this, 1);
+			cd[0].decodeEnvelope(in, this, 0, ampRes);
+			cd[1].decodeEnvelope(in, this, 1, ampRes);
 			cd[0].decodeNoise(in, this, 0);
 			cd[1].decodeNoise(in, this, 1);
 			cd[0].decodeSinusoidalCoding(in, N_high);
@@ -414,24 +360,6 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 				break;
 		}
 		return ret;
-	}
-
-	private void reset() throws AACException {
-		reset = ((startFrequency!=startFrequencyPrev)
-				||(stopFrequency!=stopFrequencyPrev)
-				||(frequencyScale!=frequencyScalePrev)
-				||(alterScale!=alterScalePrev)
-				||(xOverBand!=xOverBandPrev)
-				||(noiseBands!=noiseBandsPrev));
-
-		startFrequencyPrev = startFrequency;
-		stopFrequencyPrev = stopFrequency;
-		frequencyScalePrev = frequencyScale;
-		alterScalePrev = alterScale;
-		xOverBandPrev = xOverBand;
-		noiseBandsPrev = noiseBands;
-
-		if(reset) calculateTables();
 	}
 
 	/* ================== dequant/unmap ================== */
@@ -538,11 +466,12 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 		if(buffer==null) buffer = new float[TIME_SLOTS_RATE][64][2];
 		boolean process = true;
 
-		if(headerCount==0) {
+		//can't decode before the first header
+		if(!header.isDecoded()) {
 			//don't process just upsample
 			process = false;
 			//re-activate reset for next frame
-			if(reset) startFrequencyPrev = -1;
+			//if(reset) header.getStartFrequency(true) = -1;
 		}
 
 		processChannel(channel, buffer, 0, process);
@@ -550,7 +479,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 		if(downSampled) qmfs[0].performSynthesis32(buffer, channel, TIME_SLOTS_RATE);
 		else qmfs[0].performSynthesis64(buffer, channel, TIME_SLOTS_RATE);
 
-		if(headerCount!=0) savePreviousData(0);
+		if(header.isDecoded()) savePreviousData(0);
 
 		cd[0].saveMatrix();
 	}
@@ -559,11 +488,11 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 		if(buffer==null) buffer = new float[TIME_SLOTS_RATE][64][2];
 		boolean process = true;
 
-		if(headerCount==0) {
+		if(!header.isDecoded()) {
 			//don't process just upsample
 			process = false;
 			//re-activate reset for next frame
-			if(reset) startFrequencyPrev = -1;
+			//if(reset) startFrequencyPrev = -1;
 		}
 
 		processChannel(left, buffer, 0, process);
@@ -576,7 +505,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 		if(downSampled) qmfs[1].performSynthesis32(buffer, right, TIME_SLOTS_RATE);
 		else qmfs[1].performSynthesis64(buffer, right, TIME_SLOTS_RATE);
 
-		if(headerCount!=0) {
+		if(header.isDecoded()) {
 			savePreviousData(0);
 			savePreviousData(1);
 		}
@@ -591,11 +520,11 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 			bufRightPS = new float[38][64][2];
 		}
 		boolean process = true;
-		if(headerCount==0) {
+		if(!header.isDecoded()) {
 			//don't process just upsample
 			process = false;
 			//re-activate reset for next frame
-			startFrequencyPrev = -1;
+			//startFrequencyPrev = -1;
 		}
 
 		processChannel(left, bufLeftPS, 0, process);
@@ -623,7 +552,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 			qmfs[1].performSynthesis64(bufRightPS, right, TIME_SLOTS_RATE);
 		}
 
-		if(headerCount!=0) savePreviousData(0);
+		if(header.isDecoded()) savePreviousData(0);
 		cd[0].saveMatrix();
 	}
 
@@ -637,7 +566,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 
 		if(process) {
 			hfGen.process(cd[ch].Xsbr, cd[ch].Xsbr, ch, cd[ch]);
-			hfAdj.process(cd[ch].Xsbr, cd[ch]);
+			hfAdj.process(cd[ch].Xsbr, cd[ch], header);
 
 			int kx_band, M_band;
 			for(i = 0; i<TIME_SLOTS_RATE; i++) {

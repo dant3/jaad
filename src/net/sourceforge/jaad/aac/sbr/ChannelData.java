@@ -238,8 +238,8 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	}
 
 	/* ================= huffman ================= */
-	void decodeEnvelope(BitStream in, SBR sbr, int ch) throws AACException {
-		ampRes = ((L_E==1)&&(frameClass==FIXFIX)) ? false : sbr.ampRes;
+	void decodeEnvelope(BitStream in, SBR sbr, int ch, boolean ampRes) throws AACException {
+		ampRes = ((L_E==1)&&(frameClass==FIXFIX)) ? false : ampRes;
 		final int bits = 7-((sbr.coupling&&(ch==1)) ? 1 : 0)-(ampRes ? 1 : 0);
 
 		int delta;

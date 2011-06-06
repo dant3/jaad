@@ -55,22 +55,22 @@ class HFAdjustment implements SBRConstants, NoiseTable {
 		adj = new AdjustmentParams();
 	}
 
-	void process(float[][][] Xsbr, ChannelData cd) {
+	void process(float[][][] Xsbr, ChannelData cd, SBRHeader header) {
 		if(cd.frameClass==FIXFIX) cd.l_A = -1;
 		else if(cd.frameClass==VARFIX) cd.l_A = (cd.pointer>1) ? -1 : cd.pointer-1;
 		else cd.l_A = (cd.pointer==0) ? -1 : cd.L_E+1-cd.pointer;
 
 		adj.reset(); //TODO: needed?
-		estimateCurrentEnvelope(Xsbr, cd);
-		calculateGain(cd);
-		assembleHF(Xsbr, cd);
+		estimateCurrentEnvelope(Xsbr, cd, header.hasInterpolFrequency());
+		calculateGain(cd, header.getLimiterBands(), header.getLimiterGains());
+		assembleHF(Xsbr, cd, header.isSmoothingMode());
 	}
 
-	private void estimateCurrentEnvelope(float[][][] Xsbr, ChannelData cd) {
+	private void estimateCurrentEnvelope(float[][][] Xsbr, ChannelData cd, boolean interpolFrequency) {
 		int i, j, k, l, m, curr, next, low, high;
 		float nrg, div;
 
-		if(sbr.interpolFrequency) {
+		if(interpolFrequency) {
 			for(i = 0; i<cd.L_E; i++) {
 				curr = cd.t_E[i];
 				next = cd.t_E[i+1];
@@ -119,7 +119,7 @@ class HFAdjustment implements SBRConstants, NoiseTable {
 		}
 	}
 
-	private void calculateGain(ChannelData cd) {
+	private void calculateGain(ChannelData cd, int limiterBands, int limiterGains) {
 		final float[] qmLim = new float[MAX_M];
 		final float[] gLim = new float[MAX_M];
 		final float[] sm = new float[MAX_M];
@@ -143,13 +143,13 @@ class HFAdjustment implements SBRConstants, NoiseTable {
 
 			if(cd.t_E[i+1]>cd.t_Q[currentTNoiseBand+1]) currentTNoiseBand++;
 
-			for(j = 0; j<sbr.N_L[sbr.limiterBands]; j++) {
+			for(j = 0; j<sbr.N_L[limiterBands]; j++) {
 				den = 0;
 				acc1 = 0;
 				acc2 = 0;
 
-				ml1 = sbr.ftLim[sbr.limiterBands][j];
-				ml2 = sbr.ftLim[sbr.limiterBands][j+1];
+				ml1 = sbr.ftLim[limiterBands][j];
+				ml2 = sbr.ftLim[limiterBands][j+1];
 
 				//calculate the accumulated E_orig and E_curr over the limiter band
 				for(k = ml1; k<ml2; k++) {
@@ -159,7 +159,7 @@ class HFAdjustment implements SBRConstants, NoiseTable {
 				}
 
 				//calculate the maximum gain
-				gMax = Math.min(MAXIMUM_GAIN, ((EPS+acc1)/(EPS+acc2))*LIM_GAIN[sbr.limiterGains]);
+				gMax = Math.min(MAXIMUM_GAIN, ((EPS+acc1)/(EPS+acc2))*LIM_GAIN[limiterGains]);
 
 				for(k = ml1; k<ml2; k++) {
 					//check if m is on a noise band border
@@ -249,7 +249,7 @@ class HFAdjustment implements SBRConstants, NoiseTable {
 		return false;
 	}
 
-	private void assembleHF(float[][][] Xsbr, ChannelData cd) {
+	private void assembleHF(float[][][] Xsbr, ChannelData cd, boolean smoothingMode) {
 		boolean reset = sbr.reset;
 		int fIndexNoise = sbr.reset ? 0 : cd.indexNoisePrev;
 		int fIndexSine = cd.psiIsPrev;
@@ -259,7 +259,7 @@ class HFAdjustment implements SBRConstants, NoiseTable {
 		float gFilt, qFilt, currHSmooth;
 		for(int i = 0; i<cd.L_E; i++) {
 			noNoise = (i==cd.l_A||i==cd.prevEnvIsShort);
-			h_SL = noNoise ? 0 : ((sbr.smoothingMode) ? 0 : 4);
+			h_SL = noNoise ? 0 : ((smoothingMode) ? 0 : 4);
 
 			if(reset) {
 				for(l = 0; l<4; l++) {
