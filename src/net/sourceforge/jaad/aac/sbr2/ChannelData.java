@@ -3,10 +3,10 @@ package net.sourceforge.jaad.aac.sbr2;
 import java.util.Arrays;
 import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.syntax.BitStream;
-import org.omg.CORBA.TIMEOUT;
 
 class ChannelData implements SBRConstants, HuffmanTables {
 
+	private static final int[] POW2_TABLE = {1, 2, 4, 8};
 	//grid
 	private int frameClass;
 	private int envCount, noiseCount;
@@ -36,7 +36,7 @@ class ChannelData implements SBRConstants, HuffmanTables {
 
 		switch(frameClass = in.readBits(2)) {
 			case FIXFIX:
-				envCount = (int) Math.pow(2, in.readBits(2)); //TODO: replace with table
+				envCount = POW2_TABLE[in.readBits(2)];
 				if(envCount==1) header.setAmpRes(false);
 
 				freqRes = new int[envCount];
@@ -52,7 +52,7 @@ class ChannelData implements SBRConstants, HuffmanTables {
 					relativeBorders1[i] = 2*in.readBits(2)+2;
 				}
 
-				bits = (int) Math.ceil(Math.log(envCount+1)/Math.log(2)); //TODO: replace with table
+				bits = (int) Math.ceil(Math.log(envCount+1)/LOG2); //TODO: replace with table
 				pointer = in.readBits(bits);
 
 				freqRes = new int[envCount];
@@ -113,45 +113,32 @@ class ChannelData implements SBRConstants, HuffmanTables {
 			dfEnv[i] = in.readBool();
 		}
 
-		dfNoise = new boolean[envCount];
+		dfNoise = new boolean[noiseCount];
 		for(int i = 0; i<noiseCount; i++) {
 			dfNoise[i] = in.readBool();
 		}
 	}
 
-	void decodeInvf(BitStream in, SBRHeader header) throws AACException {
-		final int noiseBands = 0; //TODO: get from header
-		invfMode = new int[noiseBands];
-		for(int i = 0; i<noiseBands; i++) {
+	void decodeInvf(BitStream in, SBRHeader header, FrequencyTables tables) throws AACException {
+		invfMode = new int[tables.getNq()];
+		for(int i = 0; i<invfMode.length; i++) {
 			invfMode[i] = in.readBits(2);
 		}
 	}
 
-	void decodeEnvelope(BitStream in, SBRHeader header, boolean secCh, boolean coupling) throws AACException {
+	void decodeEnvelope(BitStream in, SBRHeader header, FrequencyTables tables, boolean secCh, boolean coupling) throws AACException {
 		final boolean ampRes = header.getAmpRes();
 
 		//select huffman codebooks
 		final int[][] tHuff, fHuff;
-		if(coupling) {
-			if(secCh) {
-				if(ampRes) {
-					tHuff = T_HUFFMAN_ENV_BAL_3_0;
-					fHuff = F_HUFFMAN_ENV_BAL_3_0;
-				}
-				else {
-					tHuff = T_HUFFMAN_ENV_BAL_1_5;
-					fHuff = F_HUFFMAN_ENV_BAL_1_5;
-				}
+		if(coupling&&secCh) {
+			if(ampRes) {
+				tHuff = T_HUFFMAN_ENV_BAL_3_0;
+				fHuff = F_HUFFMAN_ENV_BAL_3_0;
 			}
 			else {
-				if(ampRes) {
-					tHuff = T_HUFFMAN_ENV_3_0;
-					fHuff = F_HUFFMAN_ENV_3_0;
-				}
-				else {
-					tHuff = T_HUFFMAN_ENV_1_5;
-					fHuff = F_HUFFMAN_ENV_1_5;
-				}
+				tHuff = T_HUFFMAN_ENV_BAL_1_5;
+				fHuff = F_HUFFMAN_ENV_BAL_1_5;
 			}
 		}
 		else {
@@ -167,24 +154,24 @@ class ChannelData implements SBRConstants, HuffmanTables {
 
 		//read huffman data: i=envelope, j=band
 		envelopeData = new int[envCount][];
-		final int[] envBands = null; //TODO: get from header
+		final int[] envBands = tables.getN();
 
 		final int bits = 7-((coupling&&secCh) ? 1 : 0)-(ampRes ? 1 : 0);
 
-		int j, start;
+		int j;
 		int[][] table;
 		for(int i = 0; i<envCount; i++) {
 			envelopeData[i] = new int[envBands[freqRes[i]]];
 
-			start = 0;
-			if(dfEnv[i]) table = fHuff;
+			j = 0;
+			if(dfEnv[i]) table = tHuff;
 			else {
-				table = tHuff;
+				table = fHuff;
 				envelopeData[i][0] = in.readBits(bits);
-				start = 1;
+				j = 1;
 			}
 
-			for(j = start; j<envelopeData[i].length; j++) {
+			for(; j<envelopeData[i].length; j++) {
 				envelopeData[i][j] = decodeHuffman(in, table);
 			}
 		}
@@ -218,29 +205,23 @@ class ChannelData implements SBRConstants, HuffmanTables {
 				nRelTrail = relCount1;
 				break;
 		}
-		
+
 		final int[] relBordLead = new int[nRelLead];
 		if(frameClass==FIXFIX) Arrays.fill(relBordLead, (int) Math.round((double) TIME_SLOTS/(double) envCount));
 		else if(frameClass==VARFIX||frameClass==VARVAR) System.arraycopy(relativeBorders0, 0, relBordLead, 0, nRelLead);
-		
+
 		final int[] relBordTrail = new int[nRelTrail];
 		if(frameClass==VARVAR||frameClass==FIXVAR) System.arraycopy(relativeBorders1, 0, relBordTrail, 0, nRelTrail);
-		
-		
+
+
 	}
 
-	void decodeNoise(BitStream in, SBRHeader header, boolean secCh, boolean coupling) throws AACException {
+	void decodeNoise(BitStream in, SBRHeader header, FrequencyTables tables, boolean secCh, boolean coupling) throws AACException {
 		//select huffman codebooks
 		final int[][] tHuff, fHuff;
-		if(coupling) {
-			if(secCh) {
-				tHuff = T_HUFFMAN_NOISE_BAL_3_0;
-				fHuff = F_HUFFMAN_NOISE_BAL_3_0;
-			}
-			else {
-				tHuff = T_HUFFMAN_NOISE_3_0;
-				fHuff = F_HUFFMAN_NOISE_3_0;
-			}
+		if(coupling&&secCh) {
+			tHuff = T_HUFFMAN_NOISE_BAL_3_0;
+			fHuff = F_HUFFMAN_NOISE_BAL_3_0;
 		}
 		else {
 			tHuff = T_HUFFMAN_NOISE_3_0;
@@ -248,33 +229,30 @@ class ChannelData implements SBRConstants, HuffmanTables {
 		}
 
 		//read huffman data: i=noise, j=band
-		noiseData = new int[noiseCount][];
-		final int[] noiseBands = null; //TODO: get from header
+		final int noiseBands = tables.getNq();
+		noiseData = new int[noiseCount][noiseBands];
 
-		int j, start;
+		int j;
 		int[][] table;
 		for(int i = 0; i<noiseCount; i++) {
-			noiseData[i] = new int[noiseBands[i]];
-
-			start = 0;
-			if(dfNoise[i]) table = fHuff;
+			j = 0;
+			if(dfNoise[i]) table = tHuff;
 			else {
-				table = tHuff;
+				table = fHuff;
 				noiseData[i][0] = in.readBits(5);
-				start = 1;
+				j = 1;
 			}
 
-			for(j = start; j<noiseBands[i]; j++) {
+			for(; j<noiseBands; j++) {
 				noiseData[i][j] = decodeHuffman(in, table);
 			}
 		}
 	}
 
-	void decodeSinusoidal(BitStream in, SBRHeader header) throws AACException {
-		final int highResCount = 0; //TODO: get from header
+	void decodeSinusoidal(BitStream in, SBRHeader header, FrequencyTables tables) throws AACException {
 		if(harmonicPresent = in.readBool()) {
-			harmonic = new boolean[highResCount];
-			for(int i = 0; i<highResCount; i++) {
+			harmonic = new boolean[tables.getN(HIGH)];
+			for(int i = 0; i<harmonic.length; i++) {
 				harmonic[i] = in.readBool();
 			}
 		}

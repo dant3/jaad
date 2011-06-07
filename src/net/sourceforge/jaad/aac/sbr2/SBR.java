@@ -44,6 +44,7 @@ public class SBR implements SBRConstants {
 
 		//header flag
 		if(in.readBool()) header.decode(in);
+		tables.calculate(header, sampleFrequency); //TODO: only needed when header changes?
 
 		//if at least one header was present yet: decode, else skip
 		if(header.isDecoded()) {
@@ -88,43 +89,42 @@ public class SBR implements SBRConstants {
 
 		cd[0].decodeGrid(in, header);
 		cd[0].decodeDTDF(in);
-		cd[0].decodeInvf(in, header);
-		cd[0].decodeEnvelope(in, header, false, false);
-		cd[0].decodeNoise(in, header, false, false);
-		cd[0].decodeSinusoidal(in, header);
+		cd[0].decodeInvf(in, header, tables);
+		cd[0].decodeEnvelope(in, header, tables, false, false);
+		cd[0].decodeNoise(in, header, tables, false, false);
+		cd[0].decodeSinusoidal(in, header, tables);
 	}
 
 	private void decodeChannelPairElement(BitStream in) throws AACException {
 		if(in.readBool()) in.skipBits(8); //reserved
 
-		final boolean ampRes = header.getAmpRes();
 		if(in.readBool()) {
 			cd[0].decodeGrid(in, header);
 			cd[1].copyGrid(cd[0]);
 			cd[0].decodeDTDF(in);
 			cd[1].decodeDTDF(in);
-			cd[0].decodeInvf(in, header);
+			cd[0].decodeInvf(in, header, tables);
 			cd[1].copyInvf(cd[0]);
-			cd[0].decodeEnvelope(in, header, false, true);
-			cd[0].decodeNoise(in, header, false, true);
-			cd[1].decodeEnvelope(in, header, true, true);
-			cd[1].decodeNoise(in, header, true, true);
+			cd[0].decodeEnvelope(in, header, tables, false, true);
+			cd[0].decodeNoise(in, header, tables, false, true);
+			cd[1].decodeEnvelope(in, header, tables, true, true);
+			cd[1].decodeNoise(in, header, tables, true, true);
 		}
 		else {
 			cd[0].decodeGrid(in, header);
 			cd[1].decodeGrid(in, header);
 			cd[0].decodeDTDF(in);
 			cd[1].decodeDTDF(in);
-			cd[0].decodeInvf(in, header);
-			cd[1].decodeInvf(in, header);
-			cd[0].decodeEnvelope(in, header, false, false);
-			cd[1].decodeEnvelope(in, header, true, false);
-			cd[0].decodeNoise(in, header, false, false);
-			cd[1].decodeNoise(in, header, true, false);
+			cd[0].decodeInvf(in, header, tables);
+			cd[1].decodeInvf(in, header, tables);
+			cd[0].decodeEnvelope(in, header, tables, false, false);
+			cd[1].decodeEnvelope(in, header, tables, true, false);
+			cd[0].decodeNoise(in, header, tables, false, false);
+			cd[1].decodeNoise(in, header, tables, true, false);
 		}
 
-		cd[0].decodeSinusoidal(in, header);
-		cd[1].decodeSinusoidal(in, header);
+		cd[0].decodeSinusoidal(in, header, tables);
+		cd[1].decodeSinusoidal(in, header, tables);
 	}
 
 	private int decodeExtension(BitStream in, int extensionID) throws AACException {

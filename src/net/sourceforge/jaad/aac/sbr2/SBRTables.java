@@ -26,4 +26,5 @@ interface SBRTables {
 	};
 	int[] MFT_INPUT1 = {12, 10, 8};
 	double[] MFT_INPUT2 = {1.0, 1.3};
+	double[] LIM_BANDS_PER_OCTAVE = {1.2, 2, 3};
 }
