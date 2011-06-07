@@ -3,6 +3,7 @@ package net.sourceforge.jaad.aac.sbr2;
 import java.util.Arrays;
 import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.syntax.BitStream;
+import org.omg.CORBA.TIMEOUT;
 
 class ChannelData implements SBRConstants, HuffmanTables {
 
@@ -187,6 +188,45 @@ class ChannelData implements SBRConstants, HuffmanTables {
 				envelopeData[i][j] = decodeHuffman(in, table);
 			}
 		}
+
+		//parsing: 4.6.18.3.3
+		final int absBordLead, absBordTrail, nRelLead, nRelTrail;
+		switch(frameClass) {
+			case FIXFIX:
+				absBordLead = 0;
+				absBordTrail = TIME_SLOTS;
+				nRelLead = envCount-1;
+				nRelTrail = 0;
+				break;
+			case FIXVAR:
+				absBordLead = 0;
+				absBordTrail = varBord1+TIME_SLOTS;
+				nRelLead = 0;
+				nRelTrail = relCount1;
+				break;
+			case VARFIX:
+				absBordLead = varBord0;
+				absBordTrail = TIME_SLOTS;
+				nRelLead = relCount0;
+				nRelTrail = 0;
+				break;
+			default:
+				//VARVAR
+				absBordLead = varBord0;
+				absBordTrail = varBord1+TIME_SLOTS;
+				nRelLead = relCount0;
+				nRelTrail = relCount1;
+				break;
+		}
+		
+		final int[] relBordLead = new int[nRelLead];
+		if(frameClass==FIXFIX) Arrays.fill(relBordLead, (int) Math.round((double) TIME_SLOTS/(double) envCount));
+		else if(frameClass==VARFIX||frameClass==VARVAR) System.arraycopy(relativeBorders0, 0, relBordLead, 0, nRelLead);
+		
+		final int[] relBordTrail = new int[nRelTrail];
+		if(frameClass==VARVAR||frameClass==FIXVAR) System.arraycopy(relativeBorders1, 0, relBordTrail, 0, nRelTrail);
+		
+		
 	}
 
 	void decodeNoise(BitStream in, SBRHeader header, boolean secCh, boolean coupling) throws AACException {
@@ -254,8 +294,8 @@ class ChannelData implements SBRConstants, HuffmanTables {
 		}
 		return table[off][2];
 	}
-	/* ======================= gets======================*/
 
+	/* ======================= gets======================*/
 	public int getFrameClass() {
 		return frameClass;
 	}

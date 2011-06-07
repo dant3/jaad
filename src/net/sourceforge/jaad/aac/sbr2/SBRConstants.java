@@ -11,6 +11,7 @@ interface SBRConstants {
 	int LOW = 0;
 	int NOISE_FLOOR_OFFSET = 6;
 	int RATE = 2;
+	int TIME_SLOTS = 16; //TODO: 15 for 960-sample frames
 	int[] PAN_OFFSETS = {24, 12};
 	int EXTENSION_ID_PS = 2;
 }
