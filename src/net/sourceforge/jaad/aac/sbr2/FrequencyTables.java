@@ -10,6 +10,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 	private int k0, k2;
 	//master
 	private int[] mft;
+	private int nMaster;
 	//frequency tables
 	private final int[][] fTable;
 	private final int[] n;
@@ -49,34 +50,45 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		k2 = Math.min(64, x);
 
 		if(k0>=k2) throw new AACException("SBR: MFT borders out of range: lower="+k0+", higher="+k2);
+		//check requirement (4.6.18.3.6):
+		final int max;
+		if(sampleRate==44100) max = 35;
+		else if(sampleRate>=48000) max = 32;
+		else max = 48;
+		if((k2-k0)>max) throw new AACException("SBR: too many subbands: "+(k2-k0)+", maximum number for samplerate "+sampleRate+": "+max);
 
 		//MFT calculation
 		final int freqScale = header.getFrequencyScale(false);
 		if(freqScale==0) calculateMFT1(header, k0, k2);
 		else calculateMFT2(header, k0, k2);
+
+		//check requirement (4.6.18.3.6):
+		if(header.getXOverBand(false)>=nMaster) throw new AACException("SBR: illegal length of master frequency table: "+nMaster+", xOverBand: "+header.getXOverBand(false));
 	}
 
 	//MFT calculation if frequencyScale==0
-	private void calculateMFT1(SBRHeader header, int k0, int k2) {
-		final int dk, bandCount;
+	private void calculateMFT1(SBRHeader header, int k0, int k2) throws AACException {
+		final int dk;
 		if(header.isAlterScale(false)) {
 			dk = 2;
-			bandCount = Math.round((float) (k2-k0)/4.0f)<<1;
+			nMaster = Math.round((float) (k2-k0)/4.0f)<<1;
 		}
 		else {
 			dk = 1;
-			bandCount = (int) ((float) (k2-k0)/2.0f)<<1;
+			nMaster = (int) ((float) (k2-k0)/2.0f)<<1;
 		}
+		//check requirement (4.6.18.6.3):
+		if(nMaster<=0) throw new AACException("SBR: illegal number of bands for master frequency table: "+nMaster);
 
-		final int k2Achieved = k0+bandCount*dk;
+		final int k2Achieved = k0+nMaster*dk;
 		int k2Diff = k2-k2Achieved;
 
-		final int[] vDk = new int[bandCount];
+		final int[] vDk = new int[nMaster];
 		Arrays.fill(vDk, dk);
 
 		if(k2Diff!=0) {
 			final int incr = (k2Diff>0) ? -1 : 1;
-			int k = (k2Diff>0) ? bandCount-1 : 0;
+			int k = (k2Diff>0) ? nMaster-1 : 0;
 			while(k2Diff!=0) {
 				vDk[k] -= incr;
 				k += incr;
@@ -84,15 +96,15 @@ class FrequencyTables implements SBRConstants, SBRTables {
 			}
 		}
 
-		mft = new int[bandCount+1];
+		mft = new int[nMaster+1];
 		mft[0] = k0;
-		for(int i = 1; i<=bandCount; i++) {
+		for(int i = 1; i<=nMaster; i++) {
 			mft[i] = mft[i-1]+vDk[i-1];
 		}
 	}
 
 	//MFT calculation if frequencyScale>0
-	private void calculateMFT2(SBRHeader header, int k0, int k2) {
+	private void calculateMFT2(SBRHeader header, int k0, int k2) throws AACException {
 		final int bands = MFT_INPUT1[header.getFrequencyScale(false)-1];
 		final double warp = MFT_INPUT2[header.isAlterScale(false) ? 1 : 0];
 
@@ -111,6 +123,8 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		final double div2 = (double) k1/(double) k0;
 		double log = Math.log(div2)*Math.log(2*LOG2);
 		final int bandCount0 = 2*(int) Math.round(bands*log);
+		//check requirement (4.6.18.6.3):
+		if(bandCount0<=0) throw new AACException("SBR: illegal band count for master frequency table: "+bandCount0);
 
 		final int[] vDk0 = new int[bandCount0];
 		double pow1, pow2;
@@ -118,6 +132,8 @@ class FrequencyTables implements SBRConstants, SBRTables {
 			pow1 = Math.pow(div2, (double) (i+1)/bandCount0);
 			pow2 = Math.pow(div2, (double) i/bandCount0);
 			vDk0[i] = (int) (Math.round(k0*pow1)-Math.round(k0*pow2));
+			//check requirement (4.6.18.6.3):
+			if(vDk0[i]<=0) throw new AACException("SBR: illegal value in master frequency table: "+vDk0[i]);
 		}
 		Arrays.sort(vDk0);
 
@@ -137,6 +153,8 @@ class FrequencyTables implements SBRConstants, SBRTables {
 				pow2 = Math.pow(div1, (double) i/bandCount1);
 				vDk1[i] = (int) (k1*pow1)-(int) (k1*pow2);
 				if(vDk1[i]>min) min = vDk1[i];
+				//check requirement (4.6.18.6.3):
+				else if(vDk1[i]<=0) throw new AACException("SBR: illegal value in master frequency table: "+vDk1[i]);
 			}
 
 			if(min<vDk0[vDk0.length-1]) {
@@ -155,17 +173,19 @@ class FrequencyTables implements SBRConstants, SBRTables {
 				vk1[i] = vk1[i-1]+vDk1[i-1];
 			}
 
-			mft = new int[bandCount0+bandCount1+1];
+			nMaster = bandCount0+bandCount1;
+			mft = new int[nMaster+1];
 			System.arraycopy(vk0, 0, mft, 0, bandCount0+1);
 			System.arraycopy(vk1, 1, mft, bandCount0+1, bandCount1);
 		}
 		else {
-			mft = new int[bandCount0+1];
-			System.arraycopy(vk0, 0, mft, 0, bandCount0+1);
+			nMaster = bandCount0;
+			mft = new int[nMaster+1];
+			System.arraycopy(vk0, 0, mft, 0, nMaster+1);
 		}
 	}
 
-	private void calculateFrequencyTables(SBRHeader header) {
+	private void calculateFrequencyTables(SBRHeader header) throws AACException {
 		final int xover = header.getXOverBand(false);
 		n[HIGH] = getNMaster()-xover;
 		fTable[HIGH] = new int[n[HIGH]+1];
@@ -173,6 +193,9 @@ class FrequencyTables implements SBRConstants, SBRTables {
 
 		kx = fTable[HIGH][0];
 		m = fTable[HIGH][getN(HIGH)]-kx;
+		//check requirements (4.6.18.3.6):
+		if(kx>32) throw new AACException("SBR: start frequency border out of range: "+kx);
+		if((kx+m)>64) throw new AACException("SBR: stop frequency border out of range: "+(kx+m));
 
 		final int half = (int) ((double) n[HIGH]/2.0);
 		n[LOW] = half+(n[HIGH]-2*half);
@@ -184,10 +207,12 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		}
 	}
 
-	private void calculateNoiseTable(SBRHeader header) {
+	private void calculateNoiseTable(SBRHeader header) throws AACException {
 		final double log = Math.log((double) k2/(double) kx)/LOG2;
 		final int x = (int) Math.round(header.getNoiseBands(false)*log);
 		nq = Math.max(1, x);
+		//check requirement (4.6.18.6.3):
+		if(nq>5) throw new AACException("SBR: too many noise floor scalefactors: "+nq);
 
 		fNoise = new int[nq+1];
 		fNoise[0] = 0;
@@ -270,7 +295,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 
 	//bands in master frequency table: Nmaster
 	public int getNMaster() {
-		return mft.length-1;
+		return nMaster;
 	}
 
 	//the frequency tables: fTableHigh, fTableLow

@@ -12,10 +12,11 @@ public class SBR implements SBRConstants {
 	//arguments
 	private int sampleFrequency;
 	private boolean downSampled;
-	//objects
+	//data
 	private final SBRHeader header;
 	private final ChannelData[] cd;
 	private final FrequencyTables tables;
+	private boolean coupling;
 	//PS extension
 	private PS ps;
 	private boolean psUsed;
@@ -98,17 +99,17 @@ public class SBR implements SBRConstants {
 	private void decodeChannelPairElement(BitStream in) throws AACException {
 		if(in.readBool()) in.skipBits(8); //reserved
 
-		if(in.readBool()) {
+		if(coupling = in.readBool()) {
 			cd[0].decodeGrid(in, header);
 			cd[1].copyGrid(cd[0]);
 			cd[0].decodeDTDF(in);
 			cd[1].decodeDTDF(in);
 			cd[0].decodeInvf(in, header, tables);
 			cd[1].copyInvf(cd[0]);
-			cd[0].decodeEnvelope(in, header, tables, false, true);
-			cd[0].decodeNoise(in, header, tables, false, true);
-			cd[1].decodeEnvelope(in, header, tables, true, true);
-			cd[1].decodeNoise(in, header, tables, true, true);
+			cd[0].decodeEnvelope(in, header, tables, false, coupling);
+			cd[0].decodeNoise(in, header, tables, false, coupling);
+			cd[1].decodeEnvelope(in, header, tables, true, coupling);
+			cd[1].decodeNoise(in, header, tables, true, coupling);
 		}
 		else {
 			cd[0].decodeGrid(in, header);
@@ -117,10 +118,10 @@ public class SBR implements SBRConstants {
 			cd[1].decodeDTDF(in);
 			cd[0].decodeInvf(in, header, tables);
 			cd[1].decodeInvf(in, header, tables);
-			cd[0].decodeEnvelope(in, header, tables, false, false);
-			cd[1].decodeEnvelope(in, header, tables, true, false);
-			cd[0].decodeNoise(in, header, tables, false, false);
-			cd[1].decodeNoise(in, header, tables, true, false);
+			cd[0].decodeEnvelope(in, header, tables, false, coupling);
+			cd[1].decodeEnvelope(in, header, tables, true, coupling);
+			cd[0].decodeNoise(in, header, tables, false, coupling);
+			cd[1].decodeNoise(in, header, tables, true, coupling);
 		}
 
 		cd[0].decodeSinusoidal(in, header, tables);
@@ -151,11 +152,81 @@ public class SBR implements SBRConstants {
 	}
 
 	public void processSingleFrame(float[] channel, boolean downSampled) {
+		dequant(false);
 	}
 
 	public void processSingleFramePS(float[] left, float[] right, boolean downSampled) {
+		dequant(true);
 	}
 
 	public void processCoupleFrame(float[] left, float[] right, boolean downSampled) {
+		dequant(true);
+	}
+
+	private void dequant(boolean pair) {
+		if(pair) {
+			if(coupling) dequantPair();
+			else {
+				dequantSingle(0);
+				dequantSingle(1);
+			}
+		}
+		else dequantSingle(0);
+	}
+
+	private void dequantSingle(int ch) {
+		//envelopes
+		final double a = header.getAmpRes() ? 1.0 : 2.0;
+		final double[][] e = cd[ch].getEnvelopeScalefactors();
+		final int[] freqRes = cd[ch].getFrequencyResolutions();
+
+		for(int l = 0; l<cd[ch].getEnvCount(); l++) {
+			for(int k = 0; k<tables.getN(freqRes[l]); k++) {
+				e[k][l] = 64*Math.pow(2, (e[k][l]/a));
+			}
+		}
+
+		//noise
+		final double[][] q = cd[ch].getNoiseFloorData();
+		for(int l = 0; l<cd[ch].getNoiseCount(); l++) {
+			for(int k = 0; k<tables.getNq(); k++) {
+				q[k][l] = Math.pow(2, NOISE_FLOOR_OFFSET-q[k][l]);
+			}
+		}
+	}
+
+	//dequantization of coupled channel pair
+	private void dequantPair() {
+		final int ampRes = header.getAmpRes() ? 1 : 0;
+		//envelopes
+		final double a = header.getAmpRes() ? 1 : 2;
+		final double[][] e0 = cd[0].getEnvelopeScalefactors();
+		final double[][] e1 = cd[1].getEnvelopeScalefactors();
+		final int le = cd[0].getEnvCount();
+		int[] r = cd[0].getFrequencyResolutions();
+
+		double d1, d2, d3;
+		for(int l = 0; l<cd[0].getEnvCount(); l++) {
+			for(int k = 0; k<tables.getN(r[l]); k++) {
+				d1 = Math.pow(2, (e0[k][l]/a)+1);
+				d2 = Math.pow(2, (PAN_OFFSETS[ampRes]-e1[k][l])/a);
+				d3 = Math.pow(2, (e1[k][l]-PAN_OFFSETS[ampRes])/a);
+				e0[k][l] = 64*(d1/(1+d2));
+				e1[k][l] = 64*(d1/(1+d3));
+			}
+		}
+
+		//noise
+		final double[][] q0 = cd[0].getNoiseFloorData();
+		final double[][] q1 = cd[1].getNoiseFloorData();
+		for(int l = 0; l<cd[0].getNoiseCount(); l++) {
+			for(int k = 0; k<tables.getNq(); k++) {
+				d1 = Math.pow(2, NOISE_FLOOR_OFFSET-q0[k][l]+1);
+				d2 = Math.pow(2, PAN_OFFSETS[ampRes]-q1[k][l]);
+				d3 = Math.pow(2, q1[k][l]-PAN_OFFSETS[ampRes]);
+				q0[k][l] = d1/(1+d2);
+				q0[k][l] = d1/(1+d3);
+			}
+		}
 	}
 }

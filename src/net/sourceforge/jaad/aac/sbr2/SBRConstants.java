@@ -12,8 +12,10 @@ interface SBRConstants {
 	int LOW = 0;
 	int RATE = 2;
 	int TIME_SLOTS = 16; //TODO: 15 for 960-sample frames
+	int NOISE_FLOOR_OFFSET = 6;
 	//extension ids
 	int EXTENSION_ID_PS = 2;
 	//helper constants
 	double LOG2 = 0.6931471805599453;
+	int[] PAN_OFFSETS = {24, 12};
 }
