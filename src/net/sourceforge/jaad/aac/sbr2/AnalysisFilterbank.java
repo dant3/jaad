@@ -1,12 +1,28 @@
+/*
+ * Copyright (C) 2010 in-somnia
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package net.sourceforge.jaad.aac.sbr2;
 
-public class AnalysisFilterbank implements SBRConstants, FilterbankTables {
+class AnalysisFilterbank implements SBRConstants, FilterbankTables {
 
 	private final float[][][] COEFS;
 	private final float[][] x;
 	private final float[] z, y;
 
-	public AnalysisFilterbank() {
+	AnalysisFilterbank() {
 		x = new float[2][320]; //for both channels
 		z = new float[320]; //tmp buffer
 		y = new float[64]; //tmp buffer
@@ -24,7 +40,7 @@ public class AnalysisFilterbank implements SBRConstants, FilterbankTables {
 	}
 
 	//in: 1024 time samples, out: 32 subbands x 32 complex samples
-	public void calculate(float[] in, float[][][] out, int ch, int maxBands) {
+	public void process(float[] in, float[][][] out, int ch) {
 		int i, j, off = 0;
 		for(int l = 0; l<TIME_SLOTS_RATE; l++) {
 			//1. shift buffer
@@ -47,7 +63,7 @@ public class AnalysisFilterbank implements SBRConstants, FilterbankTables {
 				}
 			}
 			//5. calculate subband samples, TODO: replace with FFT?
-			for(i = 0; i<32&&i<maxBands; i++) {
+			for(i = 0; i<32; i++) {
 				out[l][i][0] = 0.0f;
 				out[l][i][1] = 0.0f;
 				for(j = 0; j<64; j++) {

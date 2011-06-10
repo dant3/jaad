@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 in-somnia
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package net.sourceforge.jaad.aac.sbr2;
 
 import java.util.logging.Level;
@@ -17,6 +33,11 @@ public class SBR implements SBRConstants {
 	private final ChannelData[] cd;
 	private final FrequencyTables tables;
 	private boolean coupling;
+	//processing buffers
+	private final float[][][] W; //analysis QMF output
+	private final float[][][] Xleft, Xright; //Xlow for both channels
+	//filterbanks
+	private final AnalysisFilterbank qmfA;
 	//PS extension
 	private PS ps;
 	private boolean psUsed;
@@ -30,6 +51,12 @@ public class SBR implements SBRConstants {
 		cd[0] = new ChannelData();
 		cd[1] = new ChannelData();
 		tables = new FrequencyTables();
+
+		W = new float[32][32][2];
+		Xleft = new float[32][40][2];
+		Xright = new float[32][40][2];
+
+		qmfA = new AnalysisFilterbank();
 
 		psUsed = false;
 	}
@@ -94,6 +121,8 @@ public class SBR implements SBRConstants {
 		cd[0].decodeEnvelope(in, header, tables, false, false);
 		cd[0].decodeNoise(in, header, tables, false, false);
 		cd[0].decodeSinusoidal(in, header, tables);
+
+		dequantSingle(0);
 	}
 
 	private void decodeChannelPairElement(BitStream in) throws AACException {
@@ -110,6 +139,8 @@ public class SBR implements SBRConstants {
 			cd[0].decodeNoise(in, header, tables, false, coupling);
 			cd[1].decodeEnvelope(in, header, tables, true, coupling);
 			cd[1].decodeNoise(in, header, tables, true, coupling);
+
+			dequantCoupled();
 		}
 		else {
 			cd[0].decodeGrid(in, header);
@@ -122,6 +153,9 @@ public class SBR implements SBRConstants {
 			cd[1].decodeEnvelope(in, header, tables, true, coupling);
 			cd[0].decodeNoise(in, header, tables, false, coupling);
 			cd[1].decodeNoise(in, header, tables, true, coupling);
+
+			dequantSingle(0);
+			dequantSingle(1);
 		}
 
 		cd[0].decodeSinusoidal(in, header, tables);
@@ -146,34 +180,7 @@ public class SBR implements SBRConstants {
 		return ret;
 	}
 
-	/*========================= processing =========================*/
-	public boolean isPSUsed() {
-		return psUsed;
-	}
-
-	public void processSingleFrame(float[] channel, boolean downSampled) {
-		dequant(false);
-	}
-
-	public void processSingleFramePS(float[] left, float[] right, boolean downSampled) {
-		dequant(true);
-	}
-
-	public void processCoupleFrame(float[] left, float[] right, boolean downSampled) {
-		dequant(true);
-	}
-
-	private void dequant(boolean pair) {
-		if(pair) {
-			if(coupling) dequantPair();
-			else {
-				dequantSingle(0);
-				dequantSingle(1);
-			}
-		}
-		else dequantSingle(0);
-	}
-
+	/*======================= dequantization ====================== */
 	private void dequantSingle(int ch) {
 		//envelopes
 		final double a = header.getAmpRes() ? 1.0 : 2.0;
@@ -196,17 +203,17 @@ public class SBR implements SBRConstants {
 	}
 
 	//dequantization of coupled channel pair
-	private void dequantPair() {
+	private void dequantCoupled() {
 		final int ampRes = header.getAmpRes() ? 1 : 0;
 		//envelopes
 		final double a = header.getAmpRes() ? 1 : 2;
 		final double[][] e0 = cd[0].getEnvelopeScalefactors();
 		final double[][] e1 = cd[1].getEnvelopeScalefactors();
+		final int[] r = cd[0].getFrequencyResolutions();
 		final int le = cd[0].getEnvCount();
-		int[] r = cd[0].getFrequencyResolutions();
 
 		double d1, d2, d3;
-		for(int l = 0; l<cd[0].getEnvCount(); l++) {
+		for(int l = 0; l<le; l++) {
 			for(int k = 0; k<tables.getN(r[l]); k++) {
 				d1 = Math.pow(2, (e0[k][l]/a)+1);
 				d2 = Math.pow(2, (PAN_OFFSETS[ampRes]-e1[k][l])/a);
@@ -219,13 +226,73 @@ public class SBR implements SBRConstants {
 		//noise
 		final double[][] q0 = cd[0].getNoiseFloorData();
 		final double[][] q1 = cd[1].getNoiseFloorData();
-		for(int l = 0; l<cd[0].getNoiseCount(); l++) {
-			for(int k = 0; k<tables.getNq(); k++) {
+		final int lq = cd[0].getNoiseCount();
+		final int nq = tables.getNq();
+
+		for(int l = 0; l<lq; l++) {
+			for(int k = 0; k<nq; k++) {
 				d1 = Math.pow(2, NOISE_FLOOR_OFFSET-q0[k][l]+1);
 				d2 = Math.pow(2, PAN_OFFSETS[ampRes]-q1[k][l]);
 				d3 = Math.pow(2, q1[k][l]-PAN_OFFSETS[ampRes]);
 				q0[k][l] = d1/(1+d2);
 				q0[k][l] = d1/(1+d3);
+			}
+		}
+	}
+
+	/*========================= processing =========================*/
+	public boolean isPSUsed() {
+		return psUsed;
+	}
+
+	//channel: 1024 time samples
+	public void processSingleFrame(float[] channel, boolean downSampled) {
+		//analysis (channel -> W -> Xlow)
+		qmfA.process(channel, W, 0);
+		copyLF(Xleft);
+
+		//HF generator (Xlow -> Xhigh)
+		//HF adjuster (Xhigh -> Y)
+		//synthesis (Xlow/Xhigh/Y -> channel)
+	}
+
+	public void processSingleFramePS(float[] left, float[] right, boolean downSampled) {
+		//analysis (channel -> W -> Xlow)
+		qmfA.process(left, W, 0);
+		copyLF(Xleft);
+		qmfA.process(right, W, 0);
+		copyLF(Xright);
+
+		//HF generator (Xlow -> Xhigh)
+		//HF adjuster (Xhigh -> Y)
+		//synthesis (Xlow/Xhigh/Y -> channel)
+	}
+
+	public void processCoupleFrame(float[] left, float[] right, boolean downSampled) {
+		//analysis (channel -> W -> Xlow)
+		qmfA.process(left, W, 0);
+		copyLF(Xleft);
+		qmfA.process(right, W, 0);
+		copyLF(Xright);
+
+		//HF generator (Xlow -> Xhigh)
+		//HF adjuster (Xhigh -> Y)
+		//synthesis (Xlow/Xhigh/Y -> channel)
+	}
+
+	private void copyLF(float[][][] Xlow) {
+		int k, l;
+		//copies output from analysis QMF (W) to Xlow according to 4.6.18.5
+		for(k = 0; k<tables.getKx(true); k++) {
+			for(l = 0; l<T_HF_GEN; l++) {
+				Xlow[k][l][0] = W[l+TIME_SLOTS_RATE-T_HF_GEN][k][0];
+				Xlow[k][l][1] = W[l+TIME_SLOTS_RATE-T_HF_GEN][k][1];
+			}
+		}
+		for(k = 0; k<tables.getKx(false); k++) {
+			for(l = T_HF_GEN; l<TIME_SLOTS_RATE+T_HF_GEN; l++) {
+				Xlow[k][l][0] = W[l-T_HF_GEN][k][0];
+				Xlow[k][l][1] = W[l-T_HF_GEN][k][1];
 			}
 		}
 	}

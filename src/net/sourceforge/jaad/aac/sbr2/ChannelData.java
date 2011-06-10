@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 in-somnia
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package net.sourceforge.jaad.aac.sbr2;
 
 import java.util.Arrays;
@@ -19,7 +35,7 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	//dtdf
 	private boolean[] dfEnv, dfNoise;
 	//invf
-	private int[] invfMode;
+	private int[] invfMode, invfModePrevious;
 	//envelopes
 	private int[][] envelopeData;
 	private int[] envelopeDataPrevious; //last of previous frame
@@ -33,6 +49,8 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	//sinusoidal
 	private boolean harmonicPresent; //TODO: is this flag needed?
 	private boolean[] harmonic;
+	//chirp factors (calculated by HFGenerator)
+	private float[] bwArray;
 
 	ChannelData() {
 		relativeBorders0 = new int[0];
@@ -42,8 +60,9 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	/* ======================= decoding ======================*/
 	void decodeGrid(BitStream in, SBRHeader header) throws AACException {
 		final int bits;
-		//save previous data
+		//save previous
 		freqResPrevious = freqRes[freqRes.length-1];
+		invfModePrevious = invfMode;
 		envelopeDataPrevious = envelopeData[envelopeData.length-1];
 		noiseDataPrevious = noiseData[noiseData.length-1];
 
@@ -432,8 +451,17 @@ class ChannelData implements SBRConstants, HuffmanTables {
 		return pointer;
 	}
 
-	private int[] getInvfMode() {
-		return invfMode;
+	int[] getInvfMode(boolean previous) {
+		return previous ? invfModePrevious : invfMode;
+	}
+
+	float[] getChirpFactors() {
+		return bwArray;
+	}
+
+	void setChirpFactors(float[] bwArray) {
+		//used by HFGenerator after calculating chirp factors
+		this.bwArray = bwArray;
 	}
 
 	/* ======================= copying ======================*/
@@ -463,7 +491,7 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	}
 
 	void copyInvf(ChannelData cd) {
-		final int[] tmp = cd.getInvfMode();
+		final int[] tmp = cd.getInvfMode(false);
 		invfMode = new int[tmp.length];
 		System.arraycopy(tmp, 0, invfMode, 0, tmp.length);
 	}

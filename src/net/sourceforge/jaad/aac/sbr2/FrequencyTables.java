@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 in-somnia
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package net.sourceforge.jaad.aac.sbr2;
 
 import java.util.Arrays;
@@ -14,7 +30,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 	//frequency tables
 	private final int[][] fTable;
 	private final int[] n;
-	private int m, kx;
+	private int m, kx, kxPrev;
 	//noise table
 	private int[] fNoise;
 	private int nq;
@@ -22,7 +38,8 @@ class FrequencyTables implements SBRConstants, SBRTables {
 	private int[] fLim;
 	private int nl;
 	//patches
-	private int[] patchBorders;
+	private int patchCount;
+	private int[] patchSubbands, patchStartSubband, patchBorders;
 
 	FrequencyTables() {
 		n = new int[2];
@@ -33,7 +50,6 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		calculateMFT(header, sampleRate);
 		calculateFrequencyTables(header);
 		calculateNoiseTable(header);
-		//calculateLimiterTable(header);
 	}
 
 	private void calculateMFT(SBRHeader header, int sampleRate) throws AACException {
@@ -191,6 +207,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		fTable[HIGH] = new int[n[HIGH]+1];
 		System.arraycopy(mft, xover, fTable[HIGH], 0, n[HIGH]+1);
 
+		kxPrev = kx;
 		kx = fTable[HIGH][0];
 		m = fTable[HIGH][getN(HIGH)]-kx;
 		//check requirements (4.6.18.3.6):
@@ -224,22 +241,30 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		}
 	}
 
-	private void calculateLimiterTable(SBRHeader header) {
+	void calculateLimiterTable(SBRHeader header, int patchCount, int[] patchSubbands, int[] patchStartSubband) throws AACException {
+		//called from HFGenerator after calculating patch subbands
+		//check requirement (4.6.18.6.3):
+		if(patchCount>5) throw new AACException("SBR: too many patches: "+patchCount);
+		//save parameters
+		this.patchCount = patchCount;
+		this.patchSubbands = patchSubbands;
+		this.patchStartSubband = patchStartSubband;
+
+		//construct patch borders
 		final int bands = header.getLimiterBands();
 		if(bands==0) {
 			fLim = new int[]{fTable[LOW][0], fTable[LOW][n[LOW]]};
 			nl = 1;
+			patchBorders = new int[0];
 		}
 		else {
-			final int patchCount = 0; //TODO: get from HF generation
-			final int[] patchSubbandCount = null; //TODO: get from HF generation
 			//bands>0
 			final double limBands = LIM_BANDS_PER_OCTAVE[bands-1];
 
 			patchBorders = new int[patchCount+1];
 			patchBorders[0] = kx;
 			for(int i = 1; i<=patchCount; i++) {
-				patchBorders[i] = patchBorders[i-1]+patchSubbandCount[i-1];
+				patchBorders[i] = patchBorders[i-1]+patchSubbands[i-1];
 			}
 
 			fLim = new int[n[LOW]+patchCount];
@@ -287,8 +312,18 @@ class FrequencyTables implements SBRConstants, SBRTables {
 			nl = lims;
 		}
 	}
-	//the master frequency table: fMaster
 
+	//lower MFT border: k0
+	public int getK0() {
+		return k0;
+	}
+
+	//higher MFT border: k2
+	public int getK2() {
+		return k2;
+	}
+
+	//the master frequency table: fMaster
 	public int[] getMFT() {
 		return mft;
 	}
@@ -314,8 +349,8 @@ class FrequencyTables implements SBRConstants, SBRTables {
 	}
 
 	//first element of fTableHigh: kx
-	public int getKx() {
-		return kx;
+	public int getKx(boolean previous) {
+		return previous ? kxPrev : kx;
 	}
 
 	//difference between last and first element of fTableHigh: M
