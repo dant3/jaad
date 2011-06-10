@@ -1,8 +1,8 @@
 package net.sourceforge.jaad.aac.sbr2;
 
-interface FilterbankTable {
+interface FilterbankTables {
 
-	double[] FILTERBANK_TABLE = {
+	double[] WINDOW = {
 		0.0, -5.525286E-4, -5.617692E-4, -4.947518E-4,
 		-4.875227E-4, -4.893791E-4, -5.040714E-4, -5.226564E-4,
 		-5.466565E-4, -5.677802E-4, -5.87093E-4, -6.132747E-4,
