@@ -24,7 +24,7 @@ class HFGenerator implements SBRConstants {
 	private static final float GOAL_SB_FACTOR = 2.048e6f;
 	private static final float RELAX_COEF = 1.000001f;
 	private static final float[][] CHIRP_COEFS = {{0.75f, 0.25f}, {0.90625f, 0.09375f}};
-	//value for bw [invfModePrev][invfMode]
+	//values for bw [invfModePrev][invfMode]
 	private static final float[][] BW_COEFS = {
 		{0.0f, 0.6f, 0.9f, 0.98f},
 		{0.6f, 0.75f, 0.9f, 0.98f},
@@ -33,8 +33,23 @@ class HFGenerator implements SBRConstants {
 	};
 	private static final float CHIRP_MIN = 0.015625f;
 
+	private static class Coefs {
+
+		final float[] a0 = new float[2];
+		final float[] a1 = new float[2];
+		float d;
+	}
+
+	//in: 32x40 complex Xlow, out: 23x40 complex Xhigh
+	public static void process(SBRHeader header, FrequencyTables tables, ChannelData cd, float[][][] Xlow, float[][][] Xhigh, int sampleRate) throws AACException {
+		constructPatches(header, tables, sampleRate);
+		calculateChirpFactors(tables, cd);
+
+		//TODO
+	}
+
 	//calculates patch subbands and calls FrequencyTables.calculateLimiterTable
-	public static void constructPatches(SBRHeader header, FrequencyTables tables, int sampleRate) throws AACException {
+	private static void constructPatches(SBRHeader header, FrequencyTables tables, int sampleRate) throws AACException {
 		//get parameters
 		final int k0 = tables.getK0();
 		final int kx = tables.getKx(false);
@@ -106,25 +121,55 @@ class HFGenerator implements SBRConstants {
 
 		cd.setChirpFactors(bwArray);
 	}
-	
+
 	//x: 32 subbands x 32 samples complex input from analysis filterbank
-	private static void calculatePredictionCoefs(FrequencyTables tables, float[][][] x, int k) {
+	private static void calculatePredictionCoefs(FrequencyTables tables, float[][][] x, int k, Coefs coefs) {
 		//calculate covariance matrix
 		final float[][][] phi = new float[3][2][2];
-		float[] tmp;
+		float[] tmp1, tmp2;
 		for(int i = 0; i<3; i++) {
 			for(int j = 0; j<2; j++) {
 				phi[i][j][0] = 0;
 				phi[i][j][1] = 0;
 				for(int n = 0; n<TIME_SLOTS_RATE+6; n++) {
-					//complex multiplication with conjugate
-					tmp = x[k][n-i+T_HF_ADJ];
-					phi[i][j][0] += (tmp[0]*tmp[0]);
-					phi[i][j][1] += (tmp[1]*tmp[1]);
+					tmp1 = x[k][n-i+T_HF_ADJ];
+					tmp2 = x[k][n-j+T_HF_ADJ];
+					phi[i][j][0] += (tmp1[0]*tmp2[0])-(tmp1[1]*tmp2[1]);
+					phi[i][j][1] += (tmp1[0]*tmp2[1])+(tmp1[1]*tmp2[0]);
 				}
 			}
 		}
 
 		//calculate prediction coefficients
+		coefs.d = (phi[2][1][0]*phi[1][0][0])-(RELAX_COEF*((phi[1][1][0]*phi[1][1][0])+(phi[1][1][1]*phi[1][1][1])));
+
+		if(coefs.d==0) {
+			coefs.a1[0] = 0;
+			coefs.a1[1] = 0;
+		}
+		else {
+			float f1r = (phi[0][0][0]*phi[1][1][0])-(phi[0][0][1]*phi[1][1][1]);
+			float f1i = (phi[0][0][0]*phi[1][1][1])+(phi[0][0][1]*phi[1][1][0]);
+			f1r -= (phi[0][1][0]*phi[1][0][0])-(phi[0][1][1]*phi[1][0][1]);
+			f1i -= (phi[0][1][0]*phi[1][0][1])+(phi[0][1][1]*phi[1][0][0]);
+			coefs.a1[0] = f1r/coefs.d;
+			coefs.a1[1] = f1i/coefs.d;
+		}
+
+		if(phi[1][0][0]==0&&phi[1][0][1]==0) {
+			coefs.a0[0] = 0;
+			coefs.a0[1] = 0;
+		}
+		else {
+			float f1r = phi[0][0][0];
+			float f1i = phi[0][0][1];
+			f1r += (coefs.a1[0]*phi[1][1][0])-(coefs.a1[1]*(-phi[1][1][1]));
+			f1i += (coefs.a1[0]*(-phi[1][1][1]))+(coefs.a1[1]*phi[1][1][0]);
+			final float div = (phi[1][0][0]*phi[1][0][0])+(phi[1][0][1]*phi[1][0][1]);
+			coefs.a0[0] = (f1r*phi[1][0][0])+(f1i*phi[1][0][1]);
+			coefs.a0[1] = (f1i*phi[1][0][0])-(f1r*phi[1][0][1]);
+			coefs.a0[0] /= div;
+			coefs.a0[1] /= div;
+		}
 	}
 }

@@ -47,14 +47,9 @@ class FrequencyTables implements SBRConstants, SBRTables {
 	}
 
 	void calculate(SBRHeader header, int sampleRate) throws AACException {
-		System.out.println("\ttables:");
 		calculateMFT(header, sampleRate);
-		System.out.println("\t\tMFT: "+Arrays.toString(mft));
 		calculateFrequencyTables(header);
-		System.out.println("\t\tfreq HIGH: "+Arrays.toString(fTable[HIGH]));
-		System.out.println("\t\tfreq LOW: "+Arrays.toString(fTable[LOW]));
 		calculateNoiseTable(header);
-		System.out.println("\t\tnoise: "+Arrays.toString(fNoise));
 	}
 
 	private void calculateMFT(SBRHeader header, int sampleRate) throws AACException {
@@ -62,7 +57,6 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		final int sfIndex = SampleFrequency.forFrequency(sampleRate).getIndex();
 		final int sfOff = MFT_SF_OFFSETS[sfIndex];
 		k0 = MFT_START_MIN[sfIndex]+MFT_START_OFFSETS[sfOff][header.getStartFrequency(false)];
-		System.out.println("\t\tk0: "+k0);
 		//higher border k2
 		final int stop = header.getStopFrequency(false);
 		final int x;
@@ -70,7 +64,6 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		else if(stop==14) x = 2*k0;
 		else x = MFT_STOP_MIN[sfIndex]+MFT_STOP_OFFSETS[sfOff][header.getStopFrequency(false)-1];
 		k2 = Math.min(64, x);
-		System.out.println("\t\tk2: "+k2);
 
 		if(k0>=k2) throw new AACException("SBR: MFT borders out of range: lower="+k0+", higher="+k2);
 		//check requirement (4.6.18.3.6):
@@ -141,7 +134,6 @@ class FrequencyTables implements SBRConstants, SBRTables {
 			twoRegions = false;
 			k1 = k2;
 		}
-		System.out.println("\t\tk1: "+k1+", twoRegions: "+twoRegions);
 
 		final double div2 = (double) k1/(double) k0;
 		double log = Math.log(div2)*Math.log(2*LOG2);
@@ -356,12 +348,12 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		return n;
 	}
 
-	//first element of fTableHigh: kx
+	//first subband in fTableHigh: kx
 	public int getKx(boolean previous) {
 		return previous ? kxPrev : kx;
 	}
 
-	//difference between last and first element of fTableHigh: M
+	//number of SBR subbands: M
 	public int getM() {
 		return m;
 	}

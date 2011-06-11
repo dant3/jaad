@@ -16,7 +16,6 @@
  */
 package net.sourceforge.jaad.aac.sbr2;
 
-import net.sourceforge.jaad.aac.sbr.*;
 import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.syntax.BitStream;
 
@@ -130,7 +129,7 @@ class SBRHeader {
 		return limiterGains;
 	}
 
-	public boolean hasInterpolFrequency() {
+	public boolean interpolateFrequency() {
 		return interpolFrequency;
 	}
 
