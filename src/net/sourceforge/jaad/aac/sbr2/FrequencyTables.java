@@ -47,9 +47,14 @@ class FrequencyTables implements SBRConstants, SBRTables {
 	}
 
 	void calculate(SBRHeader header, int sampleRate) throws AACException {
+		System.out.println("\ttables:");
 		calculateMFT(header, sampleRate);
+		System.out.println("\t\tMFT: "+Arrays.toString(mft));
 		calculateFrequencyTables(header);
+		System.out.println("\t\tfreq HIGH: "+Arrays.toString(fTable[HIGH]));
+		System.out.println("\t\tfreq LOW: "+Arrays.toString(fTable[LOW]));
 		calculateNoiseTable(header);
+		System.out.println("\t\tnoise: "+Arrays.toString(fNoise));
 	}
 
 	private void calculateMFT(SBRHeader header, int sampleRate) throws AACException {
@@ -57,6 +62,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		final int sfIndex = SampleFrequency.forFrequency(sampleRate).getIndex();
 		final int sfOff = MFT_SF_OFFSETS[sfIndex];
 		k0 = MFT_START_MIN[sfIndex]+MFT_START_OFFSETS[sfOff][header.getStartFrequency(false)];
+		System.out.println("\t\tk0: "+k0);
 		//higher border k2
 		final int stop = header.getStopFrequency(false);
 		final int x;
@@ -64,6 +70,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		else if(stop==14) x = 2*k0;
 		else x = MFT_STOP_MIN[sfIndex]+MFT_STOP_OFFSETS[sfOff][header.getStopFrequency(false)-1];
 		k2 = Math.min(64, x);
+		System.out.println("\t\tk2: "+k2);
 
 		if(k0>=k2) throw new AACException("SBR: MFT borders out of range: lower="+k0+", higher="+k2);
 		//check requirement (4.6.18.3.6):
@@ -74,8 +81,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		if((k2-k0)>max) throw new AACException("SBR: too many subbands: "+(k2-k0)+", maximum number for samplerate "+sampleRate+": "+max);
 
 		//MFT calculation
-		final int freqScale = header.getFrequencyScale(false);
-		if(freqScale==0) calculateMFT1(header, k0, k2);
+		if(header.getFrequencyScale(false)==0) calculateMFT1(header, k0, k2);
 		else calculateMFT2(header, k0, k2);
 
 		//check requirement (4.6.18.3.6):
@@ -87,11 +93,11 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		final int dk;
 		if(header.isAlterScale(false)) {
 			dk = 2;
-			nMaster = Math.round((float) (k2-k0)/4.0f)<<1;
+			nMaster = 2*Math.round((float) (k2-k0)/4.0f);
 		}
 		else {
 			dk = 1;
-			nMaster = (int) ((float) (k2-k0)/2.0f)<<1;
+			nMaster = 2*(int) ((float) (k2-k0)/2.0f);
 		}
 		//check requirement (4.6.18.6.3):
 		if(nMaster<=0) throw new AACException("SBR: illegal number of bands for master frequency table: "+nMaster);
@@ -124,7 +130,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		final int bands = MFT_INPUT1[header.getFrequencyScale(false)-1];
 		final double warp = MFT_INPUT2[header.isAlterScale(false) ? 1 : 0];
 
-		final double div1 = (double) k2/(double) k0;
+		double div1 = (double) k2/(double) k0;
 		final boolean twoRegions;
 		final int k1;
 		if(div1>2.2449) {
@@ -135,6 +141,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 			twoRegions = false;
 			k1 = k2;
 		}
+		System.out.println("\t\tk1: "+k1+", twoRegions: "+twoRegions);
 
 		final double div2 = (double) k1/(double) k0;
 		double log = Math.log(div2)*Math.log(2*LOG2);
@@ -160,15 +167,16 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		}
 
 		if(twoRegions) {
+			div1 = (double) k2/(double) k1;
 			log = Math.log(div1);
 			final int bandCount1 = 2*(int) Math.round(bands*log/(2*LOG2*warp));
 			final int[] vDk1 = new int[bandCount1];
-			int min = 0;
+			int min = -1;
 			for(int i = 0; i<bandCount1; i++) {
 				pow1 = Math.pow(div1, (double) (i+1)/bandCount1);
 				pow2 = Math.pow(div1, (double) i/bandCount1);
-				vDk1[i] = (int) (k1*pow1)-(int) (k1*pow2);
-				if(vDk1[i]>min) min = vDk1[i];
+				vDk1[i] = (int) Math.round(k1*pow1)-(int) Math.round(k1*pow2);
+				if(min<0||vDk1[i]<min) min = vDk1[i];
 				//check requirement (4.6.18.6.3):
 				else if(vDk1[i]<=0) throw new AACException("SBR: illegal value in master frequency table: "+vDk1[i]);
 			}
@@ -219,7 +227,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		fTable[LOW] = new int[n[LOW]+1];
 		fTable[LOW][0] = 0;
 		final int div = (n[HIGH]%2!=0) ? 1 : 0;
-		for(int i = 0; i<=n[LOW]; i++) {
+		for(int i = 1; i<=n[LOW]; i++) {
 			fTable[LOW][i] = fTable[HIGH][2*i-div];
 		}
 	}

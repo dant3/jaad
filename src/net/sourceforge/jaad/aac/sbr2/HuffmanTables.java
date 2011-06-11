@@ -16,9 +16,22 @@
  */
 package net.sourceforge.jaad.aac.sbr2;
 
-//codebooks: {bit length, codeword, values...}
 interface HuffmanTables {
 
+	//largest absolute values
+	int T_HUFFMAN_ENV_1_5_LAV = 60;
+	int F_HUFFMAN_ENV_1_5_LAV = 60;
+	int T_HUFFMAN_ENV_BAL_1_5_LAV = 24;
+	int F_HUFFMAN_ENV_BAL_1_5_LAV = 24;
+	int T_HUFFMAN_ENV_3_0_LAV = 31;
+	int F_HUFFMAN_ENV_3_0_LAV = 31;
+	int T_HUFFMAN_ENV_BAL_3_0_LAV = 12;
+	int F_HUFFMAN_ENV_BAL_3_0_LAV = 12;
+	int T_HUFFMAN_NOISE_3_0_LAV = 31;
+	int F_HUFFMAN_NOISE_3_0_LAV = F_HUFFMAN_ENV_3_0_LAV;
+	int T_HUFFMAN_NOISE_BAL_3_0_LAV = 12;
+	int F_HUFFMAN_NOISE_BAL_3_0_LAV = F_HUFFMAN_ENV_BAL_3_0_LAV;
+	//codebooks: {bit length, codeword, values...}
 	int[][] T_HUFFMAN_ENV_1_5 = {
 		{2, 0, 60},
 		{2, 1, 59},
