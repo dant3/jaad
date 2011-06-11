@@ -27,7 +27,7 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	private int frameClass;
 	private int envCount, noiseCount;
 	private int[] freqRes;
-	private int freqResPrevious; //last of previous frame
+	private int freqResPrevious;
 	private int varBord0, varBord1;
 	private int relCount0, relCount1;
 	private int[] relativeBorders0, relativeBorders1;
@@ -38,7 +38,7 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	private int[] invfMode, invfModePrevious;
 	//envelopes
 	private int[][] envelopeData;
-	private int[] envelopeDataPrevious; //last of previous frame
+	private int[] envelopeDataPrevious;
 	private int[] te; //envelope time borders, p.214
 	private double[][] envelopeScalefactors; //delta decoded, p.216
 	//noise
@@ -53,6 +53,10 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	private float[] bwArray;
 
 	ChannelData() {
+		freqRes = new int[]{0};
+		invfMode = new int[0];
+		envelopeData = new int[1][0];
+		noiseData = new int[][]{{0}};
 		relativeBorders0 = new int[0];
 		relativeBorders1 = new int[0];
 	}
@@ -167,89 +171,119 @@ class ChannelData implements SBRConstants, HuffmanTables {
 
 		//select huffman codebooks
 		final int[][] tHuff, fHuff;
+		final int tLav, fLav;
 		if(coupling&&secCh) {
 			if(ampRes) {
 				tHuff = T_HUFFMAN_ENV_BAL_3_0;
+				tLav = T_HUFFMAN_ENV_BAL_3_0_LAV;
 				fHuff = F_HUFFMAN_ENV_BAL_3_0;
+				fLav = F_HUFFMAN_ENV_BAL_3_0_LAV;
 			}
 			else {
 				tHuff = T_HUFFMAN_ENV_BAL_1_5;
+				tLav = T_HUFFMAN_ENV_BAL_1_5_LAV;
 				fHuff = F_HUFFMAN_ENV_BAL_1_5;
+				fLav = F_HUFFMAN_ENV_BAL_1_5_LAV;
 			}
 		}
 		else {
 			if(ampRes) {
 				tHuff = T_HUFFMAN_ENV_3_0;
+				tLav = T_HUFFMAN_ENV_3_0_LAV;
 				fHuff = F_HUFFMAN_ENV_3_0;
+				fLav = F_HUFFMAN_ENV_3_0_LAV;
 			}
 			else {
 				tHuff = T_HUFFMAN_ENV_1_5;
+				tLav = T_HUFFMAN_ENV_1_5_LAV;
 				fHuff = F_HUFFMAN_ENV_1_5;
+				fLav = F_HUFFMAN_ENV_1_5_LAV;
 			}
 		}
 
-		//read huffman data: i=envelope, j=band
+		//read delta coded huffman data
 		envelopeData = new int[envCount][];
 		final int[] envBands = tables.getN();
-
 		final int bits = 7-((coupling&&secCh) ? 1 : 0)-(ampRes ? 1 : 0);
+		final int delta = (secCh&&coupling) ? 1 : 0+1;
+		final int odd = envBands[1]&1;
 
-		int j;
-		int[][] table;
+		int j, k;
+		int[] prev;
 		for(int i = 0; i<envCount; i++) {
 			envelopeData[i] = new int[envBands[freqRes[i]]];
+			prev = (i==0) ? envelopeDataPrevious : envelopeData[i-1];
 
-			j = 0;
-			if(dfEnv[i]) table = tHuff;
-			else {
-				table = fHuff;
-				envelopeData[i][0] = in.readBits(bits);
-				j = 1;
+			if(dfEnv[i]) {
+				if(freqRes[i]==freqRes[i-1]) {
+					for(j = 0; j<envBands[freqRes[i]]; j++) {
+						envelopeData[i][j] = prev[j]+delta*(decodeHuffman(in, tHuff)-tLav);
+					}
+				}
+				else if(freqRes[i]==1) {
+					for(j = 0; j<envBands[freqRes[i]]; j++) {
+						k = (j+odd)>>1; //fLow[k] <= fHigh[j] < fLow[k + 1]
+						envelopeData[i][j] = prev[k]+delta*(decodeHuffman(in, tHuff)-tLav);
+					}
+				}
+				else {
+					for(j = 0; j<envBands[freqRes[i]]; j++) {
+						k = (j!=0) ? (2*j-odd) : 0; //fHigh[k] == fLow[j]
+						envelopeData[i][j] = prev[k]+delta*(decodeHuffman(in, tHuff)-tLav);
+					}
+				}
 			}
-
-			for(; j<envelopeData[i].length; j++) {
-				envelopeData[i][j] = decodeHuffman(in, table);
+			else {
+				envelopeData[i][0] = delta*in.readBits(bits);
+				for(j = 1; j<envBands[freqRes[i]]; j++) {
+					envelopeData[i][j] = envelopeData[i][j-1]+delta*(decodeHuffman(in, fHuff)-fLav);
+				}
 			}
 		}
 
 		parseEnvelopes();
-		deltaDecodeEnvelopes(tables, secCh&&coupling);
 	}
 
 	void decodeNoise(BitStream in, SBRHeader header, FrequencyTables tables, boolean secCh, boolean coupling) throws AACException {
 		//select huffman codebooks
 		final int[][] tHuff, fHuff;
+		final int tLav, fLav;
 		if(coupling&&secCh) {
 			tHuff = T_HUFFMAN_NOISE_BAL_3_0;
+			tLav = T_HUFFMAN_NOISE_BAL_3_0_LAV;
 			fHuff = F_HUFFMAN_NOISE_BAL_3_0;
+			fLav = F_HUFFMAN_NOISE_BAL_3_0_LAV;
 		}
 		else {
 			tHuff = T_HUFFMAN_NOISE_3_0;
+			tLav = T_HUFFMAN_NOISE_3_0_LAV;
 			fHuff = F_HUFFMAN_NOISE_3_0;
+			fLav = F_HUFFMAN_NOISE_3_0_LAV;
 		}
 
 		//read huffman data: i=noise, j=band
 		final int noiseBands = tables.getNq();
+		final int delta = (secCh&&coupling) ? 1 : 0+1;
 		noiseData = new int[noiseCount][noiseBands];
 
 		int j;
-		int[][] table;
+		int[] prev;
 		for(int i = 0; i<noiseCount; i++) {
-			j = 0;
-			if(dfNoise[i]) table = tHuff;
-			else {
-				table = fHuff;
-				noiseData[i][0] = in.readBits(5);
-				j = 1;
+			if(dfNoise[i]) {
+				prev = (i==0) ? noiseDataPrevious : noiseData[i-1];
+				for(j = 0; j<noiseBands; j++) {
+					noiseData[i][j] = prev[j]+delta*(decodeHuffman(in, tHuff)-tLav);
+				}
 			}
-
-			for(; j<noiseBands; j++) {
-				noiseData[i][j] = decodeHuffman(in, table);
+			else {
+				noiseData[i][0] = delta*in.readBits(5);
+				for(j = 1; j<noiseBands; j++) {
+					noiseData[i][j] = noiseData[i][j-1]+delta*(decodeHuffman(in, fHuff)-fLav);
+				}
 			}
 		}
 
 		parseNoise();
-		deltaDecodeNoise(tables, secCh&&coupling);
 	}
 
 	void decodeSinusoidal(BitStream in, SBRHeader header, FrequencyTables tables) throws AACException {
@@ -332,37 +366,6 @@ class ChannelData implements SBRConstants, HuffmanTables {
 					te[i] += relBordTrail[j];
 				}
 				te[i] = absBordTrail-sum;
-			}
-		}
-	}
-
-	//TODO: optimize this!
-	private void deltaDecodeEnvelopes(FrequencyTables tables, boolean secAndCoupling) {
-		final int delta = secAndCoupling ? 2 : 1;
-
-		envelopeScalefactors = new double[envCount][];
-		for(int l = 0; l<envCount; l++) {
-			envelopeScalefactors[l] = new double[tables.getN(freqRes[l])];
-			for(int k = 0; k<envelopeScalefactors[l].length; k++) {
-				if(dfEnv[l]) {
-					final int g = (l==0) ? freqResPrevious : freqRes[l-1];
-					final int[] ge = (l==0) ? envelopeDataPrevious : envelopeData[l-1];
-					if(freqRes[l]==g) envelopeScalefactors[k][l] = ge[k]+delta*envelopeData[l][k];
-					else if(g==1) {
-						//freqScale[l]==0, g==1
-						//TODO
-					}
-					else {
-						//freqScale[l]==1, g==0
-						//TODO
-					}
-				}
-				else {
-					envelopeScalefactors[k][l] = 0;
-					for(int i = 0; i<k; i++) {
-						envelopeScalefactors[k][l] += (delta*envelopeData[l][i]);
-					}
-				}
 			}
 		}
 	}
