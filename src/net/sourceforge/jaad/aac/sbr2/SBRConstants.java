@@ -32,6 +32,7 @@ interface SBRConstants {
 	int NOISE_FLOOR_OFFSET = 6;
 	int T_HF_GEN = 8;
 	int T_HF_ADJ = 2;
+	int MAX_PATCHES = 6;
 	//extension ids
 	int EXTENSION_ID_PS = 2;
 	//helper constants

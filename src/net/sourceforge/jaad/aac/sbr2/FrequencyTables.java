@@ -23,6 +23,7 @@ import net.sourceforge.jaad.aac.SampleFrequency;
 //stores and calculates frequency tables
 class FrequencyTables implements SBRConstants, SBRTables {
 
+	private static final float GOAL_SB_FACTOR = 2.048e6f;
 	private int k0, k2;
 	//master
 	private int[] mft;
@@ -39,17 +40,22 @@ class FrequencyTables implements SBRConstants, SBRTables {
 	private int nl;
 	//patches
 	private int patchCount;
-	private int[] patchSubbands, patchStartSubband, patchBorders;
+	private final int[] patchSubbands, patchStartSubband;
+	private int[] patchBorders;
 
 	FrequencyTables() {
 		n = new int[2];
 		fTable = new int[2][];
+		patchSubbands = new int[MAX_PATCHES];
+		patchStartSubband = new int[MAX_PATCHES];
 	}
 
 	void calculate(SBRHeader header, int sampleRate) throws AACException {
 		calculateMFT(header, sampleRate);
 		calculateFrequencyTables(header);
 		calculateNoiseTable(header);
+		calculatePatches(sampleRate);
+		calculateLimiterTable(header);
 	}
 
 	private void calculateMFT(SBRHeader header, int sampleRate) throws AACException {
@@ -241,15 +247,53 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		}
 	}
 
-	void calculateLimiterTable(SBRHeader header, int patchCount, int[] patchSubbands, int[] patchStartSubband) throws AACException {
-		//called from HFGenerator after calculating patch subbands
+	private void calculatePatches(int sampleRate) throws AACException {
+		//patch construction (flowchart 4.46, p231)
+		int msb = k0;
+		int usb = kx;
+		patchCount = 0;
+
+		int goalSb = Math.round(GOAL_SB_FACTOR/sampleRate); //TODO: replace with table
+		int k;
+		if(goalSb<kx+m) {
+			k = 0;
+			for(int i = 0; mft[i]<goalSb; i++) {
+				k = i+1;
+			}
+		}
+		else k = nMaster;
+
+		int sb, j, odd;
+		do {
+			j = k+1;
+			do {
+				j--;
+				sb = mft[j];
+				odd = (sb-2+k0)%2;
+			}
+			while(sb>(k0-1+msb-odd));
+
+			patchSubbands[patchCount] = Math.max(sb-usb, 0);
+			patchStartSubband[patchCount] = k0-odd-patchSubbands[patchCount];
+
+			if(patchSubbands[patchCount]>0) {
+				usb = sb;
+				msb = sb;
+				patchCount++;
+			}
+			else msb = kx;
+
+			if(mft[k]-sb<3) k = nMaster;
+		}
+		while(sb!=(kx+m));
+
+		if(patchSubbands[patchCount-1]<3&&patchCount>1) patchCount--;
+
 		//check requirement (4.6.18.6.3):
 		if(patchCount>5) throw new AACException("SBR: too many patches: "+patchCount);
-		//save parameters
-		this.patchCount = patchCount;
-		this.patchSubbands = patchSubbands;
-		this.patchStartSubband = patchStartSubband;
+	}
 
+	private void calculateLimiterTable(SBRHeader header) throws AACException {
 		//construct patch borders
 		final int bands = header.getLimiterBands();
 		if(bands==0) {
@@ -366,6 +410,22 @@ class FrequencyTables implements SBRConstants, SBRTables {
 	//bands in noise table: Nq
 	public int getNq() {
 		return nq;
+	}
+
+	public int getPatchCount() {
+		return patchCount;
+	}
+
+	public int[] getPatchSubbands() {
+		return patchSubbands;
+	}
+
+	public int[] getPatchStartSubband() {
+		return patchStartSubband;
+	}
+
+	public int[] getPatchBorders() {
+		return patchBorders;
 	}
 
 	//the limiter frequency band table: fTableLim

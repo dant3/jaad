@@ -216,8 +216,8 @@ class ChannelData implements SBRConstants, HuffmanTables {
 		//read delta coded huffman data
 		envelopeSF = new float[envCount][];
 		final int[] envBands = tables.getN();
-		final int bits = 7-((coupling&&secCh) ? 1 : 0)-(ampRes ? 1 : 0);
-		final int delta = (secCh&&coupling) ? 1 : 0+1;
+		final int bits = 7-((secCh&&coupling) ? 1 : 0)-(ampRes ? 1 : 0);
+		final int delta = ((secCh&&coupling) ? 1 : 0)+1;
 		final int odd = envBands[1]&1;
 
 		int j, k, frPrev;
@@ -279,7 +279,7 @@ class ChannelData implements SBRConstants, HuffmanTables {
 
 		//read huffman data: i=noise, j=band
 		final int noiseBands = tables.getNq();
-		final int delta = (secCh&&coupling) ? 1 : 0+1;
+		final int delta = ((secCh&&coupling) ? 1 : 0)+1;
 		noiseFloorData = new float[noiseCount][noiseBands];
 
 		int j;
