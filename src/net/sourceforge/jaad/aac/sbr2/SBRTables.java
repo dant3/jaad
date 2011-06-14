@@ -41,6 +41,10 @@ interface SBRTables {
 		{1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 15, 16}
 	};
 	int[] MFT_INPUT1 = {12, 10, 8};
-	double[] MFT_INPUT2 = {1.0, 1.3};
-	double[] LIM_BANDS_PER_OCTAVE = {1.2, 2, 3};
+	float[] MFT_INPUT2 = {1.0f, 1.3f};
+	float[] LIM_BANDS_PER_OCTAVE_POW = {
+		1.32715174233856803909f, //2^(0.49/1.2)
+		1.18509277094158210129f, //2^(0.49/2)
+		1.11987160404675912501f //2^(0.49/3)
+	};
 }

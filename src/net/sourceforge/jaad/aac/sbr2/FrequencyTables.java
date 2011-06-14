@@ -16,7 +16,9 @@
  */
 package net.sourceforge.jaad.aac.sbr2;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.SampleFrequency;
 
@@ -142,7 +144,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		}
 
 		final double div2 = (double) k1/(double) k0;
-		double log = Math.log(div2)*Math.log(2*LOG2);
+		double log = Math.log(div2)/(2*LOG2);
 		final int bandCount0 = 2*(int) Math.round(bands*log);
 		//check requirement (4.6.18.6.3):
 		if(bandCount0<=0) throw new AACException("SBR: illegal band count for master frequency table: "+bandCount0);
@@ -223,8 +225,8 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		final int half = (int) ((double) n[HIGH]/2.0);
 		n[LOW] = half+(n[HIGH]-2*half);
 		fTable[LOW] = new int[n[LOW]+1];
-		fTable[LOW][0] = 0;
-		final int div = (n[HIGH]%2!=0) ? 1 : 0;
+		fTable[LOW][0] = fTable[HIGH][0];
+		final int div = n[HIGH]&1;
 		for(int i = 1; i<=n[LOW]; i++) {
 			fTable[LOW][i] = fTable[HIGH][2*i-div];
 		}
@@ -238,12 +240,11 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		if(nq>5) throw new AACException("SBR: too many noise floor scalefactors: "+nq);
 
 		fNoise = new int[nq+1];
-		fNoise[0] = 0;
-		double d1, d2;
-		for(int i = 1; i<=nq; i++) {
-			d1 = (double) (n[LOW]-fNoise[i-1]);
-			d2 = (double) (nq+1-i);
-			fNoise[i] = fNoise[i-1]+(int) (d1/d2);
+		fNoise[0] = fTable[LOW][0];
+		int i = 0;
+		for(int k = 1; k<=nq; k++) {
+			i += Math.round((double) (n[LOW]-i)/(double) (nq+1-k));
+			fNoise[k] = fTable[LOW][i];
 		}
 	}
 
@@ -294,7 +295,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 	}
 
 	private void calculateLimiterTable(SBRHeader header) throws AACException {
-		//construct patch borders
+		//calculation of fTableLim (figure 4.40, p.213)
 		final int bands = header.getLimiterBands();
 		if(bands==0) {
 			fLim = new int[]{fTable[LOW][0], fTable[LOW][n[LOW]]};
@@ -302,8 +303,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 			patchBorders = new int[0];
 		}
 		else {
-			//bands>0
-			final double limBands = LIM_BANDS_PER_OCTAVE[bands-1];
+			final float limBandsPerOctaveWarped = LIM_BANDS_PER_OCTAVE_POW[header.getLimiterBands()-1];
 
 			patchBorders = new int[patchCount+1];
 			patchBorders[0] = kx;
@@ -311,50 +311,43 @@ class FrequencyTables implements SBRConstants, SBRTables {
 				patchBorders[i] = patchBorders[i-1]+patchSubbands[i-1];
 			}
 
-			fLim = new int[n[LOW]+patchCount];
-			System.arraycopy(fTable[LOW], 0, fLim, 0, n[LOW]+1);
-			System.arraycopy(patchBorders, 1, fLim, n[LOW+1], patchCount-1);
+			int[] limTable = new int[n[LOW]+patchCount];
+			System.arraycopy(fTable[LOW], 0, limTable, 0, n[LOW]+1);
+			if(patchCount>1) System.arraycopy(patchBorders, 1, limTable, n[LOW]+1, patchCount-1);
+			Arrays.sort(limTable);
 
-			Arrays.sort(fLim);
-
-			int k = 1;
+			int in = 1;
+			int out = 0;
 			int lims = n[LOW]+patchCount-1;
-			double octaves;
-			while(k<=lims) {
-				octaves = Math.log((double) fLim[k]/(double) fLim[k-1])/LOG2;
-				if((octaves*limBands)<0.49) {
-					int r = -1;
-					if(fLim[k]==fLim[k-1]) r = k;
-					else {
-						//is fLim[k] equal to any element in patchBorders?
-						boolean found = false;
-						for(int i = 0; !found&&i<patchBorders.length; i++) {
-							if(patchBorders[i]==fLim[k]) found = true;
-						}
-						if(found) {
-							//is fLim[k-1] equal to any element in patchBorders?
-							boolean found2 = false;
-							for(int i = 0; !found2&&i<patchBorders.length; i++) {
-								if(patchBorders[i]==fLim[k]) found2 = true;
-							}
-							if(found2) k++;
-							else r = k-1;
-						}
-						else r = k;
-					}
-					if(r>0) {
-						//remove element r from fLim
-						final int[] tmp = new int[fLim.length-1];
-						System.arraycopy(fLim, 0, tmp, 0, r);
-						System.arraycopy(fLim, r+1, tmp, r, tmp.length-r);
-						fLim = tmp;
-						lims--;
-					}
+			while(out<lims) {
+				if(limTable[in]>=limTable[out]*limBandsPerOctaveWarped) {
+					limTable[++out] = limTable[in++];
 				}
-				else k++;
+				else if(limTable[in]==limTable[out]
+						||!inArray(patchBorders, limTable[in])) {
+					in++;
+					lims--;
+				}
+				else if(!inArray(patchBorders, limTable[out])) {
+					limTable[out] = limTable[in++];
+					lims--;
+				}
+				else {
+					limTable[++out] = limTable[in++];
+				}
 			}
-			nl = lims;
+
+			fLim = new int[lims+1];
+			System.arraycopy(limTable, 0, fLim, 0, lims+1);
 		}
+	}
+
+	private boolean inArray(int[] a, int x) {
+		boolean found = false;
+		for(int i = 0; !found&&i<a.length; i++) {
+			if(a[i]==x) found = true;
+		}
+		return found;
 	}
 
 	//lower MFT border: k0
