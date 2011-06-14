@@ -106,19 +106,17 @@ class HFGenerator implements SBRConstants {
 		//calculates chirp factors and replaces old ones in ChannelData
 		final int[] invfMode = cd.getInvfMode(false);
 		final int[] invfModePrevious = cd.getInvfMode(true);
-		final float[] bwArrayPrevious = cd.getChirpFactors();
+		final float[] bwArray = cd.getChirpFactors();
 
-		final float[] bwArray = new float[tables.getNq()];
+		float tmp;
 		float[] chirpCoefs;
-		for(int i = 0; i<bwArray.length; i++) {
-			bwArray[i] = BW_COEFS[invfModePrevious[i]][invfMode[i]];
-			chirpCoefs = (bwArray[i]<bwArrayPrevious[i]) ? CHIRP_COEFS[0] : CHIRP_COEFS[1];
-			bwArray[i] = (chirpCoefs[0]*bwArray[i])+(chirpCoefs[1]*bwArrayPrevious[i]);
-			bwArray[i] = (bwArray[i]<CHIRP_MIN) ? 0 : bwArray[i];
+		for(int i = 0; i<MAX_CHIRP_FACTORS; i++) {
+			tmp = BW_COEFS[invfModePrevious[i]][invfMode[i]];
+			chirpCoefs = (tmp<bwArray[i]) ? CHIRP_COEFS[0] : CHIRP_COEFS[1];
+			bwArray[i] = (chirpCoefs[0]*tmp)+(chirpCoefs[1]*bwArray[i]);
+			if(bwArray[i]<CHIRP_MIN) bwArray[i]=0;
 		}
 
-		//save for next frame
-		cd.setChirpFactors(bwArray);
 		return bwArray;
 	}
 

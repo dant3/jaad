@@ -32,6 +32,13 @@ interface SBRConstants {
 	int NOISE_FLOOR_OFFSET = 6;
 	int T_HF_GEN = 8;
 	int T_HF_ADJ = 2;
+	//max values/lengths for arrays
+	int MAX_BANDS = 64;
+	int MAX_ENV_COUNT = 5;
+	int MAX_NOISE_COUNT = 2;
+	int MAX_RELATIVE_BORDERS = 3;
+	int MAX_NQ = 5;
+	int	MAX_CHIRP_FACTORS = 5;
 	int MAX_PATCHES = 6;
 	//extension ids
 	int EXTENSION_ID_PS = 2;

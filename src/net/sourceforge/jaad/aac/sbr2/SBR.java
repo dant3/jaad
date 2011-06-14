@@ -23,6 +23,7 @@ import net.sourceforge.jaad.aac.ps.PS;
 import net.sourceforge.jaad.aac.syntax.BitStream;
 import net.sourceforge.jaad.aac.syntax.Constants;
 
+//TODO: make buffer arrays final with max sizes
 public class SBR implements SBRConstants {
 
 	//arguments
@@ -43,7 +44,6 @@ public class SBR implements SBRConstants {
 	//PS extension
 	private PS ps;
 	private boolean psUsed;
-	public static int count, pos;
 
 	public SBR(SampleFrequency sf, boolean downSampled) {
 		sampleFrequency = sf.getFrequency()*2;
@@ -69,20 +69,16 @@ public class SBR implements SBRConstants {
 	/*========================= decoding =========================*/
 	public void decode(BitStream in, int count, boolean stereo, boolean crc) throws AACException {
 		final int pos = in.getPosition();
-		SBR.pos = pos;
-		SBR.count = count;
 
 		if(crc) {
-			//System.out.println("\tCRC");
 			Constants.LOGGER.info("SBR CRC bits present");
 			in.skipBits(10); //TODO: implement crc check
 		}
 
-		//header flag
-		//System.out.println("left: "+(count-in.getPosition()+pos));
-		if(in.readBool()) header.decode(in);
-		//System.out.println("nach header: "+(count-in.getPosition()+pos));
-		tables.calculate(header, sampleFrequency); //TODO: only needed when header changes?
+		if(in.readBool()) {
+			header.decode(in);
+			tables.calculate(header, sampleFrequency);
+		}
 
 		//if at least one header was present yet: decode, else skip
 		if(header.isDecoded()) {
@@ -137,28 +133,17 @@ public class SBR implements SBRConstants {
 
 	private void decodeChannelPairElement(BitStream in) throws AACException {
 		if(in.readBool()) in.skipBits(8); //reserved
-		//System.out.println("CPE: "+(count-in.getPosition()+pos));
 		if(coupling = in.readBool()) {
-			//System.out.println("coupling: true");
 			cd[0].decodeGrid(in, header);
-			//System.out.println("nach grid0: "+(count-in.getPosition()+pos));
 			cd[1].copyGrid(cd[0]);
 			cd[0].decodeDTDF(in);
-			//System.out.println("nach dtdf0: "+(count-in.getPosition()+pos));
 			cd[1].decodeDTDF(in);
-			//System.out.println("nach dtdf1: "+(count-in.getPosition()+pos));
 			cd[0].decodeInvf(in, header, tables);
-			//System.out.println("nach invf0: "+(count-in.getPosition()+pos));
 			cd[1].copyInvf(cd[0]);
-			//System.out.println("vor: "+(count-in.getPosition()+pos));
 			cd[0].decodeEnvelope(in, header, tables, false, coupling);
-			//System.out.println("nach envelope0: "+(count-in.getPosition()+pos));
 			cd[0].decodeNoise(in, header, tables, false, coupling);
-			//System.out.println("nach noise0: "+(count-in.getPosition()+pos));
 			cd[1].decodeEnvelope(in, header, tables, true, coupling);
-			//System.out.println("nach envelope1: "+(count-in.getPosition()+pos));
 			cd[1].decodeNoise(in, header, tables, true, coupling);
-			//System.out.println("nach noise1: "+(count-in.getPosition()+pos));
 
 			dequantCoupled();
 		}
@@ -285,9 +270,9 @@ public class SBR implements SBRConstants {
 	}
 
 	private void processChannel(int channel, float[] data, boolean downSampled) throws AACException {
-		//analysis (channel -> W -> Xlow)
+		//1. analysis (channel -> W)
 		qmfA.process(data, W, 0);
-		//copy output from analysis QMF (W) to Xlow according to 4.6.18.5
+		//2. W -> Xlow (4.6.18.5)
 		int k, l;
 		for(k = 0; k<tables.getKx(true); k++) {
 			for(l = 0; l<T_HF_GEN; l++) {
@@ -302,11 +287,14 @@ public class SBR implements SBRConstants {
 			}
 		}
 
-		//HF generator (Xlow -> Xhigh)
+		//3. HF generation (Xlow -> Xhigh)
 		HFGenerator.process(header, tables, cd[channel], Xlow, Xhigh, sampleFrequency);
 
-		//HF adjuster (Xhigh -> Y)
+		//4. HF adjustment (Xhigh -> Y)
 		HFAdjuster.process(header, tables, cd[channel], Xhigh, Y);
+
+		//5. Y+Xhigh -> X
+		//TODO
 
 		//synthesis (Xlow/Xhigh/Y -> channel); TODO: pass downsampled
 		//TODO: HFAdjuster produces Y[38] but synthesis needs Y[32]

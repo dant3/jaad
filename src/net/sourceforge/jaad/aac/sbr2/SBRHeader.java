@@ -92,11 +92,6 @@ class SBRHeader {
 		return ampRes;
 	}
 
-	//used in ChannelData.decodeGrid
-	public void setAmpRes(boolean ampRes) {
-		this.ampRes = ampRes;
-	}
-
 	public int getStartFrequency(boolean previous) {
 		return previous ? startFrequencyPrev : startFrequency;
 	}
