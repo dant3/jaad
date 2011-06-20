@@ -20,13 +20,13 @@ class AnalysisFilterbank implements SBRConstants, FilterbankTables {
 
 	private final float[][][] COEFS;
 	private final float[][] x;
-	private final float[] z, y;
+	private final float[] z, u;
 
 	AnalysisFilterbank() {
 		x = new float[2][320]; //for both channels
 		z = new float[320]; //tmp buffer
-		y = new float[64]; //tmp buffer
-		
+		u = new float[64]; //tmp buffer
+
 		//complex coefficients:
 		COEFS = new float[32][64][2];
 		double tmp;
@@ -39,36 +39,42 @@ class AnalysisFilterbank implements SBRConstants, FilterbankTables {
 		}
 	}
 
-	//in: 1024 time samples, out: 32 subbands x 32 complex samples
+	//in: 1024 time samples, out: 32 x 32 complex
 	public void process(float[] in, float[][][] out, int ch) {
-		int i, j, off = 0;
+		int n, k, off = 0;
+
+		//each loop creates 32 complex subband samples
 		for(int l = 0; l<TIME_SLOTS_RATE; l++) {
 			//1. shift buffer
 			System.arraycopy(x[ch], 0, x[ch], 32, 288);
+
 			//2. add new samples
-			for(i = 31; i>=0; i--) {
-				x[ch][i] = in[off+31-i];
+			for(n = 31; n>=0; n--) {
+				x[ch][n] = in[off+31-n];
 			}
 			off += 32;
+
 			//3. windowing
-			for(i = 0; i<320; i++) {
+			for(n = 0; n<320; n++) {
 				//TODO: convert WINDOW to floats
-				z[i] = x[ch][i]*(float) WINDOW[2*i];
+				z[n] = x[ch][n]*(float) WINDOW[2*n];
 			}
+
 			//4. sum samples
-			for(i = 0; i<64; i++) {
-				y[i] = z[i];
-				for(j = 1; j<5; j++) {
-					y[i] += z[i+j*64];
+			for(n = 0; n<64; n++) {
+				u[n] = z[n];
+				for(k = 1; k<5; k++) {
+					u[n] += z[n+k*64];
 				}
 			}
+
 			//5. calculate subband samples, TODO: replace with FFT?
-			for(i = 0; i<32; i++) {
-				out[l][i][0] = 0.0f;
-				out[l][i][1] = 0.0f;
-				for(j = 0; j<64; j++) {
-					out[l][i][0] += y[j]*COEFS[i][j][0];
-					out[l][i][1] += y[j]*COEFS[i][j][1];
+			for(k = 0; k<32; k++) {
+				out[l][k][0] = 0.0f;
+				out[l][k][1] = 0.0f;
+				for(n = 0; n<64; n++) {
+					out[l][k][0] += u[n]*COEFS[k][n][0];
+					out[l][k][1] += u[n]*COEFS[k][n][1];
 				}
 			}
 		}

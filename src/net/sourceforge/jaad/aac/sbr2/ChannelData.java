@@ -51,8 +51,10 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	private boolean[] sIndexMappedPrevious;
 	//chirp factors (calculated by HFGenerator)
 	private final float[] bwArray;
-	//indizes for assembling in HFAdjustment
+	//values stored for assembling HFAdjustment
 	private int noiseIndex, sineIndex;
+	private int lTemp;
+	private final float[][] gTmp, qTmp;
 
 	ChannelData() {
 		freqRes = new int[MAX_ENV_COUNT];
@@ -76,9 +78,17 @@ class ChannelData implements SBRConstants, HuffmanTables {
 		sinusoidals = new boolean[MAX_BANDS];
 
 		bwArray = new float[MAX_CHIRP_FACTORS];
+
+		lTemp = 0;
+		//TODO: check sizes!
+		gTmp = new float[42][48];
+		qTmp = new float[42][48];
 	}
 
 	void savePreviousData() {
+		//lTemp for next frame
+		lTemp = RATE*te[envCount]-TIME_SLOTS_RATE;
+
 		//grid
 		envCountPrev = envCount;
 		freqResPrevious = freqRes[freqRes.length-1];
@@ -92,7 +102,8 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	}
 
 	/* ======================= decoding ======================*/
-	void decodeGrid(BitStream in, SBRHeader header) throws AACException {
+	void decodeGrid(BitStream in, SBRHeader header, FrequencyTables tables) throws AACException {
+		//read bitstream and fill envelope borders
 		final int bits;
 
 		ampRes = header.getAmpRes();
@@ -105,20 +116,29 @@ class ChannelData implements SBRConstants, HuffmanTables {
 				else if(envCount>4) throw new AACException("SBR: too many envelopes: "+envCount);
 
 				Arrays.fill(freqRes, 0, envCount, in.readBit());
+
+				te[0] = 0;
+				te[envCount] = TIME_SLOTS;
+				int absBordTrail = (TIME_SLOTS+(envCount>>1))/envCount;
+				int numRelLead = envCount-1;
+				for(int i = 0; i<numRelLead; i++) {
+					te[i+1] = te[i]+absBordTrail;
+				}
 				break;
 			case FIXVAR:
 				varBord1 = in.readBits(2);
 				relCount1 = in.readBits(2);
 				envCount = relCount1+1;
 
+				te[0] = 0;
+				te[envCount] = varBord1+TIME_SLOTS;
 				for(int i = 0; i<relCount1; i++) {
-					relativeBorders1[i] = 2*in.readBits(2)+2;
+					te[envCount-1-i] = te[envCount-i]-(2*in.readBits(2)+2);
 				}
 
 				bits = (int) Math.ceil(Math.log(envCount+1)/LOG2); //TODO: replace with table
 				pointer = in.readBits(bits);
 
-				//TODO: fill remaining with zeros?
 				for(int i = 0; i<envCount; i++) {
 					freqRes[envCount-1-i] = in.readBit();
 				}
@@ -128,8 +148,9 @@ class ChannelData implements SBRConstants, HuffmanTables {
 				relCount0 = in.readBits(2);
 				envCount = relCount0+1;
 
+				te[envCount] = TIME_SLOTS;
 				for(int i = 0; i<relCount0; i++) {
-					relativeBorders0[i] = 2*in.readBits(2)+2;
+					te[i+1] = te[i]+(2*in.readBits(2)+2);
 				}
 
 				bits = (int) Math.ceil(Math.log(envCount+1)/LOG2); //TODO: replace with table
@@ -139,8 +160,8 @@ class ChannelData implements SBRConstants, HuffmanTables {
 					freqRes[i] = in.readBit();
 				}
 				break;
-			case VARVAR:
-				varBord0 = in.readBits(2);
+			default: //VARVAR
+				te[0] = in.readBits(2);
 				varBord1 = in.readBits(2);
 				relCount0 = in.readBits(2);
 				relCount1 = in.readBits(2);
@@ -148,12 +169,13 @@ class ChannelData implements SBRConstants, HuffmanTables {
 				//check requirement (4.6.18.6.3):
 				if(envCount>5) throw new AACException("SBR: too many envelopes: "+envCount);
 
+				te[envCount] = varBord1+TIME_SLOTS;
 				for(int i = 0; i<relCount0; i++) {
-					relativeBorders0[i] = 2*in.readBits(2)+2;
+					te[i+1] = te[i]+(2*in.readBits(2)+2);
 				}
 
 				for(int i = 0; i<relCount1; i++) {
-					relativeBorders1[i] = 2*in.readBits(2)+2;
+					te[envCount-1-i] = te[envCount-i]-(2*in.readBits(2)+2);
 				}
 
 				bits = (int) Math.ceil(Math.log(envCount+1)/LOG2); //TODO: replace with table
@@ -164,7 +186,31 @@ class ChannelData implements SBRConstants, HuffmanTables {
 				}
 				break;
 		}
+
+		//fill noise floor time borders (4.6.18.3.3)
 		noiseCount = (envCount>1) ? 2 : 1;
+		tq[0] = te[0];
+		tq[noiseCount] = te[envCount];
+		if(envCount==1) tq[1] = te[1];
+		else {
+			final int middleBorder;
+			switch(frameClass) {
+				case FIXFIX:
+					middleBorder = envCount/2;
+					break;
+				case VARFIX:
+					if(pointer==0) middleBorder = 1;
+					else if(pointer==1) middleBorder = envCount-1;
+					else middleBorder = pointer-1;
+					break;
+				default:
+					if(pointer>1) middleBorder = envCount+1-pointer;
+					else middleBorder = envCount-1;
+					break;
+			}
+
+			tq[1] = te[middleBorder];
+		}
 
 		//calculate La (table 4.157)
 		laPrevious = la;
@@ -260,8 +306,6 @@ class ChannelData implements SBRConstants, HuffmanTables {
 				}
 			}
 		}
-
-		parseEnvelopes();
 	}
 
 	void decodeNoise(BitStream in, SBRHeader header, FrequencyTables tables, boolean secCh, boolean coupling) throws AACException {
@@ -301,8 +345,6 @@ class ChannelData implements SBRConstants, HuffmanTables {
 				}
 			}
 		}
-
-		parseNoise();
 	}
 
 	void decodeSinusoidal(BitStream in, SBRHeader header, FrequencyTables tables) throws AACException {
@@ -311,6 +353,7 @@ class ChannelData implements SBRConstants, HuffmanTables {
 				sinusoidals[i] = in.readBool();
 			}
 		}
+		else Arrays.fill(sinusoidals, false);
 	}
 
 	private int decodeHuffman(BitStream in, int[][] table) throws AACException {
@@ -328,97 +371,22 @@ class ChannelData implements SBRConstants, HuffmanTables {
 		return table[off][2];
 	}
 
-	/* ======================= parsing: 4.6.18.3.3 ======================*/
-	private void parseEnvelopes() {
-		//borders of leading and trailing envelopes
-		final int absBordLead, absBordTrail, nRelLead, nRelTrail;
-		switch(frameClass) {
-			case FIXFIX:
-				absBordLead = 0;
-				absBordTrail = TIME_SLOTS;
-				nRelLead = envCount-1;
-				nRelTrail = 0;
-				break;
-			case FIXVAR:
-				absBordLead = 0;
-				absBordTrail = varBord1+TIME_SLOTS;
-				nRelLead = 0;
-				nRelTrail = relCount1;
-				break;
-			case VARFIX:
-				absBordLead = varBord0;
-				absBordTrail = TIME_SLOTS;
-				nRelLead = relCount0;
-				nRelTrail = 0;
-				break;
-			default:
-				//VARVAR
-				absBordLead = varBord0;
-				absBordTrail = varBord1+TIME_SLOTS;
-				nRelLead = relCount0;
-				nRelTrail = relCount1;
-				break;
-		}
-
-		//number of relative borders
-		final int[] relBordLead = new int[nRelLead];
-		if(frameClass==FIXFIX) Arrays.fill(relBordLead, (int) Math.round((double) TIME_SLOTS/(double) envCount));
-		else if(frameClass==VARFIX||frameClass==VARVAR) System.arraycopy(relativeBorders0, 0, relBordLead, 0, nRelLead);
-
-		final int[] relBordTrail = new int[nRelTrail];
-		if(frameClass==VARVAR||frameClass==FIXVAR) System.arraycopy(relativeBorders1, 0, relBordTrail, 0, nRelTrail);
-
-		for(int i = 0; i<=envCount; i++) {
-			if(i==0) te[i] = absBordLead;
-			else if(i==envCount) te[i] = absBordTrail;
-			else if(i>=1&&i<=nRelLead) {
-				te[i] = absBordLead;
-				for(int j = 0; j<i; j++) {
-					te[i] += relBordLead[j];
-				}
-			}
-			else if(i>nRelLead&&i<envCount) {
-				int sum = 0;
-				for(int j = 0; j<envCount-i-1; j++) {
-					te[i] += relBordTrail[j];
-				}
-				te[i] = absBordTrail-sum;
-			}
-		}
-	}
-
-	private void parseNoise() {
-		tq[0] = te[0];
-		tq[noiseCount] = te[envCount];
-		if(envCount==1) tq[1] = te[1];
-		else {
-			final int middleBorder;
-			switch(frameClass) {
-				case FIXFIX:
-					middleBorder = envCount/2;
-					break;
-				case VARFIX:
-					if(pointer==0) middleBorder = 1;
-					else if(pointer==1) middleBorder = envCount-1;
-					else middleBorder = pointer-1;
-					break;
-				default:
-					if(pointer>1) middleBorder = envCount+1-pointer;
-					else middleBorder = envCount-1;
-					break;
-			}
-
-			tq[1] = te[middleBorder];
-		}
-	}
-
 	/* ======================= gets ======================*/
+	public boolean getAmpRes() {
+		return ampRes;
+	}
+
 	public float[][] getEnvelopeScalefactors() {
 		return envelopeSF;
 	}
 
+	//TODO:combine both
 	public int getEnvCount() {
 		return envCount;
+	}
+
+	public int getEnvCountPrevious() {
+		return envCountPrev;
 	}
 
 	public int[] getTe() {
@@ -446,7 +414,8 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	}
 
 	public int getLa(boolean previous) {
-		return previous ? laPrevious : la;
+		//laPrevious defined in 4.6.18.7.5
+		return previous ? ((laPrevious==envCountPrev) ? 0 : -1) : la;
 	}
 
 	private int getVariableBorder(boolean second) {
@@ -479,7 +448,7 @@ class ChannelData implements SBRConstants, HuffmanTables {
 
 	void setSIndexMappedPrevious(boolean[][] sIndexMapped) {
 		//used by HFAdjuster to save last sIndexMapped for next frame
-		this.sIndexMappedPrevious = sIndexMapped[envCountPrev-1];
+		this.sIndexMappedPrevious = sIndexMapped[envCount-1];
 	}
 
 	int[] getInvfMode(boolean previous) {
@@ -505,6 +474,19 @@ class ChannelData implements SBRConstants, HuffmanTables {
 	void setSineIndex(int sineIndex) {
 		this.sineIndex = sineIndex;
 	}
+
+	public int getLTemp() {
+		return lTemp;
+	}
+
+	public float[][] getGTmp() {
+		return gTmp;
+	}
+
+	public float[][] getQTmp() {
+		return qTmp;
+	}
+
 
 	/* ======================= copying ======================*/
 	void copyGrid(ChannelData cd) {

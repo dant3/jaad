@@ -29,15 +29,17 @@ public class SBR implements SBRConstants {
 	//arguments
 	private int sampleFrequency;
 	private boolean downSampled;
+	private boolean reset;
 	//data
 	private final SBRHeader header;
 	private final ChannelData[] cd;
 	private final FrequencyTables tables;
 	private boolean coupling;
 	//processing buffers
-	private final float[][][] W; //analysis QMF output
+	private final float[][][][] W; //analysis QMF output
 	private final float[][][] Xlow, Xhigh;
-	private final float[][][] Y;
+	private final float[][][][] Y;
+	private final float[][][] X;
 	//filterbanks
 	private final AnalysisFilterbank qmfA;
 	private final SynthesisFilterbank qmfS;
@@ -55,10 +57,11 @@ public class SBR implements SBRConstants {
 		cd[1] = new ChannelData();
 		tables = new FrequencyTables();
 
-		W = new float[32][32][2];
+		W = new float[2][TIME_SLOTS_RATE][TIME_SLOTS_RATE][2]; //for both channels
 		Xlow = new float[32][40][2];
 		Xhigh = new float[64][40][2];
-		Y = new float[38][64][2];
+		Y = new float[2][38+MAX_LTEMP][64][2]; //for both channels
+		X = new float[64][32][2];
 
 		qmfA = new AnalysisFilterbank();
 		qmfS = new SynthesisFilterbank();
@@ -121,7 +124,7 @@ public class SBR implements SBRConstants {
 	private void decodeSingleChannelElement(BitStream in) throws AACException {
 		if(in.readBool()) in.skipBits(4); //reserved
 
-		cd[0].decodeGrid(in, header);
+		cd[0].decodeGrid(in, header, tables);
 		cd[0].decodeDTDF(in);
 		cd[0].decodeInvf(in, header, tables);
 		cd[0].decodeEnvelope(in, header, tables, false, false);
@@ -134,7 +137,7 @@ public class SBR implements SBRConstants {
 	private void decodeChannelPairElement(BitStream in) throws AACException {
 		if(in.readBool()) in.skipBits(8); //reserved
 		if(coupling = in.readBool()) {
-			cd[0].decodeGrid(in, header);
+			cd[0].decodeGrid(in, header, tables);
 			cd[1].copyGrid(cd[0]);
 			cd[0].decodeDTDF(in);
 			cd[1].decodeDTDF(in);
@@ -148,8 +151,8 @@ public class SBR implements SBRConstants {
 			dequantCoupled();
 		}
 		else {
-			cd[0].decodeGrid(in, header);
-			cd[1].decodeGrid(in, header);
+			cd[0].decodeGrid(in, header, tables);
+			cd[1].decodeGrid(in, header, tables);
 			cd[0].decodeDTDF(in);
 			cd[1].decodeDTDF(in);
 			cd[0].decodeInvf(in, header, tables);
@@ -185,10 +188,10 @@ public class SBR implements SBRConstants {
 		return ret;
 	}
 
-	/*======================= dequantization ====================== */
+	/*============ dequantization/stereo decoding (4.6.18.3.5) =============*/
 	private void dequantSingle(int ch) {
 		//envelopes
-		final float a = header.getAmpRes() ? 1f : 0.5f;
+		final float a = cd[ch].getAmpRes() ? 1f : 0.5f;
 		final float[][] e = cd[ch].getEnvelopeScalefactors();
 		final int[] freqRes = cd[ch].getFrequencyResolutions();
 		final int[] n = tables.getN();
@@ -214,7 +217,7 @@ public class SBR implements SBRConstants {
 	private void dequantCoupled() {
 		//envelopes
 		final float a = header.getAmpRes() ? 1f : 0.5f;
-		final int panOffset = PAN_OFFSETS[header.getAmpRes() ? 1 : 0];
+		final int panOffset = PAN_OFFSETS[cd[0].getAmpRes() ? 1 : 0];
 		final float[][] e0 = cd[0].getEnvelopeScalefactors();
 		final float[][] e1 = cd[1].getEnvelopeScalefactors();
 		final int[] r = cd[0].getFrequencyResolutions();
@@ -269,35 +272,84 @@ public class SBR implements SBRConstants {
 		processChannel(1, right, downSampled);
 	}
 
-	private void processChannel(int channel, float[] data, boolean downSampled) throws AACException {
-		//1. analysis (channel -> W)
-		qmfA.process(data, W, 0);
-		//2. W -> Xlow (4.6.18.5)
-		int k, l;
-		for(k = 0; k<tables.getKx(true); k++) {
-			for(l = 0; l<T_HF_GEN; l++) {
-				Xlow[k][l][0] = W[l+TIME_SLOTS_RATE-T_HF_GEN][k][0];
-				Xlow[k][l][1] = W[l+TIME_SLOTS_RATE-T_HF_GEN][k][1];
+	private void processChannel(int ch, float[] data, boolean downSampled) throws AACException {
+		//1. old W -> Xlow (4.6.18.5)
+		final int kxPrev = tables.getKx(true);
+		int l, k;
+		//TODO: change all arrays from [k][l] to [l][k]
+		for(l = 0; l<T_HF_GEN; l++) {
+			for(k = 0; k<kxPrev; k++) {
+				Xlow[k][l][0] = W[ch][k][l+TIME_SLOTS_RATE-T_HF_GEN][0];
+				Xlow[k][l][1] = W[ch][k][l+TIME_SLOTS_RATE-T_HF_GEN][1];
+			}
+			for(k = kxPrev; k<32; k++) {
+				Xlow[k][l][0] = 0;
+				Xlow[k][l][1] = 0;
 			}
 		}
-		for(k = 0; k<tables.getKx(false); k++) {
-			for(l = T_HF_GEN; l<TIME_SLOTS_RATE+T_HF_GEN; l++) {
-				Xlow[k][l][0] = W[l-T_HF_GEN][k][0];
-				Xlow[k][l][1] = W[l-T_HF_GEN][k][1];
+
+		//2. analysis QMF (data -> W)
+		qmfA.process(data, W[ch], 0);
+
+		//3. new W -> Xlow (4.6.18.5)
+		final int kx = tables.getKx(false);
+		for(l = T_HF_GEN; l<TIME_SLOTS_RATE+T_HF_GEN; l++) {
+			for(k = 0; k<kx; k++) {
+				Xlow[k][l][0] = W[ch][l-T_HF_GEN][k][0];
+				Xlow[k][l][1] = W[ch][l-T_HF_GEN][k][1];
+			}
+			for(k = kx; k<32; k++) {
+				Xlow[k][l][0] = 0;
+				Xlow[k][l][1] = 0;
 			}
 		}
 
 		//3. HF generation (Xlow -> Xhigh)
-		HFGenerator.process(header, tables, cd[channel], Xlow, Xhigh, sampleFrequency);
+		HFGenerator.process(header, tables, cd[ch], Xlow, Xhigh, sampleFrequency);
 
-		//4. HF adjustment (Xhigh -> Y)
-		HFAdjuster.process(header, tables, cd[channel], Xhigh, Y);
+		//4. old Y -> X
+		final int lTemp = cd[ch].getLTemp();
+		final int mPrev = tables.getM(true);
+		final int m = tables.getM(false);
+		for(l = 0; l<lTemp; l++) {
+			for(k = 0; k<kxPrev; k++) {
+				X[k][l][0] = Xlow[k][l+T_HF_ADJ][0];
+				X[k][l][1] = Xlow[k][l+T_HF_ADJ][1];
+			}
+			for(k = kxPrev; k<kxPrev+mPrev; k++) {
+				X[k][l][0] = Y[ch][l+T_HF_ADJ+TIME_SLOTS_RATE][k][0];
+				X[k][l][1] = Y[ch][l+T_HF_ADJ+TIME_SLOTS_RATE][k][1];
+			}
+			for(k = kxPrev+mPrev; k<64; k++) {
+				X[k][l][0] = 0;
+				X[k][l][1] = 0;
+			}
+		}
 
-		//5. Y+Xhigh -> X
-		//TODO
+		//5. HF adjustment (Xhigh -> Y)
+		HFAdjuster.process(header, tables, cd[ch], Xhigh, Y[ch], reset);
+
+		//6. new Y -> X
+		for(l = lTemp; l<TIME_SLOTS_RATE; l++) {
+			for(k = 0; k<kx; k++) {
+				X[k][l][0] = Xlow[k][l+T_HF_ADJ][0];
+				X[k][l][1] = Xlow[k][l+T_HF_ADJ][1];
+			}
+			for(k = kx; k<kx+m; k++) {
+				X[k][l][0] = Y[ch][l+T_HF_ADJ][k][0];
+				X[k][l][1] = Y[ch][l+T_HF_ADJ][k][1];
+			}
+			for(k = kx+m; k<64; k++) {
+				X[k][l][0] = 0;
+				X[k][l][1] = 0;
+			}
+		}
 
 		//synthesis (Xlow/Xhigh/Y -> channel); TODO: pass downsampled
-		//TODO: HFAdjuster produces Y[38] but synthesis needs Y[32]
-		qmfS.process(Y, data, channel);
+		qmfS.process(X, data, ch);
+
+		//save data for next frame
+		cd[0].savePreviousData();
+		cd[1].savePreviousData();
 	}
 }

@@ -31,7 +31,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 	//frequency tables
 	private final int[][] fTable;
 	private final int[] n;
-	private int m, kx, kxPrev;
+	private int m, mPrev, kx, kxPrev;
 	//noise table
 	private int[] fNoise;
 	private int nq;
@@ -48,6 +48,8 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		fTable = new int[2][];
 		patchSubbands = new int[MAX_PATCHES];
 		patchStartSubband = new int[MAX_PATCHES];
+		kx = 0;
+		m = 0;
 	}
 
 	void calculate(SBRHeader header, int sampleRate) throws AACException {
@@ -215,6 +217,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 
 		kxPrev = kx;
 		kx = fTable[HIGH][0];
+		mPrev = m;
 		m = fTable[HIGH][getN(HIGH)]-kx;
 		//check requirements (4.6.18.3.6):
 		if(kx>32) throw new AACException("SBR: start frequency border out of range: "+kx);
@@ -337,6 +340,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 
 			fLim = new int[lims+1];
 			System.arraycopy(limTable, 0, fLim, 0, lims+1);
+			nl = lims;
 		}
 	}
 
@@ -389,8 +393,8 @@ class FrequencyTables implements SBRConstants, SBRTables {
 	}
 
 	//number of SBR subbands: M
-	public int getM() {
-		return m;
+	public int getM(boolean previous) {
+		return previous ? mPrev : m;
 	}
 
 	//the noise floor frequency table: fTableNoise

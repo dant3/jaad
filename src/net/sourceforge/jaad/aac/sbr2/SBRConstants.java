@@ -40,6 +40,7 @@ interface SBRConstants {
 	int MAX_NQ = 5;
 	int	MAX_CHIRP_FACTORS = 5;
 	int MAX_PATCHES = 6;
+	int MAX_LTEMP = 6;
 	//extension ids
 	int EXTENSION_ID_PS = 2;
 	//helper constants

@@ -49,7 +49,7 @@ class HFGenerator implements SBRConstants {
 		final int[] patchSubbands = tables.getPatchSubbands();
 		final int[] patchStartSubband = tables.getPatchStartSubband();
 		final int kx = tables.getKx(false);
-		final int m = tables.getM();
+		final int m = tables.getM(false);
 		final int Nq = tables.getNq();
 		final int[] fNoise = tables.getNoiseTable();
 
@@ -58,7 +58,7 @@ class HFGenerator implements SBRConstants {
 		final int end = RATE*te[cd.getEnvCount()];
 
 		final float[] alpha = new float[4];
-		int i, x; //loop indizes
+		int l, x; //loop indizes
 		int k = tables.getKx(false);
 		int g = 0;
 
@@ -77,8 +77,8 @@ class HFGenerator implements SBRConstants {
 				alpha[1] = alpha1[p][1]*bwArray[g]*bwArray[g];
 				alpha[2] = alpha0[p][0]*bwArray[g];
 				alpha[3] = alpha0[p][1]*bwArray[g];
-				for(i = start; i<end; i++) {
-					final int off = i+T_HF_ADJ;
+				for(l = start; l<end; l++) {
+					final int off = l+T_HF_ADJ;
 					Xhigh[k][off][0] = alpha[0]*Xlow[p][off-2][0]
 							-alpha[1]*Xlow[p][off-2][1]
 							+alpha[2]*Xlow[p][off-1][0]
