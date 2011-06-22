@@ -32,7 +32,7 @@ class AnalysisFilterbank implements SBRConstants, FilterbankTables {
 		double tmp;
 		for(int k = 0; k<32; k++) {
 			for(int n = 0; n<64; n++) {
-				tmp = (Math.PI/64)*(k+0.5)*(2*n-0.5);
+				tmp = Math.PI/64.0*(k+0.5)*(2*n-0.5);
 				COEFS[k][n][0] = (float) (2*Math.cos(tmp));
 				COEFS[k][n][1] = (float) (2*Math.sin(tmp));
 			}

@@ -18,6 +18,8 @@ class PSHeader implements PSTables {
 	private int ipdopdPars;
 	//ext
 	private boolean extEnabled;
+	//
+	private boolean use34;
 
 	PSHeader() {
 		iidEnabled = false;
@@ -60,6 +62,8 @@ class PSHeader implements PSTables {
 		}
 
 		extEnabled = in.readBool();
+
+		use34 = (iidEnabled&&iidPars==34)||(iccEnabled&&iccPars==34);
 	}
 
 	public boolean isIIDEnabled() {
@@ -108,5 +112,9 @@ class PSHeader implements PSTables {
 
 	public boolean isExtEnabled() {
 		return extEnabled;
+	}
+
+	public boolean use34Bands() {
+		return use34;
 	}
 }

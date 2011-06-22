@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 in-somnia
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package net.sourceforge.jaad.aac.ps2;
 
 import net.sourceforge.jaad.aac.AACException;
@@ -17,6 +33,8 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 	//dequantized values
 	private final int[][] iid; //TODO: using float here too would make it much easier!
 	private final float[][] icc, ipd, opd;
+	//working buffer
+	private final float[][][] buf;
 
 	public PS() {
 		headerEnabled = false;
@@ -33,6 +51,8 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		icc = new float[MAX_ENVELOPES][MAX_IID_ICC_PARS];
 		ipd = new float[MAX_ENVELOPES][MAX_IID_ICC_PARS];
 		opd = new float[MAX_ENVELOPES][MAX_IID_ICC_PARS];
+
+		buf = new float[91][32][2];
 	}
 
 	/*========================= decoding =========================*/
@@ -182,8 +202,13 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		return headerEnabled;
 	}
 
-	//in: 44 x 64 complex from SBR, left/right: 2048 output time samples
+	//in: 64 x 38 complex from SBR, left/right: 2048 output time samples
 	public void process(float[][][] in, float[] left, float[] right) {
-		//TODO...
+		//1. hybrid analysis (in -> buf)
+		AnalysisFilterbank.process(in, buf, header.use34Bands());
+
+		//2. decorrelation
+		//3. stereo processing
+		//4. hybrid synthesis
 	}
 }

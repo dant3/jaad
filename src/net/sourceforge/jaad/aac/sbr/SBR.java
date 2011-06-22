@@ -104,7 +104,7 @@ public class SBR implements Constants, SBRConstants, SBRTables {
 		}
 
 		if(in.readBool()) header.decode(in);
-		
+
 
 		if(reset) calculateTables();
 

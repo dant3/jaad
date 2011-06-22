@@ -1,6 +1,10 @@
 AAC decoder
 ===========
 - SBR in ADTS stream has problems with sample frequency
+- fix SBR
+- rewrite PS
+- fix/rewrite IC-Prediction
+- fix/rewrite LTP
 
 MP4 boxes
 =========
