@@ -22,4 +22,9 @@ interface PSConstants {
 	int MAX_ENVELOPES = 4;
 	int MAX_IID_ICC_PARS = 34;
 	int MAX_IPD_OPD_PARS = 17;
+	//band numbers
+	int[] ALLPASS_BANDS = {30, 50};
+	int[] PAR_BANDS = {20, 34};
+	//factors
+	float PEAK_DECAY_FACTOR = 0.76592833836465f;
 }

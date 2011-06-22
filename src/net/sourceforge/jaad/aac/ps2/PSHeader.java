@@ -117,4 +117,8 @@ class PSHeader implements PSTables {
 	public boolean use34Bands() {
 		return use34;
 	}
+
+	public int getBandMode() {
+		return use34 ? 1 : 0;
+	}
 }

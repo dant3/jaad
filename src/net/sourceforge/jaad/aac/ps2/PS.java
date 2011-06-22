@@ -34,7 +34,8 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 	private final int[][] iid; //TODO: using float here too would make it much easier!
 	private final float[][] icc, ipd, opd;
 	//working buffer
-	private final float[][][] buf;
+	private final float[][][] s;
+	private float[][][] H; //TODO: sizes
 
 	public PS() {
 		headerEnabled = false;
@@ -52,7 +53,7 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		ipd = new float[MAX_ENVELOPES][MAX_IID_ICC_PARS];
 		opd = new float[MAX_ENVELOPES][MAX_IID_ICC_PARS];
 
-		buf = new float[91][32][2];
+		s = new float[91][32][2];
 	}
 
 	/*========================= decoding =========================*/
@@ -87,7 +88,7 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 			for(e = 0; e<envCount; e++) {
 				dt = in.readBool();
 				table = dt ? (fine ? HUFF_IID_FINE_DT : HUFF_IID_DEFAULT_DT)
-						: (fine ? HUFF_IID_FINE_DF : HUFF_IID_DEFAULT_DF);
+					: (fine ? HUFF_IID_FINE_DF : HUFF_IID_DEFAULT_DF);
 				decodePars(in, table, iidPars, e, len, dt, false);
 				dequant(iidPars[e], iid[e], len, quant);
 			}
@@ -205,10 +206,37 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 	//in: 64 x 38 complex from SBR, left/right: 2048 output time samples
 	public void process(float[][][] in, float[] left, float[] right) {
 		//1. hybrid analysis (in -> buf)
-		AnalysisFilterbank.process(in, buf, header.use34Bands());
+		AnalysisFilterbank.process(in, s, header.use34Bands());
 
 		//2. decorrelation
 		//3. stereo processing
 		//4. hybrid synthesis
+	}
+
+	private void decorrelate() {
+		final int nL = 32;
+		final int mode = header.getBandMode();
+		int i;
+
+		//calculate decorrelated signal
+		//TODO...
+
+		//transient detection
+		final int len = PAR_BANDS[mode];
+		final int[] map = K_TO_BK[mode];
+		final float[][] power = new float[len][nL];
+		int b;
+		for(int n = 0; n<nL; n++) {
+			for(i = 0; i<PAR_BANDS[mode]; i++) {
+				b = map[i];
+				power[b][n] += s[i][n][0]*s[i][n][0]+s[i][n][1]*s[i][n][1];
+			}
+		}
+
+		final float[][] peakDecayNrg = new float[len][nL];
+		for(i = 0; i<PAR_BANDS[mode]; i++) {
+			for(int n = 0; n<nL; n++) {
+			}
+		}
 	}
 }
