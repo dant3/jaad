@@ -19,7 +19,7 @@ class PSHeader implements PSTables {
 	//ext
 	private boolean extEnabled;
 	//
-	private boolean use34;
+	private boolean use34, use34Prev;
 
 	PSHeader() {
 		iidEnabled = false;
@@ -63,7 +63,15 @@ class PSHeader implements PSTables {
 
 		extEnabled = in.readBool();
 
-		use34 = (iidEnabled&&iidPars==34)||(iccEnabled&&iccPars==34);
+	}
+
+	//method is called at every frame, even if no new header is present
+	void startNewFrame() {
+		//if neither iid nor icc is enabled: use previous number of stereo frames
+		if(iidEnabled||iccEnabled) {
+			use34Prev = use34;
+			use34 = (iidEnabled&&iidPars==34)||(iccEnabled&&iccPars==34);
+		}
 	}
 
 	public boolean isIIDEnabled() {
@@ -114,8 +122,8 @@ class PSHeader implements PSTables {
 		return extEnabled;
 	}
 
-	public boolean use34Bands() {
-		return use34;
+	public boolean use34Bands(boolean previous) {
+		return previous ? use34Prev : use34;
 	}
 
 	public int getBandMode() {

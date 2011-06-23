@@ -8,18 +8,6 @@ public class PSTables {
 		Utils.printTable(createFilter(FILTER_34_12, 12), "FILTER_34_12");
 		Utils.printTable(createFilter(FILTER_34_8, 8), "FILTER_34_8");
 		Utils.printTable(createFilter(FILTER_34_4, 4), "FILTER_34_4");
-		
-		final float[][] PHI_FRACT_20 = new float[30][2];
-		final float[][][] Q_FRACT_ALLPASS_20 = new float[30][3][2];
-		generateFractTables20(PHI_FRACT_20, Q_FRACT_ALLPASS_20);
-		Utils.printTable(PHI_FRACT_20, "PHI_FRACT_20");
-		Utils.printTable(Q_FRACT_ALLPASS_20, "Q_FRACT_ALLPASS_20");
-		
-		final float[][] PHI_FRACT_34 = new float[50][2];
-		final float[][][] Q_FRACT_ALLPASS_34 = new float[50][3][2];
-		generateFractTables34(PHI_FRACT_34, Q_FRACT_ALLPASS_34);
-		Utils.printTable(PHI_FRACT_34, "PHI_FRACT_34");
-		Utils.printTable(Q_FRACT_ALLPASS_34, "Q_FRACT_ALLPASS_34");
 	}
 
 	private static float[] generateIPDOPDQuantTable() {
@@ -123,54 +111,5 @@ public class PSTables {
 			}
 		}
 		return filter;
-	}
-	private static final double Q_PHI = 0.39;
-	private static final double[] QM = {0.43, 0.75, 0.347};
-	//table 8.40
-	private static final double[] F_CENTER_20 = {
-		-3.0/8.0, -1.0/8.0, 1.0/8.0, 3.0/8.0, 5.0/8.0, 7.0/8.0, 5.0/4.0,
-		7.0/4.0, 9.0/4.0, 11.0/4
-	};
-	//table 8.41
-	private static final double[] F_CENTER_34 = {
-		1.0/12.0, 3.0/12.0, 5.0/12.0, 7.0/12.0, 9.0/12.0, 11.0/12.0, 13.0/12.0,
-		15.0/12.0, 17.0/12.0, -5.0/12.0, -3.0/12.0, -1.0/12.0, 17.0/8.0,
-		19.0/8.0, 5.0/8.0, 7.0/8.0, 9.0/8.0, 11.0/8.0, 13.0/8.0, 15.0/8.0,
-		9.0/4.0, 11.0/4.0, 13.0/4.0, 7.0/4.0, 17.0/4.0, 11.0/4.0, 13.0/4.0,
-		15.0/4.0, 17.0/4.0, 19.0/4.0, 21.0/4.0, 15.0/4
-	};
-
-	private static void generateFractTables20(float[][] phiFract, float[][][] qFractAllpass) {
-		double fk, tmp;
-		int m;
-		for(int k = 0; k<30; k++) {
-			if(k<F_CENTER_20.length) fk = F_CENTER_20[k];
-			else fk = k-6.5;
-			tmp = -Math.PI*Q_PHI*fk;
-			phiFract[k][0] = (float) Math.cos(tmp);
-			phiFract[k][1] = (float) Math.sin(tmp);
-			for(m = 0; m<3; m++) {
-				tmp = -Math.PI*QM[m]*fk;
-				qFractAllpass[k][m][0] = (float) Math.cos(tmp);
-				qFractAllpass[k][m][1] = (float) Math.sin(tmp);
-			}
-		}
-	}
-
-	private static void generateFractTables34(float[][] phiFract, float[][][] qFractAllpass) {
-		double fk, tmp;
-		int m;
-		for(int k = 0; k<50; k++) {
-			if(k<F_CENTER_34.length) fk = F_CENTER_34[k];
-			else fk = k-26.5;
-			tmp = -Math.PI*Q_PHI*fk;
-			phiFract[k][0] = (float) Math.cos(tmp);
-			phiFract[k][1] = (float) Math.sin(tmp);
-			for(m = 0; m<3; m++) {
-				tmp = -Math.PI*QM[m]*fk;
-				qFractAllpass[k][m][0] = (float) Math.cos(tmp);
-				qFractAllpass[k][m][1] = (float) Math.sin(tmp);
-			}
-		}
 	}
 }
