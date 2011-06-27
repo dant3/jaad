@@ -19,11 +19,10 @@ package net.sourceforge.jaad.aac.sbr2;
 import java.util.logging.Level;
 import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.SampleFrequency;
-import net.sourceforge.jaad.aac.ps.PS;
+import net.sourceforge.jaad.aac.ps2.PS;
 import net.sourceforge.jaad.aac.syntax.BitStream;
 import net.sourceforge.jaad.aac.syntax.Constants;
 
-//TODO: make buffer arrays final with max sizes
 public class SBR implements SBRConstants {
 
 	//arguments
@@ -39,7 +38,7 @@ public class SBR implements SBRConstants {
 	private final float[][][][] W; //analysis QMF output
 	private final float[][][] Xlow, Xhigh;
 	private final float[][][][] Y;
-	private final float[][][] X;
+	private final float[][][] X, psBuf;
 	//filterbanks
 	private final AnalysisFilterbank qmfA;
 	private final SynthesisFilterbank qmfS;
@@ -61,7 +60,8 @@ public class SBR implements SBRConstants {
 		Xlow = new float[32][40][2];
 		Xhigh = new float[64][40][2];
 		Y = new float[2][38+MAX_LTEMP][64][2]; //for both channels
-		X = new float[64][32][2];
+		X = new float[64][38][2]; //SBR only needs 32, 38 is for compatibility with PS
+		psBuf = new float[64][38][2]; //buffer for PS output
 
 		qmfA = new AnalysisFilterbank();
 		qmfS = new SynthesisFilterbank();
@@ -171,21 +171,19 @@ public class SBR implements SBRConstants {
 	}
 
 	private int decodeExtension(BitStream in, int extensionID) throws AACException {
-		int ret;
+		final int start = in.getPosition();
 
 		switch(extensionID) {
 			case EXTENSION_ID_PS:
 				if(ps==null) ps = new PS();
-				ret = ps.decode(in);
+				ps.decode(in);
 				if(!psUsed&&ps.hasHeader()) psUsed = true;
-				else ret = 0;
 				break;
 			default:
 				in.skipBits(6); //extension data
-				ret = 6;
 				break;
 		}
-		return ret;
+		return in.getPosition()-start;
 	}
 
 	/*============ dequantization/stereo decoding (4.6.18.3.5) =============*/
@@ -260,16 +258,29 @@ public class SBR implements SBRConstants {
 	//channel: 1024 time samples
 	public void processSingleFrame(float[] channel, boolean downSampled) throws AACException {
 		processChannel(0, channel, downSampled);
-	}
-
-	public void processSingleFramePS(float[] left, float[] right, boolean downSampled) throws AACException {
-		processChannel(0, left, downSampled);
-		//TODO: PS
+		qmfS.process(X, channel, 0);
 	}
 
 	public void processCoupleFrame(float[] left, float[] right, boolean downSampled) throws AACException {
 		processChannel(0, left, downSampled);
+		qmfS.process(X, left, 0);
 		processChannel(1, right, downSampled);
+		qmfS.process(X, right, 1);
+	}
+
+	public void processSingleFramePS(float[] left, float[] right, boolean downSampled) throws AACException {
+		processChannel(0, left, downSampled);
+		int k;
+		for(int l = TIME_SLOTS_RATE; l<TIME_SLOTS_RATE+6; l++) {
+			for(k = 0; k<5; k++) {
+				X[k][l][0] = Xlow[k][l+T_HF_ADJ][0];
+				X[k][l][1] = Xlow[k][l+T_HF_ADJ][1];
+			}
+		}
+		ps.process(X, psBuf);
+
+		qmfS.process(X, left, 0);
+		qmfS.process(psBuf, right, 0);
 	}
 
 	private void processChannel(int ch, float[] data, boolean downSampled) throws AACException {
@@ -345,11 +356,7 @@ public class SBR implements SBRConstants {
 			}
 		}
 
-		//synthesis (Xlow/Xhigh/Y -> channel); TODO: pass downsampled
-		qmfS.process(X, data, ch);
-
 		//save data for next frame
-		cd[0].savePreviousData();
-		cd[1].savePreviousData();
+		cd[ch].savePreviousData();
 	}
 }

@@ -25,7 +25,7 @@ import net.sourceforge.jaad.aac.SampleFrequency;
 import net.sourceforge.jaad.aac.filterbank.FilterBank;
 import net.sourceforge.jaad.aac.noise.PNS;
 import net.sourceforge.jaad.aac.prediction.LTPrediction;
-import net.sourceforge.jaad.aac.sbr.SBR;
+import net.sourceforge.jaad.aac.sbr2.SBR;
 import net.sourceforge.jaad.aac.stereo.IS;
 import net.sourceforge.jaad.aac.stereo.MS;
 import java.util.logging.Level;
@@ -353,7 +353,7 @@ public class SyntacticElements implements Constants {
 
 		//SBR
 		if(sbrPresent) {
-			if(data[channel].length==config.getFrameLength()) LOGGER.log(Level.WARNING, "SBR data present, but buffer has normal size!");
+			//if(data[channel].length==config.getFrameLength()) LOGGER.log(Level.WARNING, "SBR data present, but buffer has normal size!");
 			cpe.getSBR().processCoupleFrame(data[channel], data[channel+1], false);
 		}
 	}

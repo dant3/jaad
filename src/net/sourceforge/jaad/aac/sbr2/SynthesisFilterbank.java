@@ -28,14 +28,14 @@ class SynthesisFilterbank implements SBRConstants, FilterbankTables {
 
 		//complex coefficients:
 		COEFS = new float[128][64][2];
-		final float gain = 1.0f/64.0f;
+		final float fac = 1.0f/64.0f;
 		double tmp;
 		//TODO: optimize loop
 		for(int n = 0; n<128; n++) {
 			for(int k = 0; k<64; k++) {
 				tmp = Math.PI/128.0*(k+0.5)*(2*n-255);
-				COEFS[n][k][0] = gain*(float) Math.cos(tmp);
-				COEFS[n][k][1] = gain*(float) Math.sin(tmp);
+				COEFS[n][k][0] = fac*(float) Math.cos(tmp);
+				COEFS[n][k][1] = fac*(float) Math.sin(tmp);
 			}
 		}
 	}
