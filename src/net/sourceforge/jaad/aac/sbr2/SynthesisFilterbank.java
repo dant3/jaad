@@ -19,66 +19,68 @@ package net.sourceforge.jaad.aac.sbr2;
 class SynthesisFilterbank implements SBRConstants, FilterbankTables {
 
 	private final float[][][] COEFS;
-	private final float[][] v;
+	private final float[][] V;
 	private final float[] g;
 
 	SynthesisFilterbank() {
-		v = new float[2][1280]; //for both channels
+		V = new float[2][1280]; //for both channels
 		g = new float[640]; //tmp buffer
 
 		//complex coefficients:
-		COEFS = new float[128][64][2];
+		COEFS = new float[64][128][2];
 		final float fac = 1.0f/64.0f;
 		double tmp;
 		//TODO: optimize loop
-		for(int n = 0; n<128; n++) {
-			for(int k = 0; k<64; k++) {
-				tmp = Math.PI/128.0*(k+0.5)*(2*n-255);
-				COEFS[n][k][0] = fac*(float) Math.cos(tmp);
-				COEFS[n][k][1] = fac*(float) Math.sin(tmp);
+		for(int k = 0; k<64; k++) {
+			for(int n = 0; n<128; n++) {
+				tmp = Math.PI/128.0*(n+0.5)*(2*k-255);
+				COEFS[k][n][0] = fac*(float) Math.cos(tmp);
+				COEFS[k][n][1] = fac*(float) Math.sin(tmp);
 			}
 		}
 	}
 
 	//in: 64 x 32 complex, out: 2048 time samples
 	public void process(float[][][] in, float[] out, int ch) {
+		final float[] v = V[ch];
 		int n, k, off = 0;
 
 		//each loop creates 64 output samples
 		for(int l = 0; l<TIME_SLOTS_RATE; l++) {
 			//1. shift buffer
-			System.arraycopy(v[ch], 0, v[ch], 128, 1152);
+			System.arraycopy(v, 0, v, 128, 1152);
 
 			//2. multiple input by matrix and save in buffer
 			for(n = 0; n<128; n++) {
-				v[ch][n] = 0.0f;
+				v[n] = 0.0f;
 				for(k = 0; k<64; k++) {
-					v[ch][l] += in[k][l][0]*COEFS[n][k][0];
-					v[ch][l] -= in[k][l][1]*COEFS[n][k][1];
+					v[n] += in[k][l][0]*COEFS[k][n][0];
+					v[n] -= in[k][l][1]*COEFS[k][n][1];
 				}
 			}
 
 			//3. extract samples
 			for(n = 0; n<5; n++) {
 				for(k = 0; k<64; k++) {
-					g[128*n+k] = v[ch][256*n+k];
-					g[128*n+64+k] = v[ch][256*n+192+k];
+					g[128*n+k] = v[256*n+k];
+					g[128*n+64+k] = v[256*n+192+k];
 				}
 			}
 
 			//4. window signal
-			for(n = 0; n<640; n++) {
-				g[n] *= WINDOW[n];
+
+			for(n = 0; n<=639; n++) {
+				g[n] *= (float) WINDOW[n];
 			}
 
 			//5. calculate output samples
-			for(k = 0; k<64; k++) {
-				out[off+k] = g[k];
-				for(n = 1; n<10; n++) {
-					out[off+k] += g[64*n+k];
+			for(k = 0; k<=63; k++) {
+				out[off] = g[k];
+				for(n = 1; n<=9; n++) {
+					out[off] += g[64*n+k];
 				}
+				off++;
 			}
-			off += 64;
 		}
 	}
 }

@@ -197,7 +197,7 @@ public class SBR implements SBRConstants {
 
 		for(int l = 0; l<cd[ch].getEnvCount(); l++) {
 			for(int k = 0; k<n[freqRes[l]]; k++) {
-				e[l][k] = (float) Math.pow(2, e[l][k]*a+6);
+				e[l][k] = (float) Math.pow(2.0f, e[l][k]*a+6.0f);
 			}
 		}
 
@@ -207,7 +207,7 @@ public class SBR implements SBRConstants {
 
 		for(int l = 0; l<cd[ch].getNoiseCount(); l++) {
 			for(int k = 0; k<nq; k++) {
-				q[l][k] = (float) Math.pow(2, NOISE_FLOOR_OFFSET-q[l][k]);
+				q[l][k] = (float) Math.pow(2.0f, NOISE_FLOOR_OFFSET-q[l][k]);
 			}
 		}
 	}
@@ -215,7 +215,7 @@ public class SBR implements SBRConstants {
 	//dequantization of coupled channel pair
 	private void dequantCoupled() {
 		//envelopes
-		final float a = header.getAmpRes() ? 1f : 0.5f;
+		final float a = cd[0].getAmpRes() ? 1f : 0.5f;
 		final int panOffset = PAN_OFFSETS[cd[0].getAmpRes() ? 1 : 0];
 		final float[][] e0 = cd[0].getEnvelopeScalefactors();
 		final float[][] e1 = cd[1].getEnvelopeScalefactors();
@@ -223,14 +223,14 @@ public class SBR implements SBRConstants {
 		final int le = cd[0].getEnvCount();
 		final int[] n = tables.getN();
 
-		float d1, d2, d3;
+		float f1, f2, f3;
 		for(int l = 0; l<le; l++) {
 			for(int k = 0; k<n[r[l]]; k++) {
-				d1 = (float) Math.pow(2, (e0[l][k]*a)+7);
-				d2 = (float) Math.pow(2, (panOffset-e1[l][k])*a);
-				d3 = d1/(1+d2);
-				e0[l][k] = d3;
-				e1[l][k] = d3*d2;
+				f1 = (float) Math.pow(2.0f, (e0[l][k]*a)+7.0f);
+				f2 = (float) Math.pow(2.0f, (panOffset-e1[l][k])*a);
+				f3 = f1/(1.0f+f2);
+				e0[l][k] = f3;
+				e1[l][k] = f3*f2;
 			}
 		}
 
@@ -242,11 +242,11 @@ public class SBR implements SBRConstants {
 
 		for(int l = 0; l<lq; l++) {
 			for(int k = 0; k<nq; k++) {
-				d1 = (float) Math.pow(2, NOISE_FLOOR_OFFSET-q0[l][k]+1);
-				d2 = (float) Math.pow(2, panOffset-q1[l][k]);
-				d3 = d1/(1+d2);
-				q0[l][k] = d3;
-				q0[l][k] = d3*d2;
+				f1 = (float) Math.pow(2.0f, NOISE_FLOOR_OFFSET-q0[l][k]+1.0f);
+				f2 = (float) Math.pow(2.0f, PAN_OFFSETS[1]-q1[l][k]);
+				f3 = f1/(1.0f+f2);
+				q0[l][k] = f3;
+				q0[l][k] = f3*f2;
 			}
 		}
 	}
@@ -279,7 +279,6 @@ public class SBR implements SBRConstants {
 		//1. old W -> Xlow (4.6.18.5)
 		final int kxPrev = tables.getKx(true);
 		int l, k;
-		//TODO: change all arrays from [k][l] to [l][k]
 		for(l = 0; l<T_HF_GEN; l++) {
 			for(k = 0; k<kxPrev; k++) {
 				Xlow[k][l][0] = W[ch][k][l+TIME_SLOTS_RATE-T_HF_GEN][0];

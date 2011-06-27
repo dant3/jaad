@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.aac.syntax;
+package net.sourceforge.jaad.aac;
 
 import java.util.Random;
 import static org.junit.Assert.*;
 
 public class TestUtils {
 
-	private static final float TOLERANCE = 1e-2f;
+	private static final float TOLERANCE = 1e-5f;
 	private static final Random RAND = new Random();
 
 	public static float[] generateRandomVector(int len) {

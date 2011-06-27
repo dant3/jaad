@@ -19,11 +19,11 @@ package net.sourceforge.jaad.aac.sbr2;
 class AnalysisFilterbank implements SBRConstants, FilterbankTables {
 
 	private final float[][][] COEFS;
-	private final float[][] x;
+	private final float[][] X;
 	private final float[] z, u;
 
 	AnalysisFilterbank() {
-		x = new float[2][320]; //for both channels
+		X = new float[2][320]; //for both channels
 		z = new float[320]; //tmp buffer
 		u = new float[64]; //tmp buffer
 
@@ -41,23 +41,24 @@ class AnalysisFilterbank implements SBRConstants, FilterbankTables {
 
 	//in: 1024 time samples, out: 32 x 32 complex
 	public void process(float[] in, float[][][] out, int ch) {
+		final float[] x = X[ch];
 		int n, k, off = 0;
 
 		//each loop creates 32 complex subband samples
 		for(int l = 0; l<TIME_SLOTS_RATE; l++) {
 			//1. shift buffer
-			System.arraycopy(x[ch], 0, x[ch], 32, 288);
+			System.arraycopy(x, 0, x, 32, 288);
 
 			//2. add new samples
 			for(n = 31; n>=0; n--) {
-				x[ch][n] = in[off+31-n];
+				x[n] = in[off];
+				off++;
 			}
-			off += 32;
 
 			//3. windowing
 			for(n = 0; n<320; n++) {
 				//TODO: convert WINDOW to floats
-				z[n] = x[ch][n]*(float) WINDOW[2*n];
+				z[n] = x[n]*(float) WINDOW[2*n];
 			}
 
 			//4. sum samples
@@ -70,11 +71,11 @@ class AnalysisFilterbank implements SBRConstants, FilterbankTables {
 
 			//5. calculate subband samples, TODO: replace with FFT?
 			for(k = 0; k<32; k++) {
-				out[l][k][0] = 0.0f;
-				out[l][k][1] = 0.0f;
+				out[k][l][0] = 0.0f;
+				out[k][l][1] = 0.0f;
 				for(n = 0; n<64; n++) {
-					out[l][k][0] += u[n]*COEFS[k][n][0];
-					out[l][k][1] += u[n]*COEFS[k][n][1];
+					out[k][l][0] += u[n]*COEFS[k][n][0];
+					out[k][l][1] += u[n]*COEFS[k][n][1];
 				}
 			}
 		}

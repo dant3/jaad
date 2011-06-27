@@ -17,7 +17,7 @@
 package net.sourceforge.jaad.aac.filterbank;
 
 import net.sourceforge.jaad.aac.AACException;
-import net.sourceforge.jaad.aac.syntax.TestUtils;
+import net.sourceforge.jaad.aac.TestUtils;
 import org.junit.Test;
 
 /**
