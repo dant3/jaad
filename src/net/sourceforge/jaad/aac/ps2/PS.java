@@ -26,6 +26,7 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 	private final float[][][] HA, HB;
 	private final float[][] PHI_FRACT_20, PHI_FRACT_34;
 	private final float[][][] Q_FRACT_ALLPASS_20, Q_FRACT_ALLPASS_34;
+	private final float[][] SMOOTHING_TABLE;
 	//header
 	private boolean headerEnabled;
 	private final PSHeader header;
@@ -35,6 +36,7 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 	private final int[] borderPositions;
 	//pars
 	private final int[][] iidPars, iccPars, ipdPars, opdPars;
+	private final int[][] iidMapped, iccMapped, ipdMapped, opdMapped;
 	private final int[] ipdPrev, opdPrev;
 	//working buffer
 	private final float[][][] lBuf, rBuf;
@@ -55,6 +57,8 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		PHI_FRACT_34 = new float[50][2];
 		Q_FRACT_ALLPASS_34 = new float[50][3][2];
 		TableGenerator.generateFractTables34(PHI_FRACT_34, Q_FRACT_ALLPASS_34);
+		SMOOTHING_TABLE = new float[8*8*8][2];
+		TableGenerator.generateIPDOPDSmoothingTables(SMOOTHING_TABLE);
 
 		headerEnabled = false;
 		header = new PSHeader();
@@ -65,6 +69,10 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		iccPars = new int[MAX_ENVELOPES][MAX_IID_ICC_PARS];
 		ipdPars = new int[MAX_ENVELOPES][MAX_IPD_OPD_PARS];
 		opdPars = new int[MAX_ENVELOPES][MAX_IPD_OPD_PARS];
+		iidMapped = new int[MAX_ENVELOPES][MAX_IID_ICC_PARS];
+		iccMapped = new int[MAX_ENVELOPES][MAX_IID_ICC_PARS];
+		ipdMapped = new int[MAX_ENVELOPES][MAX_IPD_OPD_PARS];
+		opdMapped = new int[MAX_ENVELOPES][MAX_IPD_OPD_PARS];
 		ipdPrev = new int[MAX_IPD_OPD_PARS];
 		opdPrev = new int[MAX_IPD_OPD_PARS];
 
@@ -76,6 +84,7 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		delay = new float[91][32+MAX_DELAY][2];
 		apDelay = new float[50][ALLPASS_LINKS][32+MAX_DELAY][2];
 
+		//complex in first dimension makes mapping easier
 		H11 = new float[2][MAX_ENVELOPES+1][MAX_IID_ICC_PARS];
 		H12 = new float[2][MAX_ENVELOPES+1][MAX_IID_ICC_PARS];
 		H21 = new float[2][MAX_ENVELOPES+1][MAX_IID_ICC_PARS];
@@ -120,7 +129,7 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 			for(e = 0; e<envCount; e++) {
 				dt = in.readBool();
 				table = dt ? (fine ? HUFF_IID_FINE_DT : HUFF_IID_DEFAULT_DT)
-					: (fine ? HUFF_IID_FINE_DF : HUFF_IID_DEFAULT_DF);
+						: (fine ? HUFF_IID_FINE_DF : HUFF_IID_DEFAULT_DF);
 				decodePars(in, table, iidPars, e, len, dt, false);
 			}
 		}
@@ -314,9 +323,9 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 
 			for(n = 0; n<32; n++) {
 				re = delay[k][n+MAX_DELAY-2][0]*phiFract[k][0]
-					-delay[k][n+MAX_DELAY-2][1]*phiFract[k][1];
+						-delay[k][n+MAX_DELAY-2][1]*phiFract[k][1];
 				im = delay[k][n+MAX_DELAY-2][0]*phiFract[k][1]
-					+delay[k][n+MAX_DELAY-2][1]*phiFract[k][0];
+						+delay[k][n+MAX_DELAY-2][1]*phiFract[k][0];
 				for(m = 0; m<ALLPASS_LINKS; m++) {
 					float a_re = ag[m]*re;
 					float a_im = ag[m]*im;
@@ -368,12 +377,12 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 
 	private void performStereoProcessing() {
 		//remapping
-		mapPars(iidPars, header.getIIDPars(), true);
-		mapPars(iccPars, header.getICCPars(), true);
+		mapPars(iidPars, iidMapped, header.getIIDPars(), true);
+		mapPars(iccPars, iccMapped, header.getICCPars(), true);
 		if(header.isIPDOPDEnabled()) {
 			final int pars = header.getIPDOPDPars();
-			mapPars(ipdPars, pars, true);
-			mapPars(opdPars, pars, true);
+			mapPars(ipdPars, ipdMapped, pars, true);
+			mapPars(opdPars, opdMapped, pars, true);
 		}
 
 		System.arraycopy(H11[0][envCountPrev], 0, H11[0][0], 0, 34);
@@ -411,37 +420,146 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		}
 
 		//mixing
+		final boolean ipdopd = header.isIPDOPDEnabled();
 		final int mode = header.getBandMode();
+		final float[][][] filter = header.useICCMixingB() ? HB : HA;
+		final int[] map = header.use34Bands(false) ? PARAMETER_MAP_34 : PARAMETER_MAP_20;
+		final int iidQuant = header.useIIDQuantFine() ? 1 : 0;
+
+		final float[] h11 = new float[2], h12 = new float[2];
+		final float[] h21 = new float[2], h22 = new float[2];
+		final float[] h11Step = new float[2], h12Step = new float[2];
+		final float[] h21Step = new float[2], h22Step = new float[2];
+		final float[] tmp = new float[2];
+		final float[] l = new float[2], r = new float[2];
+		float[] ipd, opd;
+		float width;
+		int ipdIndex, opdIndex;
+
+		int b, k, n;
 		for(int e = 0; e<envCount; e++) {
-			for(int n = 0; n<PAR_BANDS[mode]; n++) {
+			for(b = 0; b<PAR_BANDS[mode]; b++) {
+				h11[0] = filter[iidMapped[e][b]+7+23*iidQuant][iccMapped[e][b]][0];
+				h12[0] = filter[iidMapped[e][b]+7+23*iidQuant][iccMapped[e][b]][1];
+				h21[0] = filter[iidMapped[e][b]+7+23*iidQuant][iccMapped[e][b]][2];
+				h22[0] = filter[iidMapped[e][b]+7+23*iidQuant][iccMapped[e][b]][3];
+				if(ipdopd&&b<header.getIPDOPDPars()) {
+					ipdIndex = ipdPrev[b]*8+ipdMapped[e][b];
+					opdIndex = opdPrev[b]*8+opdMapped[e][b];
+					opdPrev[b] = opdIndex&0x3F;
+					ipdPrev[b] = ipdIndex&0x3F;
+
+					ipd = SMOOTHING_TABLE[ipdIndex];
+					opd = SMOOTHING_TABLE[opdIndex];
+					tmp[0] = opd[0]*ipd[0]+opd[1]*ipd[1];
+					tmp[1] = opd[1]*ipd[0]-opd[0]*ipd[1];
+					h11[1] = h11[0]*opd[1];
+					h11[0] *= opd[0];
+					h12[1] = h12[0]*tmp[1];
+					h12[0] *= tmp[0];
+					h21[1] = h21[0]*opd[1];
+					h21[0] *= opd[0];
+					h22[1] = h22[0]*tmp[1];
+					h22[0] *= tmp[0];
+					H11[1][e+1][b] = h11[1];
+					H12[1][e+1][b] = h12[1];
+					H21[1][e+1][b] = h21[1];
+					H22[1][e+1][b] = h22[1];
+				}
+				H11[0][e+1][b] = h11[0];
+				H12[0][e+1][b] = h12[0];
+				H21[0][e+1][b] = h21[0];
+				H22[0][e+1][b] = h22[0];
+			}
+			for(k = 0; k<BANDS[mode]; k++) {
+				width = 1.f/(borderPositions[e]+1-borderPositions[e+1]);
+				b = map[k];
+
+				h11[0] = H11[0][e][b];
+				h12[0] = H12[0][e][b];
+				h21[0] = H21[0][e][b];
+				h22[0] = H22[0][e][b];
+
+				if(ipdopd) {
+					if((use34&&k>=9&&k<=13)||(!use34&&k<=1)) {
+						h11[1] = -H11[1][e][b];
+						h12[1] = -H12[1][e][b];
+						h21[1] = -H21[1][e][b];
+						h22[1] = -H22[1][e][b];
+					}
+					else {
+						h11[1] = H11[1][e][b];
+						h12[1] = H12[1][e][b];
+						h21[1] = H21[1][e][b];
+						h22[1] = H22[1][e][b];
+					}
+				}
+
+				//interpolation
+				h11Step[0] = (H11[0][e+1][b]-h11[0])*width;
+				h12Step[0] = (H12[0][e+1][b]-h12[0])*width;
+				h21Step[0] = (H21[0][e+1][b]-h21[0])*width;
+				h22Step[0] = (H22[0][e+1][b]-h22[0])*width;
+				if(ipdopd) {
+					h11Step[1] = (H11[1][e+1][b]-h11[1])*width;
+					h12Step[1] = (H12[1][e+1][b]-h12[1])*width;
+					h21Step[1] = (H21[1][e+1][b]-h21[1])*width;
+					h22Step[1] = (H22[1][e+1][b]-h22[1])*width;
+				}
+
+				for(n = borderPositions[e]+1; n<=borderPositions[e+1]; n++) {
+					l[0] = lBuf[k][n][0];
+					l[1] = lBuf[k][n][1];
+					r[0] = rBuf[k][n][0];
+					r[1] = rBuf[k][n][1];
+					h11[0] += h11Step[0];
+					h12[0] += h12Step[0];
+					h21[0] += h21Step[0];
+					h22[0] += h22Step[0];
+					lBuf[k][n][0] = h11[0]*l[0]+h21[0]*r[0];
+					lBuf[k][n][1] = h11[0]*l[1]+h21[0]*r[1];
+					rBuf[k][n][0] = h12[0]*l[0]+h22[0]*r[0];
+					rBuf[k][n][1] = h12[0]*l[1]+h22[0]*r[1];
+
+					if(ipdopd) {
+						h11[1] += h11Step[1];
+						h12[1] += h12Step[1];
+						h21[1] += h21Step[1];
+						h22[1] += h22Step[1];
+						lBuf[k][n][0] -= h11[1]*l[1]-h21[1]*r[1];
+						lBuf[k][n][1] += h11[1]*l[0]+h21[1]*r[0];
+						rBuf[k][n][0] -= h12[1]*l[1]-h22[1]*r[1];
+						rBuf[k][n][1] += h12[1]*l[0]+h22[1]*r[0];
+					}
+				}
 			}
 		}
 	}
 
-	private void mapPars(int[][] pars, int len, boolean full) {
+	private void mapPars(int[][] in, int[][] out, int len, boolean full) {
 		int i;
 
 		if(header.use34Bands(false)) {
 			if(len==10) {
 				for(i = 0; i<envCount; i++) {
-					Utils.map10To34(pars[i], full);
+					Utils.map10To34(in[i], out[i], full);
 				}
 			}
 			else if(len==20) {
 				for(i = 0; i<envCount; i++) {
-					Utils.map20To34(pars[i], full);
+					Utils.map20To34(in[i], out[i], full);
 				}
 			}
 		}
 		else {
 			if(len==10) {
 				for(i = 0; i<envCount; i++) {
-					Utils.map10To20(pars[i], full);
+					Utils.map10To20(in[i], out[i], full);
 				}
 			}
 			else if(len==34) {
 				for(i = 0; i<envCount; i++) {
-					Utils.map34To20(pars[i], full);
+					Utils.map34To20(in[i], out[i], full);
 				}
 			}
 		}

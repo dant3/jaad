@@ -43,6 +43,8 @@ class TableGenerator {
 		9.0/4.0, 11.0/4.0, 13.0/4.0, 7.0/4.0, 17.0/4.0, 11.0/4.0, 13.0/4.0,
 		15.0/4.0, 17.0/4.0, 19.0/4.0, 21.0/4.0, 15.0/4
 	};
+	private static final double[] IPDOPD_SIN = {0, SQRT1_2, 1, SQRT1_2, 0, -SQRT1_2, -1, -SQRT1_2};
+	private static final double[] IPDOPD_COS = {1, SQRT1_2, 0, -SQRT1_2, -1, -SQRT1_2, 0, SQRT1_2};
 
 	public static void generateMixingTables(float[][][] HA, float[][][] HB) {
 		double c, c1, c2, alpha, beta, gamma, rho, mu;
@@ -56,14 +58,14 @@ class TableGenerator {
 			for(icc = 0; icc<8; icc++) {
 				//filter A
 				alpha = 0.5*ACOS_ICC_DEQUANT[icc];
-				beta = alpha*(c1-c2)*(float) SQRT1_2;
-				HA[iid][icc][0] = (float) (c2*Math.cos(beta+alpha));
+				beta = alpha*(c1-c2)/(float) SQRT2;
+				HA[iid][icc][0] = (float) (c2*Math.cos(alpha+beta));
 				HA[iid][icc][1] = (float) (c1*Math.cos(beta-alpha));
-				HA[iid][icc][2] = (float) (c2*Math.sin(beta+alpha));
+				HA[iid][icc][2] = (float) (c2*Math.sin(alpha+beta));
 				HA[iid][icc][3] = (float) (c1*Math.sin(beta-alpha));
 				//filter B
 				rho = Math.max(ICC_DEQUANT[icc], 0.05f);
-				alpha = (c==1) ? (Math.PI/4.0) : 0.5*Math.atan((2.0f*c*rho)/(c*c-1.0f));
+				alpha = (c==1) ? (Math.PI/4.0) : 0.5*Math.atan2((2.0f*c*rho), (c*c-1.0f));
 				if(alpha<0) alpha += Math.PI/2;
 				mu = c+1.0f/c;
 				mu = Math.sqrt(1+(4*rho*rho-4)/(mu*mu));
@@ -110,6 +112,33 @@ class TableGenerator {
 				tmp = -Math.PI*QM[m]*fk;
 				qFractAllpass[k][m][0] = (float) Math.cos(tmp);
 				qFractAllpass[k][m][1] = (float) Math.sin(tmp);
+			}
+		}
+	}
+
+	public static void generateIPDOPDSmoothingTables(float[][] table) {
+		int i, j, k;
+		final double[] tmp0 = new double[2];
+		final double[] tmp1 = new double[2];
+		final double[] tmp2 = new double[2];
+		final double[] smooth = new double[2];
+		double mag;
+
+		for(i = 0; i<8; i++) {
+			tmp0[0] = IPDOPD_COS[i];
+			tmp0[1] = IPDOPD_SIN[i];
+			for(j = 0; j<8; j++) {
+				tmp1[0] = IPDOPD_COS[j];
+				tmp1[1] = IPDOPD_SIN[j];
+				for(k = 0; k<8; k++) {
+					tmp2[0] = IPDOPD_COS[k];
+					tmp2[1] = IPDOPD_SIN[k];
+					smooth[0] = 0.25f*tmp0[0]+0.5f*tmp1[0]+tmp2[0];
+					smooth[1] = 0.25f*tmp0[1]+0.5f*tmp1[1]+tmp2[1];
+					mag = 1/Math.sqrt(smooth[1]*smooth[1]+smooth[0]*smooth[0]);
+					table[i*64+j*8+k][0] = (float) (smooth[0]*mag);
+					table[i*64+j*8+k][1] = (float) (smooth[1]*mag);
+				}
 			}
 		}
 	}

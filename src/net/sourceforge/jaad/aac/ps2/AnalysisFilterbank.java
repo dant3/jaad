@@ -23,17 +23,16 @@ class AnalysisFilterbank implements FilterbankTables {
 	private static void splitBands2(float[][] in, float[][][] out, int outOff, boolean reverse) {
 		final float[] tmp1 = new float[2];
 		final float[] tmp2 = new float[2];
-		int inOff = 0;
 		int i, j;
 
 		for(i = 0; i<32; i++) {
-			tmp1[0] = FILTER_20_2[6]*in[inOff+6][0];
-			tmp1[1] = FILTER_20_2[6]*in[inOff+6][1];
+			tmp1[0] = FILTER_20_2[6]*in[i+6][0];
+			tmp1[1] = FILTER_20_2[6]*in[i+6][1];
 			tmp2[0] = 0.0f;
 			tmp2[1] = 0.0f;
 			for(j = 0; j<6; j += 2) {
-				tmp2[0] += FILTER_20_2[j+1]*(in[inOff+j+1][0]+in[inOff+12-j-1][0]);
-				tmp2[1] += FILTER_20_2[j+1]*(in[inOff+j+1][1]+in[inOff+12-j-1][1]);
+				tmp2[0] += FILTER_20_2[j+1]*(in[i+j+1][0]+in[i+12-j-1][0]);
+				tmp2[1] += FILTER_20_2[j+1]*(in[i+j+1][1]+in[i+12-j-1][1]);
 			}
 			if(reverse) {
 				out[outOff+1][i][0] = tmp1[0]+tmp2[0];
@@ -47,7 +46,6 @@ class AnalysisFilterbank implements FilterbankTables {
 				out[outOff+1][i][0] = tmp1[0]-tmp2[0];
 				out[outOff+1][i][1] = tmp1[1]-tmp2[1];
 			}
-			inOff++;
 		}
 	}
 
@@ -56,35 +54,32 @@ class AnalysisFilterbank implements FilterbankTables {
 		final float[][] tmp = new float[8][2];
 		final float[] sum = new float[2];
 		int i, j, k;
-		int inOff = 0;
 
 		for(i = 0; i<32; i++) {
 			for(k = 0; k<8; k++) {
-				sum[0] = FILTER_20_8[k][6][0]*in[inOff+6][0];
-				sum[1] = FILTER_20_8[k][6][0]*in[inOff+6][1];
+				sum[0] = FILTER_20_8[k][6][0]*in[i+6][0];
+				sum[1] = FILTER_20_8[k][6][0]*in[i+6][1];
 				for(j = 0; j<6; j++) {
-					sum[0] += FILTER_20_8[k][j][0]*(in[inOff+j][0]+in[inOff+12-j][0])
-						-FILTER_20_8[k][j][1]*(in[inOff+j][1]-in[inOff+12-j][1]);
-					sum[1] += FILTER_20_8[k][j][0]*(in[inOff+j][1]+in[inOff+12-j][1])
-						+FILTER_20_8[k][j][1]*(in[inOff+j][0]-in[inOff+12-j][0]);
+					sum[0] += FILTER_20_8[k][j][0]*(in[i+j][0]+in[i+12-j][0])
+						-FILTER_20_8[k][j][1]*(in[i+j][1]-in[i+12-j][1]);
+					sum[1] += FILTER_20_8[k][j][0]*(in[i+j][1]+in[i+12-j][1])
+						+FILTER_20_8[k][j][1]*(in[i+j][0]-in[i+12-j][0]);
 				}
 				tmp[k][0] = sum[0];
 				tmp[k][1] = sum[1];
 			}
-			out[0][i][0] = tmp[6][0];
-			out[0][i][1] = tmp[6][1];
-			out[1][i][0] = tmp[7][0];
-			out[1][i][1] = tmp[7][1];
-			out[2][i][0] = tmp[0][0];
-			out[2][i][1] = tmp[0][1];
-			out[3][i][0] = tmp[1][0];
-			out[3][i][1] = tmp[1][1];
-			out[4][i][0] = tmp[2][0]+tmp[5][0];
-			out[4][i][1] = tmp[2][1]+tmp[5][1];
-			out[5][i][0] = tmp[3][0]+tmp[4][0];
-			out[5][i][1] = tmp[3][1]+tmp[4][1];
-
-			inOff++;
+			out[outOff+0][i][0] = tmp[6][0];
+			out[outOff+0][i][1] = tmp[6][1];
+			out[outOff+1][i][0] = tmp[7][0];
+			out[outOff+1][i][1] = tmp[7][1];
+			out[outOff+2][i][0] = tmp[0][0];
+			out[outOff+2][i][1] = tmp[0][1];
+			out[outOff+3][i][0] = tmp[1][0];
+			out[outOff+3][i][1] = tmp[1][1];
+			out[outOff+4][i][0] = tmp[2][0]+tmp[5][0];
+			out[outOff+4][i][1] = tmp[2][1]+tmp[5][1];
+			out[outOff+5][i][0] = tmp[3][0]+tmp[4][0];
+			out[outOff+5][i][1] = tmp[3][1]+tmp[4][1];
 		}
 	}
 
@@ -92,22 +87,20 @@ class AnalysisFilterbank implements FilterbankTables {
 	private static void splitBands4(float[][] in, float[][][] out, int outOff, float[][][] filter, int len) {
 		final float[] sum = new float[2];
 		int i, j, k;
-		int inOff = 0;
 
 		for(i = 0; i<len; i++) {
 			for(k = 0; k<len; k++) {
-				sum[0] = filter[k][6][0]*in[inOff+6][0];
-				sum[1] = filter[k][6][0]*in[inOff+6][1];
+				sum[0] = filter[k][6][0]*in[i+6][0];
+				sum[1] = filter[k][6][0]*in[i+6][1];
 				for(j = 0; j<6; j++) {
-					sum[0] += filter[k][j][0]*(in[inOff+j][0]+in[inOff+12-j][0])
-						-filter[k][j][1]*(in[inOff+j][1]-in[inOff+12-j][1]);
-					sum[1] += filter[k][j][0]*(in[inOff+j][1]+in[inOff+12-j][1])
-						+filter[k][j][1]*(in[inOff+j][0]-in[inOff+12-j][0]);
+					sum[0] += filter[k][j][0]*(in[i+j][0]+in[i+12-j][0])
+						-filter[k][j][1]*(in[i+j][1]-in[i+12-j][1]);
+					sum[1] += filter[k][j][0]*(in[i+j][1]+in[i+12-j][1])
+						+filter[k][j][1]*(in[i+j][0]-in[i+12-j][0]);
 				}
-				out[k][i][0] = sum[0];
-				out[k][i][1] = sum[1];
+				out[outOff+k][i][0] = sum[0];
+				out[outOff+k][i][1] = sum[1];
 			}
-			inOff++;
 		}
 	}
 }
