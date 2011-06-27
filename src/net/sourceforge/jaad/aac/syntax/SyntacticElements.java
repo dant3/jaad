@@ -281,9 +281,9 @@ public class SyntacticElements implements Constants {
 			final SBR sbr = scelfe.getSBR();
 			if(sbr.isPSUsed()) {
 				chs = 2;
-				scelfe.getSBR().processSingleFramePS(data[channel], data[channel+1], false);
+				scelfe.getSBR().process(data[channel], data[channel+1], false);
 			}
-			else scelfe.getSBR().processSingleFrame(data[channel], false);
+			else scelfe.getSBR().process(data[channel], null, false);
 		}
 		return chs;
 	}
@@ -354,7 +354,7 @@ public class SyntacticElements implements Constants {
 		//SBR
 		if(sbrPresent) {
 			//if(data[channel].length==config.getFrameLength()) LOGGER.log(Level.WARNING, "SBR data present, but buffer has normal size!");
-			cpe.getSBR().processCoupleFrame(data[channel], data[channel+1], false);
+			cpe.getSBR().process(data[channel], data[channel+1], false);
 		}
 	}
 

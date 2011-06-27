@@ -26,6 +26,7 @@ import net.sourceforge.jaad.aac.syntax.Constants;
 public class SBR implements SBRConstants {
 
 	//arguments
+	private boolean stereo;
 	private int sampleFrequency;
 	private boolean downSampled;
 	private boolean reset;
@@ -38,7 +39,7 @@ public class SBR implements SBRConstants {
 	private final float[][][][] W; //analysis QMF output
 	private final float[][][] Xlow, Xhigh;
 	private final float[][][][] Y;
-	private final float[][][] X, psBuf;
+	private final float[][][][] X;
 	//filterbanks
 	private final AnalysisFilterbank qmfA;
 	private final SynthesisFilterbank qmfS;
@@ -60,8 +61,7 @@ public class SBR implements SBRConstants {
 		Xlow = new float[32][40][2];
 		Xhigh = new float[64][40][2];
 		Y = new float[2][38+MAX_LTEMP][64][2]; //for both channels
-		X = new float[64][38][2]; //SBR only needs 32, 38 is for compatibility with PS
-		psBuf = new float[64][38][2]; //buffer for PS output
+		X = new float[2][64][38][2]; //for both channels
 
 		qmfA = new AnalysisFilterbank();
 		qmfS = new SynthesisFilterbank();
@@ -71,6 +71,7 @@ public class SBR implements SBRConstants {
 
 	/*========================= decoding =========================*/
 	public void decode(BitStream in, int count, boolean stereo, boolean crc) throws AACException {
+		this.stereo = stereo;
 		final int pos = in.getPosition();
 
 		if(crc) {
@@ -255,35 +256,26 @@ public class SBR implements SBRConstants {
 		return psUsed;
 	}
 
-	//channel: 1024 time samples
-	public void processSingleFrame(float[] channel, boolean downSampled) throws AACException {
-		processChannel(0, channel, downSampled);
-		qmfS.process(X, channel, 0);
-	}
-
-	public void processCoupleFrame(float[] left, float[] right, boolean downSampled) throws AACException {
-		processChannel(0, left, downSampled);
-		qmfS.process(X, left, 0);
-		processChannel(1, right, downSampled);
-		qmfS.process(X, right, 1);
-	}
-
-	public void processSingleFramePS(float[] left, float[] right, boolean downSampled) throws AACException {
-		processChannel(0, left, downSampled);
-		int k;
-		for(int l = TIME_SLOTS_RATE; l<TIME_SLOTS_RATE+6; l++) {
-			for(k = 0; k<5; k++) {
-				X[k][l][0] = Xlow[k][l+T_HF_ADJ][0];
-				X[k][l][1] = Xlow[k][l+T_HF_ADJ][1];
+	//left/right: 1024 time samples
+	public void process(float[] left, float[] right, boolean downSampled) throws AACException {
+		processChannel(0, left);
+		if(stereo) processChannel(1, right);
+		else if(psUsed) {
+			int k;
+			for(int l = TIME_SLOTS_RATE; l<TIME_SLOTS_RATE+6; l++) {
+				for(k = 0; k<5; k++) {
+					X[0][k][l][0] = Xlow[k][l+T_HF_ADJ][0];
+					X[0][k][l][1] = Xlow[k][l+T_HF_ADJ][1];
+				}
 			}
+			ps.process(X[0], X[1]);
 		}
-		ps.process(X, psBuf);
 
-		qmfS.process(X, left, 0);
-		qmfS.process(psBuf, right, 0);
+		qmfS.process(X[0], left, 0);
+		if(stereo||psUsed) qmfS.process(X[1], right, 0);
 	}
 
-	private void processChannel(int ch, float[] data, boolean downSampled) throws AACException {
+	private void processChannel(int ch, float[] data) throws AACException {
 		//1. old W -> Xlow (4.6.18.5)
 		final int kxPrev = tables.getKx(true);
 		int l, k;
@@ -324,16 +316,16 @@ public class SBR implements SBRConstants {
 		final int m = tables.getM(false);
 		for(l = 0; l<lTemp; l++) {
 			for(k = 0; k<kxPrev; k++) {
-				X[k][l][0] = Xlow[k][l+T_HF_ADJ][0];
-				X[k][l][1] = Xlow[k][l+T_HF_ADJ][1];
+				X[ch][k][l][0] = Xlow[k][l+T_HF_ADJ][0];
+				X[ch][k][l][1] = Xlow[k][l+T_HF_ADJ][1];
 			}
 			for(k = kxPrev; k<kxPrev+mPrev; k++) {
-				X[k][l][0] = Y[ch][l+T_HF_ADJ+TIME_SLOTS_RATE][k][0];
-				X[k][l][1] = Y[ch][l+T_HF_ADJ+TIME_SLOTS_RATE][k][1];
+				X[ch][k][l][0] = Y[ch][l+T_HF_ADJ+TIME_SLOTS_RATE][k][0];
+				X[ch][k][l][1] = Y[ch][l+T_HF_ADJ+TIME_SLOTS_RATE][k][1];
 			}
 			for(k = kxPrev+mPrev; k<64; k++) {
-				X[k][l][0] = 0;
-				X[k][l][1] = 0;
+				X[ch][k][l][0] = 0;
+				X[ch][k][l][1] = 0;
 			}
 		}
 
@@ -343,16 +335,16 @@ public class SBR implements SBRConstants {
 		//6. new Y -> X
 		for(l = lTemp; l<TIME_SLOTS_RATE; l++) {
 			for(k = 0; k<kx; k++) {
-				X[k][l][0] = Xlow[k][l+T_HF_ADJ][0];
-				X[k][l][1] = Xlow[k][l+T_HF_ADJ][1];
+				X[ch][k][l][0] = Xlow[k][l+T_HF_ADJ][0];
+				X[ch][k][l][1] = Xlow[k][l+T_HF_ADJ][1];
 			}
 			for(k = kx; k<kx+m; k++) {
-				X[k][l][0] = Y[ch][l+T_HF_ADJ][k][0];
-				X[k][l][1] = Y[ch][l+T_HF_ADJ][k][1];
+				X[ch][k][l][0] = Y[ch][l+T_HF_ADJ][k][0];
+				X[ch][k][l][1] = Y[ch][l+T_HF_ADJ][k][1];
 			}
 			for(k = kx+m; k<64; k++) {
-				X[k][l][0] = 0;
-				X[k][l][1] = 0;
+				X[ch][k][l][0] = 0;
+				X[ch][k][l][1] = 0;
 			}
 		}
 

@@ -115,7 +115,7 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		else {
 			//fixed borders (8.6.4.6.2)
 			for(e = 0; e<envCount; e++) {
-				borderPositions[e] = (int) (32*(e+1)/envCount)-1;
+				borderPositions[e] = (32*(e+1))/envCount-1;
 			}
 		}
 
@@ -232,7 +232,7 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 	//left: 64 x 38 complex in-/output, left/right: 64 x 38 complex output
 	public void process(float[][][] left, float[][][] right) {
 		//1. hybrid analysis (in -> lBuf)
-		AnalysisFilterbank.process(left, lBuf, header.use34Bands(false));
+		HybridFilterbank.analyze(left, lBuf, header.use34Bands(false));
 
 		//2. decorrelation (lBuf -> rBuf)
 		decorrelate();
@@ -241,8 +241,8 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		performStereoProcessing();
 
 		//4. hybrid synthesis
-		SynthesisFilterbank.process(lBuf, left, header.use34Bands(false));
-		SynthesisFilterbank.process(rBuf, right, header.use34Bands(false));
+		HybridFilterbank.synthesize(lBuf, left, header.use34Bands(false));
+		HybridFilterbank.synthesize(rBuf, right, header.use34Bands(false));
 	}
 
 	private void decorrelate() {

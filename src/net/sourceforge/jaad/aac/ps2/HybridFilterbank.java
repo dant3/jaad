@@ -1,10 +1,10 @@
 package net.sourceforge.jaad.aac.ps2;
 
 //hybrid analysis filterbank: splits lower frequency bands
-class AnalysisFilterbank implements FilterbankTables {
+class HybridFilterbank implements FilterbankTables {
 
 	//in: 64 x 38 complex, out: 91 x 32 complex
-	public static void process(float[][][] in, float[][][] out, boolean use34) {
+	public static void analyze(float[][][] in, float[][][] out, boolean use34) {
 		if(use34) {
 			splitBands4(in[0], out, 0, FILTER_34_12, 12);
 			splitBands4(in[1], out, 12, FILTER_34_8, 8);
@@ -61,9 +61,9 @@ class AnalysisFilterbank implements FilterbankTables {
 				sum[1] = FILTER_20_8[k][6][0]*in[i+6][1];
 				for(j = 0; j<6; j++) {
 					sum[0] += FILTER_20_8[k][j][0]*(in[i+j][0]+in[i+12-j][0])
-						-FILTER_20_8[k][j][1]*(in[i+j][1]-in[i+12-j][1]);
+							-FILTER_20_8[k][j][1]*(in[i+j][1]-in[i+12-j][1]);
 					sum[1] += FILTER_20_8[k][j][0]*(in[i+j][1]+in[i+12-j][1])
-						+FILTER_20_8[k][j][1]*(in[i+j][0]-in[i+12-j][0]);
+							+FILTER_20_8[k][j][1]*(in[i+j][0]-in[i+12-j][0]);
 				}
 				tmp[k][0] = sum[0];
 				tmp[k][1] = sum[1];
@@ -94,12 +94,65 @@ class AnalysisFilterbank implements FilterbankTables {
 				sum[1] = filter[k][6][0]*in[i+6][1];
 				for(j = 0; j<6; j++) {
 					sum[0] += filter[k][j][0]*(in[i+j][0]+in[i+12-j][0])
-						-filter[k][j][1]*(in[i+j][1]-in[i+12-j][1]);
+							-filter[k][j][1]*(in[i+j][1]-in[i+12-j][1]);
 					sum[1] += filter[k][j][0]*(in[i+j][1]+in[i+12-j][1])
-						+filter[k][j][1]*(in[i+j][0]-in[i+12-j][0]);
+							+filter[k][j][1]*(in[i+j][0]-in[i+12-j][0]);
 				}
 				out[outOff+k][i][0] = sum[0];
 				out[outOff+k][i][1] = sum[1];
+			}
+		}
+	}
+
+	//in: 91 x 32 complex, out: 64 x 32 complex for SBR
+	public static void synthesize(float[][][] in, float[][][] out, boolean use34) {
+		int n, k;
+		if(use34) {
+			for(n = 0; n<32; n++) {
+				//sum first 32 into 5
+				for(k = 0; k<5; k++) {
+					out[k][n][0] = 0;
+					out[k][n][1] = 0;
+				}
+				for(k = 0; k<12; k++) {
+					out[0][n][0] += in[k][n][0];
+					out[0][n][1] += in[k][n][1];
+				}
+				for(k = 12; k<19; k++) {
+					out[1][n][0] += in[k][n][0];
+					out[1][n][1] += in[k][n][1];
+				}
+				for(k = 20; k<24; k++) {
+					out[2][n][0] += in[k][n][0];
+					out[2][n][1] += in[k][n][1];
+					out[3][n][0] += in[k+4][n][0];
+					out[3][n][1] += in[k+4][n][1];
+					out[4][n][0] += in[k+8][n][0];
+					out[4][n][1] += in[k+8][n][1];
+				}
+				//copy remaining 59
+				for(k = 0; k<59; k++) {
+					out[k+5][n][0] = in[k+32][n][0];
+					out[k+5][n][1] = in[k+32][n][1];
+				}
+			}
+		}
+		else {
+			for(n = 0; n<32; n++) {
+				//sum first 10 into 3
+				out[0][n][0] = in[0][n][0]+in[1][n][0]+in[2][n][0]
+						+in[3][n][0]+in[4][n][0]+in[5][n][0];
+				out[0][n][1] = in[0][n][1]+in[1][n][1]+in[2][n][1]
+						+in[3][n][1]+in[4][n][1]+in[5][n][1];
+				out[1][n][0] = in[6][n][0]+in[7][n][0];
+				out[1][n][1] = in[6][n][1]+in[7][n][1];
+				out[2][n][0] = in[8][n][0]+in[9][n][0];
+				out[2][n][1] = in[8][n][1]+in[9][n][1];
+				//copy remaining 61
+				for(k = 0; k<61; k++) {
+					out[k+3][n][0] = in[k+10][n][0];
+					out[k+3][n][1] = in[k+10][n][1];
+				}
 			}
 		}
 	}
