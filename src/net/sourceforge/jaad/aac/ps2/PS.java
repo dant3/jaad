@@ -36,8 +36,6 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 	//pars
 	private final int[][] iidPars, iccPars, ipdPars, opdPars;
 	private final int[] ipdPrev, opdPrev;
-	//dequantized values
-	//private final float[][] iid, icc, ipd, opd;
 	//working buffer
 	private final float[][][] lBuf, rBuf;
 	//buffers for decorrelation in z-domain
@@ -69,11 +67,6 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		opdPars = new int[MAX_ENVELOPES][MAX_IPD_OPD_PARS];
 		ipdPrev = new int[MAX_IPD_OPD_PARS];
 		opdPrev = new int[MAX_IPD_OPD_PARS];
-
-		/*iid = new float[MAX_ENVELOPES][MAX_IID_ICC_PARS];
-		icc = new float[MAX_ENVELOPES][MAX_IID_ICC_PARS];
-		ipd = new float[MAX_ENVELOPES][MAX_IID_ICC_PARS];
-		opd = new float[MAX_ENVELOPES][MAX_IID_ICC_PARS];*/
 
 		lBuf = new float[91][32][2];
 		rBuf = new float[91][32][2];
@@ -110,6 +103,12 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 				borderPositions[e] = in.readBits(5);
 			}
 		}
+		else {
+			//fixed borders (8.6.4.6.2)
+			for(e = 0; e<envCount; e++) {
+				borderPositions[e] = (int) (32*(e+1)/envCount)-1;
+			}
+		}
 
 		int len;
 		boolean dt;
@@ -118,13 +117,11 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		if(header.isIIDEnabled()) {
 			len = header.getIIDPars();
 			final boolean fine = header.useIIDQuantFine();
-			final float[] quant = fine ? IID_QUANT_FINE : IID_QUANT_DEFAULT;
 			for(e = 0; e<envCount; e++) {
 				dt = in.readBool();
 				table = dt ? (fine ? HUFF_IID_FINE_DT : HUFF_IID_DEFAULT_DT)
-						: (fine ? HUFF_IID_FINE_DF : HUFF_IID_DEFAULT_DF);
+					: (fine ? HUFF_IID_FINE_DF : HUFF_IID_DEFAULT_DF);
 				decodePars(in, table, iidPars, e, len, dt, false);
-				//dequant(iidPars[e], iid[e], len, quant);
 			}
 		}
 
@@ -135,7 +132,6 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 				dt = in.readBool();
 				table = dt ? HUFF_ICC_DT : HUFF_ICC_DF;
 				decodePars(in, table, iccPars, e, len, dt, false);
-				//dequant(iccPars[e], icc[e], len, ICC_QUANT);
 			}
 		}
 
@@ -219,22 +215,15 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		return in.getPosition()-start;
 	}
 
-	/*========================= dequantization=========================*/
-	/*private void dequant(int[] pars, float[] vals, int len, float[] table) {
-	for(int i = 0; i<len; i++) {
-	vals[i] = table[pars[i]];
-	}
-	}*/
-
 	/*========================= processing =========================*/
 	public boolean hasHeader() {
 		return headerEnabled;
 	}
 
-	//in: 64 x 38 complex from SBR, left/right: 2048 output time samples
-	public void process(float[][][] in, float[] left, float[] right) {
+	//left: 64 x 38 complex in-/output, left/right: 64 x 38 complex output
+	public void process(float[][][] left, float[][][] right) {
 		//1. hybrid analysis (in -> lBuf)
-		AnalysisFilterbank.process(in, lBuf, header.use34Bands(false));
+		AnalysisFilterbank.process(left, lBuf, header.use34Bands(false));
 
 		//2. decorrelation (lBuf -> rBuf)
 		decorrelate();
@@ -243,6 +232,8 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		performStereoProcessing();
 
 		//4. hybrid synthesis
+		SynthesisFilterbank.process(lBuf, left, header.use34Bands(false));
+		SynthesisFilterbank.process(rBuf, right, header.use34Bands(false));
 	}
 
 	private void decorrelate() {
@@ -323,9 +314,9 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 
 			for(n = 0; n<32; n++) {
 				re = delay[k][n+MAX_DELAY-2][0]*phiFract[k][0]
-						-delay[k][n+MAX_DELAY-2][1]*phiFract[k][1];
+					-delay[k][n+MAX_DELAY-2][1]*phiFract[k][1];
 				im = delay[k][n+MAX_DELAY-2][0]*phiFract[k][1]
-						+delay[k][n+MAX_DELAY-2][1]*phiFract[k][0];
+					+delay[k][n+MAX_DELAY-2][1]*phiFract[k][0];
 				for(m = 0; m<ALLPASS_LINKS; m++) {
 					float a_re = ag[m]*re;
 					float a_im = ag[m]*im;
@@ -420,7 +411,11 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		}
 
 		//mixing
-		//TODO...
+		final int mode = header.getBandMode();
+		for(int e = 0; e<envCount; e++) {
+			for(int n = 0; n<PAR_BANDS[mode]; n++) {
+			}
+		}
 	}
 
 	private void mapPars(int[][] pars, int len, boolean full) {

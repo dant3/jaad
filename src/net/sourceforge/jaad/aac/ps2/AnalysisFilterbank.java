@@ -1,5 +1,6 @@
 package net.sourceforge.jaad.aac.ps2;
 
+//hybrid analysis filterbank: splits lower frequency bands
 class AnalysisFilterbank implements FilterbankTables {
 
 	//in: 64 x 38 complex, out: 91 x 32 complex
@@ -24,7 +25,7 @@ class AnalysisFilterbank implements FilterbankTables {
 		final float[] tmp2 = new float[2];
 		int inOff = 0;
 		int i, j;
-		
+
 		for(i = 0; i<32; i++) {
 			tmp1[0] = FILTER_20_2[6]*in[inOff+6][0];
 			tmp1[1] = FILTER_20_2[6]*in[inOff+6][1];
@@ -63,9 +64,9 @@ class AnalysisFilterbank implements FilterbankTables {
 				sum[1] = FILTER_20_8[k][6][0]*in[inOff+6][1];
 				for(j = 0; j<6; j++) {
 					sum[0] += FILTER_20_8[k][j][0]*(in[inOff+j][0]+in[inOff+12-j][0])
-							-FILTER_20_8[k][j][1]*(in[inOff+j][1]-in[inOff+12-j][1]);
+						-FILTER_20_8[k][j][1]*(in[inOff+j][1]-in[inOff+12-j][1]);
 					sum[1] += FILTER_20_8[k][j][0]*(in[inOff+j][1]+in[inOff+12-j][1])
-							+FILTER_20_8[k][j][1]*(in[inOff+j][0]-in[inOff+12-j][0]);
+						+FILTER_20_8[k][j][1]*(in[inOff+j][0]-in[inOff+12-j][0]);
 				}
 				tmp[k][0] = sum[0];
 				tmp[k][1] = sum[1];
@@ -99,9 +100,9 @@ class AnalysisFilterbank implements FilterbankTables {
 				sum[1] = filter[k][6][0]*in[inOff+6][1];
 				for(j = 0; j<6; j++) {
 					sum[0] += filter[k][j][0]*(in[inOff+j][0]+in[inOff+12-j][0])
-							-filter[k][j][1]*(in[inOff+j][1]-in[inOff+12-j][1]);
+						-filter[k][j][1]*(in[inOff+j][1]-in[inOff+12-j][1]);
 					sum[1] += filter[k][j][0]*(in[inOff+j][1]+in[inOff+12-j][1])
-							+filter[k][j][1]*(in[inOff+j][0]-in[inOff+12-j][0]);
+						+filter[k][j][1]*(in[inOff+j][0]-in[inOff+12-j][0]);
 				}
 				out[k][i][0] = sum[0];
 				out[k][i][1] = sum[1];
