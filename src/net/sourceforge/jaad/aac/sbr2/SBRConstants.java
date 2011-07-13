@@ -38,7 +38,7 @@ interface SBRConstants {
 	int MAX_NOISE_COUNT = 2;
 	int MAX_RELATIVE_BORDERS = 3;
 	int MAX_NQ = 5;
-	int	MAX_CHIRP_FACTORS = 5;
+	int MAX_CHIRP_FACTORS = 5;
 	int MAX_PATCHES = 6;
 	int MAX_LTEMP = 6;
 	//extension ids
@@ -46,4 +46,6 @@ interface SBRConstants {
 	//helper constants
 	double LOG2 = 0.6931471805599453;
 	int[] PAN_OFFSETS = {24, 12};
+	//CEIL_LOG[i] = Math.ceil(Math.log(i+1)/Math.log(2))
+	int[] CEIL_LOG2 = {0, 1, 2, 2, 3, 3};
 }

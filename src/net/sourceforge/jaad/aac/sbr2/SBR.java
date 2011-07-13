@@ -29,7 +29,6 @@ public class SBR implements SBRConstants {
 	private boolean stereo;
 	private int sampleFrequency;
 	private boolean downSampled;
-	private boolean reset;
 	//data
 	private final SBRHeader header;
 	private final ChannelData[] cd;
@@ -81,7 +80,7 @@ public class SBR implements SBRConstants {
 
 		if(in.readBool()) {
 			header.decode(in);
-			tables.calculate(header, sampleFrequency);
+			if(header.isReset()) tables.calculate(header, sampleFrequency);
 		}
 
 		//if at least one header was present yet: decode, else skip
@@ -203,9 +202,10 @@ public class SBR implements SBRConstants {
 
 		//noise
 		final int nq = tables.getNq();
+		final int lq = cd[ch].getNoiseCount();
 		final float[][] q = cd[ch].getNoiseFloorData();
 
-		for(int l = 0; l<cd[ch].getNoiseCount(); l++) {
+		for(int l = 0; l<lq; l++) {
 			for(int k = 0; k<nq; k++) {
 				q[l][k] = (float) Math.pow(2.0f, NOISE_FLOOR_OFFSET-q[l][k]);
 			}
@@ -306,10 +306,10 @@ public class SBR implements SBRConstants {
 			}
 		}
 
-		//3. HF generation (Xlow -> Xhigh)
-		HFGenerator.process(header, tables, cd[ch], Xlow, Xhigh, sampleFrequency);
+		//4. HF generation (Xlow -> Xhigh)
+		HFGenerator.process(tables, cd[ch], Xlow, Xhigh);
 
-		//4. old Y -> X
+		//5. old Y -> X
 		final int lTemp = cd[ch].getLTemp();
 		final int mPrev = tables.getM(true);
 		final int m = tables.getM(false);
@@ -328,11 +328,12 @@ public class SBR implements SBRConstants {
 			}
 		}
 
-		//5. HF adjustment (Xhigh -> Y)
-		HFAdjuster.process(header, tables, cd[ch], Xhigh, Y[ch], reset);
+		//6. HF adjustment (Xhigh -> Y)
+		HFAdjuster.process(header, tables, cd[ch], Xhigh, Y[ch]);
 
-		//6. new Y -> X
+		//7. new Y -> X
 		for(l = lTemp; l<TIME_SLOTS_RATE; l++) {
+			//System.out.println("lTemp: "+lTemp);
 			for(k = 0; k<kx; k++) {
 				X[ch][k][l][0] = Xlow[k][l+T_HF_ADJ][0];
 				X[ch][k][l][1] = Xlow[k][l+T_HF_ADJ][1];

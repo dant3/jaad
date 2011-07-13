@@ -21,7 +21,7 @@ import net.sourceforge.jaad.aac.syntax.BitStream;
 
 class SBRHeader {
 
-	private boolean decoded;
+	private boolean decoded, reset;
 	//header fields sorted by decoding order
 	private boolean ampRes;
 	private int startFrequency, startFrequencyPrev;
@@ -82,10 +82,22 @@ class SBRHeader {
 			interpolFrequency = true;
 			smoothingMode = true;
 		}
+
+		reset = (startFrequency!=startFrequencyPrev||stopFrequency!=stopFrequencyPrev
+				||frequencyScale!=frequencyScalePrev||alterScale!=alterScalePrev
+				||xOverBand!=xOverBandPrev||noiseBands!=noiseBandsPrev);
+	}
+
+	void newFrame() {
+		reset = false;
 	}
 
 	public boolean isDecoded() {
 		return decoded;
+	}
+
+	public boolean isReset() {
+		return reset;
 	}
 
 	public boolean getAmpRes() {

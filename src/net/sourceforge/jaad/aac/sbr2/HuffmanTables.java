@@ -16,6 +16,7 @@
  */
 package net.sourceforge.jaad.aac.sbr2;
 
+//TODO: include LAVs in tables
 interface HuffmanTables {
 
 	//largest absolute values

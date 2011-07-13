@@ -16,6 +16,8 @@
  */
 package net.sourceforge.jaad.aac.sbr2;
 
+import java.util.Arrays;
+
 /*
  * HFAdjustment accoding to 4.6.18.7: Xhigh -> Y
  * 
@@ -30,14 +32,14 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 
 	private static final float[] LIMITER_GAINS = {0.70795f, 1.0f, 1.41254f, 10000000000f};
 	private static final float EPSILON = 1.0f;
-	private static final float EPSILON_0 = 1e-12f;
-	private static final float MAX_BOOST = 1.584893192f;
-	private static final float[] SMOOTHING_FACTORS = {
-		0.33333333333333f,
-		0.30150283239582f,
-		0.21816949906249f,
-		0.11516383427084f,
-		0.03183050093751f
+	private static final float EPSILON_0 = 1E-12f;
+	private static final double MAX_BOOST = 1.584893192;
+	private static final double[] SMOOTHING_FACTORS = {
+		0.33333333333333,
+		0.30150283239582,
+		0.21816949906249,
+		0.11516383427084,
+		0.03183050093751
 	};
 	private static final int[][] PHI = {
 		{1, 0, -1, 0},
@@ -53,14 +55,14 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 		float[][] Qm, Sm, Glim;
 	}
 
-	public static void process(SBRHeader header, FrequencyTables tables, ChannelData cd, float[][][] Xhigh, float[][][] Y, boolean reset) {
+	public static void process(SBRHeader header, FrequencyTables tables, ChannelData cd, float[][][] Xhigh, float[][][] Y) {
 		final Parameter p = map(tables, cd);
-		float[][] eCurr = estimateEnvelopes(header, tables, cd, Xhigh);
+		final float[][] eCurr = estimateEnvelopes(header, tables, cd, Xhigh);
 		calculateGain(header, tables, cd, p, eCurr);
-		assembleSignals(header, tables, cd, p, Xhigh, Y, reset);
+		assembleSignals(header, tables, cd, p, Xhigh, Y);
 	}
 
-	//mapping from dequantized values (4.6.18.7.2)
+	//mapping of dequantized values (4.6.18.7.2)
 	private static Parameter map(FrequencyTables tables, ChannelData cd) {
 		//parameter from FrequencyTables
 		final int kx = tables.getKx(false);
@@ -68,10 +70,11 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 		final int[] fHigh = tables.getFrequencyTable(HIGH);
 		final int nHigh = tables.getN(HIGH);
 		final int M = tables.getM(false);
+		final int nq = tables.getNq();
 
 		//parameter from ChannelData
 		final int le = cd.getEnvCount();
-		final int nq = cd.getNoiseCount();
+		final int lq = cd.getNoiseCount();
 		final int[] freqRes = cd.getFrequencyResolutions();
 		final int la = cd.getLa(false);
 
@@ -102,7 +105,7 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 			}
 
 			//noise: qOrig -> qMapped
-			k = ((cd.getNoiseCount()>1)&&(cd.getTe()[e]>=cd.getTq()[1])) ? 1 : 0;
+			k = ((lq>1)&&(cd.getTe()[e]>=cd.getTq()[1])) ? 1 : 0;
 			for(i = 0; i<nq; i++) {
 				for(m = noiseTable[i]; m<noiseTable[i+1]; m++) {
 					qMapped[e][m-kx] = qOrig[k][i];
@@ -129,7 +132,7 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 			}
 		}
 
-		cd.setSIndexMappedPrevious(sIndexMapped);
+		cd.setSIndexMappedPrevious(sIndexMapped[le-1]);
 
 		final Parameter p = new Parameter();
 		p.eMapped = eMapped;
@@ -232,6 +235,7 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 		for(int e = 0; e<le; e++) {
 			delta = (e!=la)&&(e!=laPrevious);
 
+			//level of additional HF components + gain
 			for(m = 0; m<M; m++) {
 				tmp = p.eMapped[e][m]/(1.0f+p.qMapped[e][m]);
 				Qm[e][m] = (float) Math.sqrt(tmp*p.qMapped[e][m]);
@@ -248,6 +252,7 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 				}
 			}
 
+			//limiter
 			for(k = 0; k<nl; k++) {
 				eMappedSum[k] = EPSILON_0;
 				tmp = EPSILON_0;
@@ -269,6 +274,7 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 				gain[e][m] = Math.min(gain[e][m], gMax);
 			}
 
+			//compensate
 			for(k = 0; k<nl; k++) {
 				tmp = EPSILON_0;
 				for(i = fLim[k]-kx; i<fLim[k+1]-kx; i++) {
@@ -282,9 +288,10 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 
 			//apply boost
 			for(m = 0; m<M; m++) {
-				gMax = Math.min(gTemp[e][km[m]], MAX_BOOST);
+				gMax = (float) Math.min(gTemp[e][km[m]], MAX_BOOST);
 				Qm[e][m] *= gMax;
 				Sm[e][m] *= gMax;
+				gain[e][m] *= gMax;
 			}
 		}
 
@@ -294,7 +301,8 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 	}
 
 	//assembling HF signals (4.6.18.7.5)
-	private static void assembleSignals(SBRHeader header, FrequencyTables tables, ChannelData cd, Parameter p, float[][][] Xhigh, float[][][] Y, boolean reset) {
+	private static void assembleSignals(SBRHeader header, FrequencyTables tables, ChannelData cd, Parameter p, float[][][] Xhigh, float[][][] Y) {
+		final boolean reset = header.isReset();
 		final int hSL = header.isSmoothingMode() ? 0 : 4;
 		final int M = tables.getM(false);
 		final int le = cd.getEnvCount();
@@ -308,8 +316,6 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 
 		final float[][] gTmp = cd.getGTmp();
 		final float[][] qTmp = cd.getQTmp();
-		final float[][][] gFilt = new float[42][M][2]; //TODO: size
-		final float[][][] qFilt = new float[42][M][2]; //TODO: size
 
 		int e, i, m, j;
 
@@ -329,63 +335,58 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 
 		//calculate new
 		int phiSign = (1-2*(kx&1));
+		float gFilt, qFilt;
 
 		for(e = 0; e<le; e++) {
-			//fill gTmp and qTmp
 			for(i = RATE*te[e]; i<RATE*te[e+1]; i++) {
-				System.arraycopy(p.Glim[e], 0, gTmp[i+hSL], 0, M);
-				System.arraycopy(p.Qm[e], 0, qTmp[i+hSL], 0, M);
-			}
-
-			//fill gFilt = W1
-			if((e!=la)&&(e!=laPrev)&&(hSL!=0)) {
-				for(i = RATE*te[e]; i<RATE*te[e+1]; i++) {
+				if(hSL!=0&&e!=la&&e!=laPrev) {
 					for(m = 0; m<M; m++) {
-						for(j = 0; j<hSL; j++) {
-							gFilt[i][m][0] += gTmp[i-j+hSL][m]*SMOOTHING_FACTORS[j];
+						final int idx1 = i+hSL;
+						gFilt = 0.0f;
+						for(j = 0; j<=hSL; j++) {
+							gFilt += gTmp[idx1-j][m]*SMOOTHING_FACTORS[j];
 						}
-						gFilt[i][m][1] = gFilt[i][m][0]*Xhigh[m+kx][i+T_HF_ADJ][1];
-						gFilt[i][m][0] *= Xhigh[m+kx][i+T_HF_ADJ][0];
+						Y[i][m+kx][0] = Xhigh[m+kx][i+T_HF_ADJ][0]*gFilt;
+						Y[i][m+kx][1] = Xhigh[m+kx][i+T_HF_ADJ][1]*gFilt;
 					}
 				}
-			}
-			else {
-				for(i = RATE*te[e]; i<RATE*te[e+1]; i++) {
+				else {
 					for(m = 0; m<M; m++) {
-						gFilt[i][m][0] = gTmp[i+hSL][m]*Xhigh[m+kx][i+T_HF_ADJ][0];
-						gFilt[i][m][1] = gTmp[i+hSL][m]*Xhigh[m+kx][i+T_HF_ADJ][1];
+						final float g_filt = gTmp[i+hSL][m];
+						Y[i][m+kx][0] = Xhigh[m+kx][i+T_HF_ADJ][0]*g_filt;
+						Y[i][m+kx][1] = Xhigh[m+kx][i+T_HF_ADJ][1]*g_filt;
 					}
 				}
-			}
 
-			//fill qFilt = W2
-			for(i = RATE*te[e]; i<RATE*te[e+1]; i++) {
-				for(m = 0; m<M; m++) {
-					noiseIndex = (noiseIndex+1)&0x1FF;
-					if((e!=la)&&(e!=laPrev)&&(p.Sm[e][m]==0)) {
-						if(hSL==0) gFilt[i][m][0] = qTmp[i][m];
+				if(e!=la&&e!=laPrev) {
+					for(m = 0; m<M; m++) {
+						noiseIndex = (noiseIndex+1)&0x1ff;
+						if(p.Sm[e][m]!=0) {
+							Y[i][m+kx][0] += p.Sm[e][m]*PHI[0][sineIndex];
+							Y[i][m+kx][1] += p.Sm[e][m]*(PHI[1][sineIndex]*phiSign);
+						}
 						else {
-							qFilt[i][m][0] = 0;
-							for(j = 0; j<hSL; j++) {
-								qFilt[i][m][0] += qTmp[i-j-hSL][m]*SMOOTHING_FACTORS[j];
+							if(hSL!=0) {
+								final int idx1 = i+hSL;
+								qFilt = 0.0f;
+								for(j = 0; j<=hSL; j++) {
+									qFilt += qTmp[idx1-j][m]*SMOOTHING_FACTORS[j];
+								}
 							}
+							else qFilt = qTmp[i][m];
+							Y[i][m+kx][0] += qFilt*NOISE_TABLE[noiseIndex][0];
+							Y[i][m+kx][1] += qFilt*NOISE_TABLE[noiseIndex][1];
 						}
-						qFilt[i][m][1] = gFilt[i][m][1]+qFilt[i][m][0]*NOISE_TABLE[noiseIndex][1];
-						qFilt[i][m][0] = gFilt[i][m][0]+qFilt[i][m][0]*NOISE_TABLE[noiseIndex][0];
-					}
-					else {
-						qFilt[i][m][0] = gFilt[i][m][0];
-						qFilt[i][m][1] = gFilt[i][m][1];
+						phiSign = -phiSign;
 					}
 				}
-			}
-
-			//fill Y
-			for(i = RATE*te[e]; i<RATE*te[e+1]; i++) {
-				for(m = 0; m<M; m++) {
-					Y[i+T_HF_ADJ][m+kx][0] = qFilt[i][m][0]+(p.Sm[e][m]*PHI[0][sineIndex]);
-					Y[i+T_HF_ADJ][m+kx][1] = qFilt[i][m][1]+(p.Sm[e][m]*PHI[1][sineIndex]*phiSign);
-					phiSign = -phiSign;
+				else {
+					noiseIndex = (noiseIndex+M)&0x1ff;
+					for(m = 0; m<M; m++) {
+						Y[i][m+kx][0] += p.Sm[e][m]*PHI[0][sineIndex];
+						Y[i][m+kx][1] += p.Sm[e][m]*(PHI[1][sineIndex]*phiSign);
+						phiSign = -phiSign;
+					}
 				}
 				sineIndex = (sineIndex+1)&3;
 			}

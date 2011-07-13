@@ -34,7 +34,7 @@ class HFGenerator implements SBRConstants {
 	private static final float CHIRP_MIN = 0.015625f;
 
 	//in: 32x40 complex Xlow, out: 23x40 complex Xhigh
-	public static void process(SBRHeader header, FrequencyTables tables, ChannelData cd, float[][][] Xlow, float[][][] Xhigh, int sampleRate) throws AACException {
+	public static void process(FrequencyTables tables, ChannelData cd, float[][][] Xlow, float[][][] Xhigh) throws AACException {
 		//calculate chirp factors
 		final float[] bwArray = calculateChirpFactors(tables, cd);
 
@@ -58,8 +58,9 @@ class HFGenerator implements SBRConstants {
 		final int end = RATE*te[cd.getEnvCount()];
 
 		final float[] alpha = new float[4];
+		float square;
 		int l, x; //loop indizes
-		int k = tables.getKx(false);
+		int k = kx;
 		int g = 0;
 
 		for(int j = 0; j<patchCount; j++) {
@@ -73,8 +74,9 @@ class HFGenerator implements SBRConstants {
 				if(g<0) throw new AACException("SBR: HFGenerator: no subband found for frequency "+k);
 
 				//fill Xhigh[k] (4.6.18.6.3)
-				alpha[0] = alpha1[p][0]*bwArray[g]*bwArray[g];
-				alpha[1] = alpha1[p][1]*bwArray[g]*bwArray[g];
+				square = bwArray[g]*bwArray[g];
+				alpha[0] = alpha1[p][0]*square;
+				alpha[1] = alpha1[p][1]*square;
 				alpha[2] = alpha0[p][0]*bwArray[g];
 				alpha[3] = alpha0[p][1]*bwArray[g];
 				for(l = start; l<end; l++) {
@@ -99,22 +101,24 @@ class HFGenerator implements SBRConstants {
 				Xhigh[k][j][0] = 0;
 				Xhigh[k][j][1] = 0;
 			}
+			k++;
 		}
 	}
 
 	private static float[] calculateChirpFactors(FrequencyTables tables, ChannelData cd) {
 		//calculates chirp factors and replaces old ones in ChannelData
+		final int nq = tables.getNq();
 		final int[] invfMode = cd.getInvfMode(false);
 		final int[] invfModePrevious = cd.getInvfMode(true);
 		final float[] bwArray = cd.getChirpFactors();
 
 		float tmp;
 		float[] chirpCoefs;
-		for(int i = 0; i<MAX_CHIRP_FACTORS; i++) {
+		for(int i = 0; i<nq; i++) {
 			tmp = BW_COEFS[invfModePrevious[i]][invfMode[i]];
 			chirpCoefs = (tmp<bwArray[i]) ? CHIRP_COEFS[0] : CHIRP_COEFS[1];
 			bwArray[i] = (chirpCoefs[0]*tmp)+(chirpCoefs[1]*bwArray[i]);
-			if(bwArray[i]<CHIRP_MIN) bwArray[i]=0;
+			if(bwArray[i]<CHIRP_MIN) bwArray[i] = 0;
 		}
 
 		return bwArray;

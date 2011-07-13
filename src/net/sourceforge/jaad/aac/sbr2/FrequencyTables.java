@@ -21,10 +21,39 @@ import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.SampleFrequency;
 
 //stores and calculates frequency tables, TODO: make arrays final with max sizes
-class FrequencyTables implements SBRConstants, SBRTables {
+class FrequencyTables implements SBRConstants {
 
-	private static final float GOAL_SB_FACTOR = 2.048e6f;
-	private int k0, k2;
+	private static final int[] MFT_START_MIN = {7, 7, 10, 11, 12, 16, 16, 17, 24};
+	private static final int[] MFT_STOP_MIN = {13, 15, 20, 21, 23, 32, 32, 35, 48};
+	private static final int[] MFT_SF_OFFSETS = {5, 5, 4, 4, 4, 3, 2, 1, 0};
+	private static final int[][] MFT_START_OFFSETS = {
+		{-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7}, //16000
+		{-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13}, //22050
+		{-5, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13, 16}, //24000
+		{-6, -4, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13, 16}, //32000
+		{-4, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13, 16, 20}, //44100-64000
+		{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13, 16, 20, 24} //>64000
+	};
+	private static final int[][] MFT_STOP_OFFSETS = {
+		{2, 4, 6, 8, 11, 14, 18, 22, 26, 31, 37, 44, 51},
+		{2, 4, 6, 8, 11, 14, 18, 22, 26, 31, 36, 42, 49},
+		{2, 4, 6, 9, 11, 14, 17, 21, 25, 29, 34, 39, 44},
+		{2, 4, 6, 9, 11, 14, 17, 21, 24, 28, 33, 38, 43},
+		{2, 4, 6, 9, 11, 14, 17, 20, 24, 28, 32, 36, 41},
+		{2, 4, 6, 8, 10, 12, 14, 17, 20, 23, 26, 29, 32},
+		{2, 4, 6, 8, 10, 12, 14, 17, 20, 23, 26, 29, 32},
+		{2, 3, 5, 7, 9, 11, 13, 16, 18, 21, 23, 26, 29},
+		{1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 15, 16}
+	};
+	private static final int[] MFT_INPUT1 = {12, 10, 8};
+	private static final float[] MFT_INPUT2 = {1.0f, 1.3f};
+	private static final float[] LIM_BANDS_PER_OCTAVE_POW = {
+		1.32715174233856803909f, //2^(0.49/1.2)
+		1.18509277094158210129f, //2^(0.49/2)
+		1.11987160404675912501f //2^(0.49/3)
+	};
+	private static final float GOAL_SB_FACTOR = 2.048E6f;
+	int k0, k2; //TODO: private
 	//master
 	private int[] mft;
 	private int nMaster;
@@ -34,7 +63,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 	private int m, mPrev, kx, kxPrev;
 	//noise table
 	private int[] fNoise;
-	private int nq;
+	int nq; //TODO: private
 	//limiter table
 	private int[] fLim;
 	private int nl;
@@ -49,7 +78,9 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		patchSubbands = new int[MAX_PATCHES];
 		patchStartSubband = new int[MAX_PATCHES];
 		kx = 0;
+		kxPrev = 0;
 		m = 0;
+		mPrev = 0;
 	}
 
 	void calculate(SBRHeader header, int sampleRate) throws AACException {
@@ -255,7 +286,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 		int usb = kx;
 		patchCount = 0;
 
-		int goalSb = Math.round(GOAL_SB_FACTOR/sampleRate); //TODO: replace with table
+		int goalSb = Math.round(GOAL_SB_FACTOR/(float) sampleRate); //TODO: replace with table
 		int k;
 		if(goalSb<kx+m) {
 			k = 0;
@@ -271,7 +302,7 @@ class FrequencyTables implements SBRConstants, SBRTables {
 			do {
 				j--;
 				sb = mft[j];
-				odd = (sb-2+k0)%2;
+				odd = (sb-2+k0)&1;
 			}
 			while(sb>(k0-1+msb-odd));
 
