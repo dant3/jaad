@@ -23,7 +23,6 @@ import net.sourceforge.jaad.aac.Profile;
 import net.sourceforge.jaad.aac.SampleBuffer;
 import net.sourceforge.jaad.aac.SampleFrequency;
 import net.sourceforge.jaad.aac.filterbank.FilterBank;
-import net.sourceforge.jaad.aac.noise.PNS;
 import net.sourceforge.jaad.aac.prediction.LTPrediction;
 import net.sourceforge.jaad.aac.sbr2.SBR;
 import net.sourceforge.jaad.aac.stereo.IS;
@@ -247,9 +246,6 @@ public class SyntacticElements implements Constants {
 		//inverse quantization
 		final float[] iqData = ics.getInvQuantData();
 
-		//PNS
-		PNS.processSingle(ics, iqData);
-
 		//prediction
 		if(profile.equals(Profile.AAC_MAIN)&&info.isICPredictionPresent()) info.getICPrediction().process(ics, iqData, sf);
 		if(LTPrediction.isLTPProfile(profile)&&info.isLTPrediction1Present()) ltp.process(ics, iqData, filterBank, sf);
@@ -300,13 +296,6 @@ public class SyntacticElements implements Constants {
 		//inverse quantization
 		final float[] iqData1 = ics1.getInvQuantData();
 		final float[] iqData2 = ics2.getInvQuantData();
-
-		//PNS
-		if(cpe.isMSMaskPresent()) PNS.processPair(cpe, iqData1, iqData2);
-		else {
-			PNS.processSingle(ics1, iqData1);
-			PNS.processSingle(ics2, iqData2);
-		}
 
 		//MS
 		if(cpe.isCommonWindow()&&cpe.isMSMaskPresent()) MS.process(cpe, iqData1, iqData2);
@@ -412,9 +401,9 @@ public class SyntacticElements implements Constants {
 		final boolean be = buffer.isBigEndian();
 
 		final int chs = data.length;
-		final int length = (sbrPresent ? 2 : 1)*config.getFrameLength();
-		int freq = config.getSampleFrequency().getFrequency();
-		if(sbrPresent) freq *= 2;
+		final int mult = (sbrPresent) ? 2 : 1;
+		final int length = mult*config.getFrameLength();
+		final int freq = mult*config.getSampleFrequency().getFrequency();
 
 		byte[] b = buffer.getData();
 		if(b.length!=chs*length*2) b = new byte[chs*length*2];

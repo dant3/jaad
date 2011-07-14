@@ -18,12 +18,10 @@ package net.sourceforge.jaad.aac.error;
 
 import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.huffman.HCB;
-import net.sourceforge.jaad.aac.huffman.Huffman;
 import net.sourceforge.jaad.aac.syntax.BitStream;
 import net.sourceforge.jaad.aac.syntax.Constants;
 import net.sourceforge.jaad.aac.syntax.ICSInfo;
 import net.sourceforge.jaad.aac.syntax.ICStream;
-import net.sourceforge.jaad.aac.syntax.SectionData;
 
 /**
  * Huffman Codeword Reordering
@@ -114,12 +112,13 @@ public class HCR implements Constants {
 		final int maxSFB = info.getMaxSFB();
 		final int[] swbOffsets = info.getSWBOffsets();
 		final int swbOffsetMax = info.getSWBOffsetMax();
-		final SectionData sectData = ics.getSectionData();
-		final int[][] sectStart = sectData.getSectStart();
-		final int[][] sectEnd = sectData.getSectEnd();
-		final int[] numSec = sectData.getNumSec();
-		final int[][] sectCB = sectData.getSectCB();
-		final int[][] sectSFBOffsets = info.getSectSFBOffsets();
+		//TODO:
+		//final SectionData sectData = ics.getSectionData();
+		final int[][] sectStart = null; //sectData.getSectStart();
+		final int[][] sectEnd = null; //sectData.getSectEnd();
+		final int[] numSec = null; //sectData.getNumSec();
+		final int[][] sectCB = null; //sectData.getSectCB();
+		final int[][] sectSFBOffsets = null; //info.getSectSFBOffsets();
 
 		//check parameter
 		final int spDataLen = ics.getReorderedSpectralDataLength();

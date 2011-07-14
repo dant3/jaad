@@ -38,11 +38,11 @@ public interface Constants {
 	int ELEMENT_PCE = 5;
 	int ELEMENT_FIL = 6;
 	int ELEMENT_END = 7;
-	//maximum number of windows and window groups
+	//maximum numbers
 	int MAX_WINDOW_COUNT = 8;
 	int MAX_WINDOW_GROUP_COUNT = MAX_WINDOW_COUNT;
-	//maximum number of Scale Window Bands
-	int MAX_SWB_COUNT = 51;
-	float SQRT2 = 1.414213562f;
 	int MAX_LTP_SFB = 40;
+	int MAX_SECTIONS = 120;
+	int MAX_MS_MASK = 128;
+	float SQRT2 = 1.414213562f;
 }

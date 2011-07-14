@@ -43,15 +43,15 @@ public class Huffman implements Codebooks {
 		return off;
 	}
 
-	private static void signValues(BitStream in, short[] data, int off, int len) throws AACException {
+	private static void signValues(BitStream in, int[] data, int off, int len) throws AACException {
 		for(int i = off; i<off+len; i++) {
 			if(data[i]!=0) {
-				if(in.readBool()) data[i] = (short) -data[i];
+				if(in.readBool()) data[i] = -data[i];
 			}
 		}
 	}
 
-	private static short getEscape(BitStream in, short s) throws AACException {
+	private static int getEscape(BitStream in, int s) throws AACException {
 		final boolean neg = s<0;
 
 		int i = 4;
@@ -60,7 +60,7 @@ public class Huffman implements Codebooks {
 		}
 		final int j = in.readBits(i)|(1<<i);
 
-		return (short) (neg ? -j : j);
+		return (neg ? -j : j);
 	}
 
 	public static int decodeScaleFactor(BitStream in) throws AACException {
@@ -68,18 +68,26 @@ public class Huffman implements Codebooks {
 		return HCB_SF[offset][2];
 	}
 
-	public static void decodeSpectralData(BitStream in, int cb, short[] data, int off) throws AACException {
-		final int[][] HCB = CODEBOOKS[cb-1];
+	public static void decodeSpectralData(BitStream in, int cb, int[] data, int off) throws AACException {
+		int[][] HCB;
+		try {
+			HCB = CODEBOOKS[cb-1];
+		}
+		catch(ArrayIndexOutOfBoundsException ex) {
+			System.out.println("codebook: "+cb);
+			ex.printStackTrace();
+			throw ex;
+		}
 
 		//find index
 		final int offset = findOffset(in, HCB);
 
 		//copy data
-		data[off] = (short) HCB[offset][2];
-		data[off+1] = (short) HCB[offset][3];
+		data[off] = HCB[offset][2];
+		data[off+1] = HCB[offset][3];
 		if(cb<5) {
-			data[off+2] = (short) HCB[offset][4];
-			data[off+3] = (short) HCB[offset][5];
+			data[off+2] = HCB[offset][4];
+			data[off+3] = HCB[offset][5];
 		}
 
 		//sign & escape

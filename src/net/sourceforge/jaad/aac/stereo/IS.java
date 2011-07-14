@@ -16,67 +16,58 @@
  */
 package net.sourceforge.jaad.aac.stereo;
 
-import net.sourceforge.jaad.aac.prediction.ICPrediction;
+import net.sourceforge.jaad.aac.huffman.HCB;
 import net.sourceforge.jaad.aac.syntax.CPE;
 import net.sourceforge.jaad.aac.syntax.Constants;
 import net.sourceforge.jaad.aac.syntax.ICSInfo;
 import net.sourceforge.jaad.aac.syntax.ICStream;
-import net.sourceforge.jaad.aac.syntax.SectionData;
 
 /**
  * Intensity stereo
  * @author in-somnia
  */
-public final class IS implements Constants, ISScaleTable {
+public final class IS implements Constants, ISScaleTable, HCB {
 
 	private IS() {
 	}
 
 	public static void process(CPE cpe, float[] specL, float[] specR) {
-		final ICStream icsL = cpe.getLeftChannel();
-		final ICStream icsR = cpe.getRightChannel();
-		final ICSInfo infoL = icsL.getInfo();
-		final ICSInfo infoR = icsR.getInfo();
-		final SectionData sectDataR = icsR.getSectionData();
-		final int windowGroupCount = infoR.getWindowGroupCount();
-		final int maxSFB = infoR.getMaxSFB();
-		final int[][] scaleFactors = icsR.getScaleFactors();
-		final int[] swbOffsets = infoR.getSWBOffsets();
-		final int swbOffsetMax = infoL.getSWBOffsetMax();
-		final ICPrediction predL = infoL.getICPrediction();
-		final ICPrediction predR = infoR.getICPrediction();
+		final ICStream ics = cpe.getRightChannel();
+		final ICSInfo info = ics.getInfo();
+		final int[] offsets = info.getSWBOffsets();
+		final int windowGroups = info.getWindowGroupCount();
+		final int maxSFB = info.getMaxSFB();
+		final int[] sfbCB = ics.getSfbCB();
+		final int[] sectEnd = ics.getSectEnd();
+		final float[] scaleFactors = ics.getScaleFactors();
 
-		final int shortFrameLen = specL.length/8;
-
-		int sfb, b, i, max;
+		int w, i, j, c, end, off;
+		int idx = 0, groupOff = 0;
 		float scale;
-		int group = 0;
-
-		for(int g = 0; g<windowGroupCount; g++) {
-			for(b = 0; b<infoR.getWindowGroupLength(g); b++) {
-				for(sfb = 0; sfb<maxSFB; sfb++) {
-					max = Math.min(swbOffsets[sfb+1], swbOffsetMax);
-					if(sectDataR.isIntensity(g, sfb)!=0) {
-						predL.setPredictionUnused(sfb);
-						predR.setPredictionUnused(sfb);
-
-						scale = SCALE_TABLE[scaleFactors[g][sfb]];
-
-						for(i = swbOffsets[sfb]; i<max; i++) {
-							specR[(group*shortFrameLen)+i] = specL[(group*shortFrameLen)+i]*scale;
-							if(sectDataR.isIntensity(g, sfb)!=invertIntensity(cpe, g, sfb)) specR[(group*shortFrameLen)+i] = -specR[(group*shortFrameLen)+i];
+		for(int g = 0; g<windowGroups; g++) {
+			for(i = 0; i<maxSFB;) {
+				if(sfbCB[idx]==INTENSITY_HCB||sfbCB[idx]==INTENSITY_HCB2) {
+					end = sectEnd[idx];
+					for(; i<end; i++, idx++) {
+						c = sfbCB[idx]==INTENSITY_HCB ? 1 : -1;
+						if(cpe.isMSMaskPresent())
+							c *= cpe.isMSUsed(idx) ? -1 : 1;
+						scale = c*scaleFactors[idx];
+						for(w = 0; w<info.getWindowGroupLength(g); w++) {
+							off = groupOff+w*128+offsets[i];
+							for(j = 0; j<offsets[i+1]-offsets[i]; j++) {
+								specR[off+j] = specL[off+j]*scale;
+							}
 						}
 					}
 				}
-				group++;
+				else {
+					end = sectEnd[idx];
+					idx += end-i;
+					i = end;
+				}
 			}
+			groupOff += info.getWindowGroupLength(g)*128;
 		}
-	}
-
-	private static int invertIntensity(CPE cpe, int g, int sfb) {
-		int i;
-		if(cpe.getMSMask().equals(MSMask.TYPE_USED)) i = (1-2*(cpe.isMSUsed(g, sfb) ? 1 : 0));
-		else i = 1;
-		return i;
 	}
 }

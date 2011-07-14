@@ -14,16 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If notf, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.aac.invquant;
+package net.sourceforge.jaad.aac.syntax;
 
 /**
  * Inverse quantization lookup table for all possible values
  * from 0<sup>4/3</sup> to 8191<sup>4/3</sup>.
  * @author in-somnia
  */
+//TODO: list is too big, create at startup
 interface IQTable {
 
-	int MAX_VALUE = 8191;
 	float[] IQ_TABLE = {
 		0.0f,
 		1.0f,

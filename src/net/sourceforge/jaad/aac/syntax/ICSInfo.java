@@ -59,7 +59,7 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 			return w;
 		}
 	}
-	private final int frameLength, shortFrameLen;
+	private final int frameLength;
 	private WindowSequence windowSequence;
 	private int[] windowShape;
 	private int maxSFB;
@@ -74,15 +74,12 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 	private int[] windowGroupLength;
 	private int swbCount;
 	private int[] swbOffsets;
-	private int[][] sectSFBOffsets;
 
 	public ICSInfo(int frameLength) {
 		this.frameLength = frameLength;
-		shortFrameLen = frameLength/8;
 		windowShape = new int[2];
 		windowSequence = WindowSequence.ONLY_LONG_SEQUENCE;
 		windowGroupLength = new int[MAX_WINDOW_GROUP_COUNT];
-		sectSFBOffsets = new int[MAX_WINDOW_GROUP_COUNT][MAX_SWB_COUNT+1];
 		ltpData1Present = false;
 		ltpData2Present = false;
 	}
@@ -97,19 +94,31 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 		windowShape[PREVIOUS] = windowShape[CURRENT];
 		windowShape[CURRENT] = in.readBit();
 
-		int grouping = 0;
+		windowGroupCount = 1;
+		windowGroupLength[0] = 1;
 		if(windowSequence.equals(WindowSequence.EIGHT_SHORT_SEQUENCE)) {
 			maxSFB = in.readBits(4);
-			grouping = in.readBits(7);
+			int i;
+			for(i = 0; i<7; i++) {
+				if(in.readBool()) windowGroupLength[windowGroupCount-1]++;
+				else {
+					windowGroupCount++;
+					windowGroupLength[windowGroupCount-1] = 1;
+				}
+			}
+			windowCount = 8;
+			swbOffsets = SWB_OFFSET_SHORT_WINDOW[sf.getIndex()];
+			swbCount = SWB_SHORT_WINDOW_COUNT[sf.getIndex()];
+			predictionDataPresent = false;
 		}
 		else {
 			maxSFB = in.readBits(6);
+			windowCount = 1;
+			swbOffsets = SWB_OFFSET_LONG_WINDOW[sf.getIndex()];
+			swbCount = SWB_LONG_WINDOW_COUNT[sf.getIndex()];
 			predictionDataPresent = in.readBool();
 			if(predictionDataPresent) readPredictionData(in, conf.getProfile(), sf, commonWindow);
 		}
-
-		if(windowSequence.equals(WindowSequence.EIGHT_SHORT_SEQUENCE)) computeWindowGroupingInfoShort(sf, grouping);
-		else computeWindowGroupingInfoLong(sf);
 	}
 
 	private void readPredictionData(BitStream in, Profile profile, SampleFrequency sf, boolean commonWindow) throws AACException {
@@ -143,73 +152,9 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 		}
 	}
 
-	private void computeWindowGroupingInfoLong(SampleFrequency sf) throws AACException {
-		windowCount = 1;
-		windowGroupCount = 1;
-		windowGroupLength[0] = 1;
-		swbCount = SWB_LONG_WINDOW_COUNT[sf.getIndex()];
-		if(swbOffsets==null||swbOffsets.length!=swbCount+1) {
-			//only reallocate if needed
-			swbOffsets = new int[swbCount+1];
-		}
-
-		int offset;
-		for(int i = 0; i<swbCount+1; i++) {
-			offset = SWB_OFFSET_LONG_WINDOW[sf.getIndex()][i];
-			if(offset<0) throw new AACException("invalid swb offset while decoding ICSInfo");
-			sectSFBOffsets[0][i] = offset;
-			swbOffsets[i] = offset;
-		}
-		if(sectSFBOffsets[0][swbCount]!=frameLength) throw new AACException("unexpected window length while decoding ICSInfo: "+sectSFBOffsets[0][swbCount]);
-	}
-
-	private void computeWindowGroupingInfoShort(SampleFrequency sf, int scaleFactorGrouping) throws AACException {
-		windowCount = 8;
-		windowGroupCount = 1;
-		windowGroupLength[0] = 1;
-		swbCount = SWB_SHORT_WINDOW_COUNT[sf.getIndex()];
-		if(swbOffsets==null||swbOffsets.length!=swbCount+1) {
-			//only reallocate if needed
-			swbOffsets = new int[swbCount+1];
-		}
-
-		int i;
-		for(i = 0; i<swbCount+1; i++) {
-			swbOffsets[i] = SWB_OFFSET_SHORT_WINDOW[sf.getIndex()][i];
-		}
-
-		int bit = 1<<7;
-		for(i = 0; i<windowCount-1; i++) {
-			bit >>= 1;
-			if((scaleFactorGrouping&bit)==0) {
-				windowGroupCount++;
-				windowGroupLength[windowGroupCount-1] = 1;
-			}
-			else windowGroupLength[windowGroupCount-1]++;
-		}
-		int offset, sectSFB, width;
-		for(int g = 0; g<windowGroupCount; g++) {
-			sectSFB = 0;
-			offset = 0;
-
-			for(i = 0; i<swbCount; i++) {
-				if(i+1==swbCount) width = shortFrameLen-SWB_OFFSET_SHORT_WINDOW[sf.getIndex()][i];
-				else width = SWB_OFFSET_SHORT_WINDOW[sf.getIndex()][i+1]-SWB_OFFSET_SHORT_WINDOW[sf.getIndex()][i];
-				width *= windowGroupLength[g];
-				sectSFBOffsets[g][sectSFB++] = offset;
-				offset += width;
-			}
-			sectSFBOffsets[g][sectSFB] = offset;
-		}
-	}
-
 	/* =========== gets ============ */
 	public int getMaxSFB() {
 		return maxSFB;
-	}
-
-	public int[][] getSectSFBOffsets() {
-		return sectSFBOffsets;
 	}
 
 	public int getSWBCount() {
@@ -218,6 +163,10 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 
 	public int[] getSWBOffsets() {
 		return swbOffsets;
+	}
+
+	public int getSWBOffsetMax() {
+		return swbOffsets[swbCount];
 	}
 
 	public int getWindowCount() {
@@ -274,13 +223,9 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 		if(ltpData2Present) ltPredict2.setPredictionUnused(sfb);
 	}
 
-	public int getSWBOffsetMax() {
-		return swbOffsets[swbCount];
-	}
-
 	public void setData(ICSInfo info) {
 		windowSequence = WindowSequence.valueOf(info.windowSequence.name());
-		windowShape[PREVIOUS] = info.windowShape[PREVIOUS];
+		windowShape[PREVIOUS] = windowShape[CURRENT];
 		windowShape[CURRENT] = info.windowShape[CURRENT];
 		maxSFB = info.maxSFB;
 		predictionDataPresent = info.predictionDataPresent;
@@ -295,9 +240,5 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 		windowGroupLength = Arrays.copyOf(info.windowGroupLength, info.windowGroupLength.length);
 		swbCount = info.swbCount;
 		swbOffsets = Arrays.copyOf(info.swbOffsets, info.swbOffsets.length);
-		sectSFBOffsets = new int[info.sectSFBOffsets.length][];
-		for(int i = 0; i<info.sectSFBOffsets.length; i++) {
-			sectSFBOffsets[i] = Arrays.copyOf(info.sectSFBOffsets[i], info.sectSFBOffsets[i].length);
-		}
 	}
 }

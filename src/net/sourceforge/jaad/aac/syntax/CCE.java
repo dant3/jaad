@@ -97,7 +97,8 @@ class CCE extends Element implements Constants {
 		final ICSInfo info = ics.getInfo();
 		final int windowGroupCount = info.getWindowGroupCount();
 		final int maxSFB = info.getMaxSFB();
-		final int[][] sfbCB = ics.getSectionData().getSfbCB();
+		//TODO:
+		final int[][] sfbCB = null;//ics.getSectionData().getSfbCB();
 
 		for(i = 0; i<gainCount; i++) {
 			int idx = 0;
@@ -151,7 +152,8 @@ class CCE extends Element implements Constants {
 		final int[] swbOffsets = info.getSWBOffsets();
 		final int windowGroupCount = info.getWindowGroupCount();
 		final int maxSFB = info.getMaxSFB();
-		final int[][] sfbCB = ics.getSectionData().getSfbCB();
+		//TODO:
+		final int[][] sfbCB = null; //ics.getSectionData().getSfbCB();
 
 		int srcOff = 0;
 		int dstOff = 0;

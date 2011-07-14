@@ -16,28 +16,30 @@
  */
 package net.sourceforge.jaad.aac.syntax;
 
+import java.util.Arrays;
 import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.ChannelConfiguration;
 import net.sourceforge.jaad.aac.DecoderConfig;
-import net.sourceforge.jaad.aac.error.HCR;
 import net.sourceforge.jaad.aac.error.RVLC;
 import net.sourceforge.jaad.aac.gain.GainControl;
 import net.sourceforge.jaad.aac.huffman.HCB;
 import net.sourceforge.jaad.aac.huffman.Huffman;
-import net.sourceforge.jaad.aac.invquant.InvQuant;
 import net.sourceforge.jaad.aac.noise.TNS;
 import java.util.logging.Level;
 
-public class ICStream implements Constants, HCB {
+//TODO: apply pulse data
+public class ICStream implements Constants, HCB, ScaleFactorTable, IQTable {
 
 	private static final int SF_DELTA = 60;
+	private static final int SF_OFFSET = 200;
+	private static int randomState = 0x1F2E3D4C;
 	private final int frameLength;
 	//always needed
 	private final ICSInfo info;
-	private final SectionData sectionData;
-	private final short[] data;
-	private final float[] invQuant;
-	private int[][] scaleFactors;
+	private final int[] sfbCB;
+	private final int[] sectEnd;
+	private final float[] data;
+	private final float[] scaleFactors;
 	private int globalGain;
 	private boolean pulseDataPresent, tnsDataPresent, gainControlPresent;
 	//only allocated if needed
@@ -54,9 +56,10 @@ public class ICStream implements Constants, HCB {
 	public ICStream(int frameLength) {
 		this.frameLength = frameLength;
 		info = new ICSInfo(frameLength);
-		sectionData = new SectionData();
-		data = new short[frameLength];
-		invQuant = new float[frameLength];
+		sfbCB = new int[MAX_SECTIONS];
+		sectEnd = new int[MAX_SECTIONS];
+		data = new float[frameLength];
+		scaleFactors = new float[MAX_SECTIONS];
 	}
 
 	/* ========= decoding ========== */
@@ -68,9 +71,10 @@ public class ICStream implements Constants, HCB {
 
 		if(!commonWindow) info.decode(in, conf, commonWindow);
 
-		sectionData.decode(in, info, conf.isSectionDataResilienceUsed());
-		if(conf.isScalefactorResilienceUsed()) rvlc.decode(in, this, scaleFactors);
-		else decodeScaleFactors(in);
+		decodeSectionData(in, conf.isSectionDataResilienceUsed());
+
+		//if(conf.isScalefactorResilienceUsed()) rvlc.decode(in, this, scaleFactors);
+		/*else*/ decodeScaleFactors(in);
 
 		pulseDataPresent = in.readBool();
 		if(pulseDataPresent) {
@@ -99,9 +103,40 @@ public class ICStream implements Constants, HCB {
 			int max = (conf.getChannelConfiguration()==ChannelConfiguration.CHANNEL_CONFIG_STEREO) ? 6144 : 12288;
 			reorderedSpectralDataLen = Math.max(in.readBits(14), max);
 			longestCodewordLen = Math.max(in.readBits(6), 49);
-			HCR.decodeReorderedSpectralData(this, in, data, conf.isSectionDataResilienceUsed());
+			//HCR.decodeReorderedSpectralData(this, in, data, conf.isSectionDataResilienceUsed());
 		}
 		else decodeSpectralData(in);
+	}
+
+	public void decodeSectionData(BitStream in, boolean sectionDataResilienceUsed) throws AACException {
+		Arrays.fill(sfbCB, 0);
+		Arrays.fill(sectEnd, 0);
+		final int bits = info.isEightShortFrame() ? 3 : 5;
+		final int escVal = (1<<bits)-1;
+
+		final int windowGroupCount = info.getWindowGroupCount();
+		final int maxSFB = info.getMaxSFB();
+
+		int end, cb, incr;
+		int idx = 0;
+
+		for(int g = 0; g<windowGroupCount; g++) {
+			int k = 0;
+			while(k<maxSFB) {
+				end = k;
+				cb = in.readBits(4);
+				if(cb==12) throw new AACException("invalid huffman codebook: 12");
+				while((incr = in.readBits(bits))==escVal) {
+					end += incr;
+				}
+				end += incr;
+				if(end>maxSFB) throw new AACException("too many bands: "+end+", allowed: "+maxSFB);
+				for(; k<end; k++) {
+					sfbCB[idx] = cb;
+					sectEnd[idx++] = end;
+				}
+			}
+		}
 	}
 
 	private void decodePulseData(BitStream in) throws AACException {
@@ -126,43 +161,49 @@ public class ICStream implements Constants, HCB {
 	}
 
 	public void decodeScaleFactors(BitStream in) throws AACException {
-		noiseUsed = false;
+		final int windowGroups = info.getWindowGroupCount();
 		final int maxSFB = info.getMaxSFB();
-		final int windowGroupCount = info.getWindowGroupCount();
-		final int[][] sfbCB = sectionData.getSfbCB();
-		if(scaleFactors==null||windowGroupCount!=scaleFactors.length||maxSFB!=scaleFactors[0].length) {
-			//only reallocate if needed
-			scaleFactors = new int[windowGroupCount][maxSFB];
-		}
+		//0: spectrum, 1: noise, 2: intensity
+		final int[] offset = {globalGain, globalGain-90, 0};
 
-		int scaleFactor = globalGain;
-		int isPosition = 0;
-		int noiseEnergy = globalGain-90-256;
-		boolean noisePCM = true;
-		int sfb;
-		for(int g = 0; g<windowGroupCount; g++) {
-			for(sfb = 0; sfb<maxSFB; sfb++) {
-				switch(sfbCB[g][sfb]) {
+		int tmp;
+		boolean noiseFlag = true;
+
+		int sfb, idx = 0;
+		for(int g = 0; g<windowGroups; g++) {
+			for(sfb = 0; sfb<maxSFB;) {
+				int end = sectEnd[idx];
+				switch(sfbCB[idx]) {
 					case ZERO_HCB:
-						scaleFactors[g][sfb] = 0;
+						for(; sfb<end; sfb++, idx++) {
+							scaleFactors[idx] = 0;
+						}
 						break;
 					case INTENSITY_HCB:
 					case INTENSITY_HCB2:
-						isPosition += Huffman.decodeScaleFactor(in)-60;
-						scaleFactors[g][sfb] = isPosition;
+						for(; sfb<end; sfb++, idx++) {
+							offset[2] += Huffman.decodeScaleFactor(in)-SF_DELTA;
+							tmp = Math.min(Math.max(offset[2], -155), 100);
+							scaleFactors[idx] = SCALEFACTOR_TABLE[-tmp+SF_OFFSET];
+						}
 						break;
 					case NOISE_HCB:
-						if(!noiseUsed) noiseUsed = true;
-						if(noisePCM) {
-							noisePCM = false;
-							noiseEnergy += in.readBits(9);
+						for(; sfb<end; sfb++, idx++) {
+							if(noiseFlag) {
+								offset[1] += in.readBits(9)-256;
+								noiseFlag = false;
+							}
+							else offset[1] += Huffman.decodeScaleFactor(in)-SF_DELTA;
+							tmp = Math.min(Math.max(offset[1], -100), 155);
+							scaleFactors[idx] = -SCALEFACTOR_TABLE[tmp+SF_OFFSET];
 						}
-						else noiseEnergy += Huffman.decodeScaleFactor(in)-SF_DELTA;
-						scaleFactors[g][sfb] = noiseEnergy;
 						break;
 					default:
-						scaleFactor += Huffman.decodeScaleFactor(in)-SF_DELTA;
-						scaleFactors[g][sfb] = scaleFactor;
+						for(; sfb<end; sfb++, idx++) {
+							offset[0] += Huffman.decodeScaleFactor(in)-SF_DELTA;
+							if(offset[0]>255) throw new AACException("scalefactor out of range: "+offset[0]);
+							scaleFactors[idx] = -SCALEFACTOR_TABLE[offset[0]-100+SF_OFFSET];
+						}
 						break;
 				}
 			}
@@ -170,47 +211,63 @@ public class ICStream implements Constants, HCB {
 	}
 
 	private void decodeSpectralData(BitStream in) throws AACException {
-		final int[] numSec = sectionData.getNumSec();
-		final int[][] sectCB = sectionData.getSectCB();
-		final int[][] sectSFBOffset = info.getSectSFBOffsets();
-		final int[][] sectStart = sectionData.getSectStart();
-		final int[][] sectEnd = sectionData.getSectEnd();
-		final int shortFrameLen = data.length/8;
-		int i, k, inc, hcb, p;
-		int start, end, startOff, endOff;
-		int wins = 0;
+		Arrays.fill(data, 0);
+		final int maxSFB = info.getMaxSFB();
+		final int windowGroups = info.getWindowGroupCount();
+		final int[] offsets = info.getSWBOffsets();
+		final int[] buf = new int[4];
 
-		for(int g = 0; g<info.getWindowGroupCount(); g++) {
-			p = wins*shortFrameLen;
+		int sfb, j, k, w, hcb, off, width, num;
+		int groupOff = 0, idx = 0;
+		for(int g = 0; g<windowGroups; g++) {
+			int groupLen = info.getWindowGroupLength(g);
 
-			for(i = 0; i<numSec[g]; i++) {
-				hcb = sectCB[g][i];
-				inc = (hcb>=FIRST_PAIR_HCB) ? 2 : 4;
-				start = sectStart[g][i];
-				end = sectEnd[g][i];
-				startOff = sectSFBOffset[g][start];
-				endOff = sectSFBOffset[g][end];
+			for(sfb = 0; sfb<maxSFB; sfb++, idx++) {
+				hcb = sfbCB[idx];
+				off = groupOff+offsets[sfb];
+				width = offsets[sfb+1]-offsets[sfb];
+				if(hcb==ZERO_HCB||hcb==INTENSITY_HCB||hcb==INTENSITY_HCB2) {
+					for(w = 0; w<groupLen; w++, off += 128) {
+						Arrays.fill(data, off, off+width, 0);
+					}
+				}
+				else if(hcb==NOISE_HCB) {
+					//apply PNS: fill with random values
+					for(w = 0; w<groupLen; w++, off += 128) {
+						float energy = 0;
 
-				switch(hcb) {
-					case ZERO_HCB:
-					case NOISE_HCB:
-					case INTENSITY_HCB:
-					case INTENSITY_HCB2:
-						p += (endOff-startOff);
-						break;
-					default:
-						for(k = startOff; k<endOff; k += inc) {
-							Huffman.decodeSpectralData(in, hcb, data, p);
-							p += inc;
+						for(k = 0; k<width; k++) {
+							randomState *= 1664525+1013904223;
+							data[off+k] = randomState;
+							energy += data[off+k]*data[off+k];
 						}
-						break;
+
+						final float scale = (float) (scaleFactors[idx]/Math.sqrt(energy));
+						for(k = 0; k<width; k++) {
+							data[off+k] *= scale;
+						}
+					}
+				}
+				else {
+					for(w = 0; w<groupLen; w++, off += 128) {
+						num = (hcb>=FIRST_PAIR_HCB) ? 2 : 4;
+						for(k = 0; k<width; k += num) {
+							Huffman.decodeSpectralData(in, hcb, buf, 0);
+
+							//inverse quantization & scaling
+							for(j = 0; j<num; j++) {
+								data[off+k+j] = (buf[j]>0) ? IQ_TABLE[buf[j]] : -IQ_TABLE[-buf[j]];
+								data[off+k+j] *= scaleFactors[idx];
+							}
+						}
+					}
 				}
 			}
-			wins += info.getWindowGroupLength(g);
+			groupOff += groupLen<<7;
 		}
 	}
 
-	/* ========= processing ========= */
+	/* =========== gets ============ */
 	/**
 	 * Does inverse quantization and applies the scale factors on the decoded
 	 * data. After this the noiseless decoding is finished and the decoded data
@@ -218,30 +275,22 @@ public class ICStream implements Constants, HCB {
 	 * @return the inverse quantized and scaled data
 	 */
 	public float[] getInvQuantData() throws AACException {
-		if(pulseDataPresent) {
-			int k = Math.min(info.getSWBOffsets()[pulseStartSWB], info.getSWBOffsetMax());
-			for(int i = 0; i<=pulseCount; i++) {
-				k += pulseOffset[i];
-				if(k>=data.length) throw new AACException("pulse offset out of range");
-
-				if(data[k]>0) data[k] += pulseAmp[i];
-				else data[k] -= pulseAmp[i];
-			}
-		}
-		InvQuant.process(info, data, invQuant, scaleFactors);
-		return invQuant;
+		return data;
 	}
 
-	/* =========== gets ============ */
 	public ICSInfo getInfo() {
 		return info;
 	}
 
-	public SectionData getSectionData() {
-		return sectionData;
+	public int[] getSectEnd() {
+		return sectEnd;
 	}
 
-	public int[][] getScaleFactors() {
+	public int[] getSfbCB() {
+		return sfbCB;
+	}
+
+	public float[] getScaleFactors() {
 		return scaleFactors;
 	}
 

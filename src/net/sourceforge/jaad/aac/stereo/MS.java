@@ -16,54 +16,46 @@
  */
 package net.sourceforge.jaad.aac.stereo;
 
+import net.sourceforge.jaad.aac.huffman.HCB;
 import net.sourceforge.jaad.aac.syntax.CPE;
 import net.sourceforge.jaad.aac.syntax.Constants;
 import net.sourceforge.jaad.aac.syntax.ICSInfo;
 import net.sourceforge.jaad.aac.syntax.ICStream;
-import net.sourceforge.jaad.aac.syntax.SectionData;
 
 /**
  * Mid/side stereo
  * @author in-somnia
  */
-public final class MS implements Constants {
+public final class MS implements Constants, HCB {
 
 	private MS() {
 	}
 
 	public static void process(CPE cpe, float[] specL, float[] specR) {
-		final MSMask msMask = cpe.getMSMask();
-		final ICStream icsL = cpe.getLeftChannel();
-		final ICStream icsR = cpe.getRightChannel();
-		final ICSInfo infoL = icsL.getInfo();
-		final SectionData sectDataL = icsL.getSectionData(), sectDataR = icsR.getSectionData();
-		final int windowGroupCount = infoL.getWindowGroupCount();
-		final int maxSFB = infoL.getMaxSFB();
-		final int[] swbOffsets = infoL.getSWBOffsets();
-		final int swbOffsetMax = infoL.getSWBOffsetMax();
+		final ICStream ics = cpe.getLeftChannel();
+		final ICSInfo info = ics.getInfo();
+		final int[] offsets = info.getSWBOffsets();
+		final int windowGroups = info.getWindowGroupCount();
+		final int maxSFB = info.getMaxSFB();
+		final int[] sfbCBl = ics.getSfbCB();
+		final int[] sfbCBr = cpe.getRightChannel().getSfbCB();
+		int groupOff = 0;
+		int g, i, w, j, idx = 0;
 
-		final int shortFrameLen = specL.length/8;
-		
-		int off = 0;
-		int i, k, b, sfb;
-		float l, r;
-
-		for(int g = 0; g<windowGroupCount; g++) {
-			for(b = 0; b<infoL.getWindowGroupLength(g); b++) {
-				for(sfb = 0; sfb<maxSFB; sfb++) {
-					if((cpe.isMSUsed(g, sfb)||msMask.equals(MSMask.TYPE_ALL_1))
-							&&(sectDataR.isIntensity(g, sfb)==0)&&!sectDataL.isNoise(g, sfb)) {
-						for(i = swbOffsets[sfb]; i<Math.min(swbOffsets[sfb+1], swbOffsetMax); i++) {
-							k = (off*shortFrameLen)+i;
-							l = specL[k];
-							r = specR[k];
-							specL[k] = r+l;
-							specR[k] = l-r;
+		for(g = 0; g<windowGroups; g++) {
+			for(i = 0; i<maxSFB; i++, idx++) {
+				if(cpe.isMSUsed(idx)&&sfbCBl[idx]<NOISE_HCB&&sfbCBr[idx]<NOISE_HCB) {
+					for(w = 0; w<info.getWindowGroupLength(g); w++) {
+						final int off = groupOff+w*128+offsets[i];
+						for(j = 0; j<offsets[i+1]-offsets[i]; j++) {
+							float t = specL[off+j]-specR[off+j];
+							specL[off+j] += specR[off+j];
+							specR[off+j] = t;
 						}
 					}
 				}
-				off++;
 			}
+			groupOff += info.getWindowGroupLength(g)*128;
 		}
 	}
 }
