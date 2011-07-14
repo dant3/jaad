@@ -30,7 +30,7 @@ public class InvQuantTables {
 
 	public static void main(String[] args) {
 		Utils.printTable(generateIQTable(), "iq table");
-		Utils.printTable(generateGainTable(), "gain table");
+		Utils.printTable(generateSFTable(), "scalefactor table");
 	}
 
 	private static float[] generateIQTable() {
@@ -41,10 +41,10 @@ public class InvQuantTables {
 		return f;
 	}
 
-	private static float[] generateGainTable() {
-		float[] f = new float[256];
-		for(int i = 0; i<f.length; i++) {
-			f[i] = (float) Math.pow(2.0, 0.25*(i-100));
+	private static float[] generateSFTable() {
+		float[] f = new float[428];
+		for(int i = 0; i<428; i++) {
+			f[i] = (float) Math.pow(2, (i-200)/4.);
 		}
 		return f;
 	}

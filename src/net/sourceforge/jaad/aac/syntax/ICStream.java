@@ -24,7 +24,7 @@ import net.sourceforge.jaad.aac.error.RVLC;
 import net.sourceforge.jaad.aac.gain.GainControl;
 import net.sourceforge.jaad.aac.huffman.HCB;
 import net.sourceforge.jaad.aac.huffman.Huffman;
-import net.sourceforge.jaad.aac.noise.TNS;
+import net.sourceforge.jaad.aac.tools.TNS;
 import java.util.logging.Level;
 
 //TODO: apply pulse data

@@ -20,8 +20,8 @@ import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.DecoderConfig;
 import net.sourceforge.jaad.aac.Profile;
 import net.sourceforge.jaad.aac.SampleFrequency;
-import net.sourceforge.jaad.aac.prediction.ICPrediction;
-import net.sourceforge.jaad.aac.prediction.LTPrediction;
+import net.sourceforge.jaad.aac.tools.ICPrediction;
+import net.sourceforge.jaad.aac.tools.LTPrediction;
 import java.util.Arrays;
 
 public class ICSInfo implements Constants, ScaleFactorBands {

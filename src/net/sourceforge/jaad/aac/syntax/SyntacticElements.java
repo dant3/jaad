@@ -23,10 +23,10 @@ import net.sourceforge.jaad.aac.Profile;
 import net.sourceforge.jaad.aac.SampleBuffer;
 import net.sourceforge.jaad.aac.SampleFrequency;
 import net.sourceforge.jaad.aac.filterbank.FilterBank;
-import net.sourceforge.jaad.aac.prediction.LTPrediction;
+import net.sourceforge.jaad.aac.tools.LTPrediction;
 import net.sourceforge.jaad.aac.sbr2.SBR;
-import net.sourceforge.jaad.aac.stereo.IS;
-import net.sourceforge.jaad.aac.stereo.MS;
+import net.sourceforge.jaad.aac.tools.IS;
+import net.sourceforge.jaad.aac.tools.MS;
 import java.util.logging.Level;
 
 public class SyntacticElements implements Constants {

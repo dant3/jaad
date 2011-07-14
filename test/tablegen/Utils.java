@@ -28,6 +28,7 @@ class Utils {
 			sb.append(f[i]);
 			sb.append('f');
 			if(i<f.length-1) sb.append(", ");
+			if(i>0&&(i%5)==0) sb.append("\n");
 		}
 		sb.append("};");
 		System.out.println(sb.toString());

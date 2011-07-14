@@ -21,7 +21,7 @@ import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.DecoderConfig;
 import net.sourceforge.jaad.aac.Profile;
 import net.sourceforge.jaad.aac.SampleFrequency;
-import net.sourceforge.jaad.aac.stereo.MSMask;
+import net.sourceforge.jaad.aac.tools.MSMask;
 
 public class CPE extends Element implements Constants {
 
