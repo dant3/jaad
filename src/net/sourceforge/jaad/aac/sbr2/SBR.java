@@ -98,7 +98,7 @@ public class SBR implements SBRConstants {
 			in.skipBits(bitsLeft);
 		}
 		else {
-			final int left = count-pos+in.getPosition();
+			final int left = count-(in.getPosition()-pos);
 			in.skipBits(left);
 			Constants.LOGGER.log(Level.INFO, "SBR frame without header, skipped {0} bits", left);
 		}

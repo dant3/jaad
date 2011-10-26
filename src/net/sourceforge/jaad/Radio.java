@@ -19,10 +19,10 @@
  */
 package net.sourceforge.jaad;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
+import java.io.DataInputStream;
+import java.io.PrintStream;
+import java.net.Socket;
+import java.net.URI;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.SourceDataLine;
@@ -62,13 +62,23 @@ public class Radio {
 		SourceDataLine line = null;
 		byte[] b;
 		try {
-			final URL url = new URL(arg);
-			final InputStream in = url.openStream();
-			//skip icy header
-			final BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			final URI uri = new URI(arg);
+			final Socket sock = new Socket(uri.getHost(), uri.getPort()>0 ? uri.getPort() : 80);
+
+			//send HTTP request
+			final PrintStream out = new PrintStream(sock.getOutputStream());
+			String path = uri.getPath();
+			if(path==null||path.equals("")) path = "/";
+			if(uri.getQuery()!=null) path += "?"+uri.getQuery();
+			out.println("GET "+path+" HTTP/1.1");
+			out.println("Host: "+uri.getHost());
+			out.println();
+
+			//read response (skip header)
+			final DataInputStream in = new DataInputStream(sock.getInputStream());
 			String x;
 			do {
-				x = br.readLine();
+				x = in.readLine();
 			}
 			while(x!=null&&!x.trim().equals(""));
 
