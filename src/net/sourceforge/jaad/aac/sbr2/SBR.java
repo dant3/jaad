@@ -261,6 +261,8 @@ public class SBR implements SBRConstants {
 
 	//left/right: 1024 time samples
 	public void process(float[] left, float[] right, boolean downSampled) throws AACException {
+		if(!header.isDecoded()) return;
+
 		processChannel(0, left);
 		if(stereo) processChannel(1, right);
 		else if(psUsed) {
