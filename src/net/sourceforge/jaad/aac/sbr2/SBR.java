@@ -72,9 +72,9 @@ public class SBR implements SBRConstants {
 	}
 
 	/*========================= decoding =========================*/
-	public void decode(BitStream in, int count, boolean stereo, boolean crc) throws AACException {
+	public void decode(BitStream in, int bitsAvailable, boolean stereo, boolean crc) throws AACException {
 		this.stereo = stereo;
-		final int pos = in.getPosition();
+		final int start = in.getPosition();
 
 		if(crc) {
 			Constants.LOGGER.info("SBR CRC bits present");
@@ -91,14 +91,14 @@ public class SBR implements SBRConstants {
 			decodeData(in, stereo);
 
 			//check for remaining bits (byte-align) and skip them
-			final int len = in.getPosition()-pos;
-			final int bitsLeft = count-len;
+			final int read = in.getPosition()-start;
+			final int bitsLeft = bitsAvailable-read;
 			if(bitsLeft>=8) Constants.LOGGER.log(Level.WARNING, "SBR: bits left: {0}", bitsLeft);
 			else if(bitsLeft<0) throw new AACException("SBR data overread: "+bitsLeft);
 			in.skipBits(bitsLeft);
 		}
 		else {
-			final int left = count-(in.getPosition()-pos);
+			final int left = bitsAvailable-(in.getPosition()-start);
 			in.skipBits(left);
 			Constants.LOGGER.log(Level.INFO, "SBR frame without header, skipped {0} bits", left);
 		}
@@ -338,7 +338,6 @@ public class SBR implements SBRConstants {
 
 		//7. new Y -> X
 		for(l = lTemp; l<TIME_SLOTS_RATE; l++) {
-			//System.out.println("lTemp: "+lTemp);
 			for(k = 0; k<kx; k++) {
 				X[ch][k][l][0] = Xlow[k][l+T_HF_ADJ][0];
 				X[ch][k][l][1] = Xlow[k][l+T_HF_ADJ][1];

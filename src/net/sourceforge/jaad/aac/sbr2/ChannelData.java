@@ -129,7 +129,7 @@ class ChannelData implements SBRConstants, HuffmanTables {
 				absBordTrail += in.readBits(2);
 				relTrail = in.readBits(2);
 				envCount = relTrail+1;
-				
+
 				te[0] = 0;
 				te[envCount] = absBordTrail;
 				for(int i = 0; i<relTrail; i++) {
@@ -233,14 +233,18 @@ class ChannelData implements SBRConstants, HuffmanTables {
 		//select huffman codebooks
 		final int[][] tHuff, fHuff;
 		final int tLav, fLav;
+		final int delta, bits;
 		if(coupling&&secCh) {
+			delta = 1;
 			if(ampRes) {
+				bits = 5;
 				tHuff = T_HUFFMAN_ENV_BAL_3_0;
 				tLav = T_HUFFMAN_ENV_BAL_3_0_LAV;
 				fHuff = F_HUFFMAN_ENV_BAL_3_0;
 				fLav = F_HUFFMAN_ENV_BAL_3_0_LAV;
 			}
 			else {
+				bits = 6;
 				tHuff = T_HUFFMAN_ENV_BAL_1_5;
 				tLav = T_HUFFMAN_ENV_BAL_1_5_LAV;
 				fHuff = F_HUFFMAN_ENV_BAL_1_5;
@@ -248,13 +252,16 @@ class ChannelData implements SBRConstants, HuffmanTables {
 			}
 		}
 		else {
+			delta = 0;
 			if(ampRes) {
+				bits = 6;
 				tHuff = T_HUFFMAN_ENV_3_0;
 				tLav = T_HUFFMAN_ENV_3_0_LAV;
 				fHuff = F_HUFFMAN_ENV_3_0;
 				fLav = F_HUFFMAN_ENV_3_0_LAV;
 			}
 			else {
+				bits = 7;
 				tHuff = T_HUFFMAN_ENV_1_5;
 				tLav = T_HUFFMAN_ENV_1_5_LAV;
 				fHuff = F_HUFFMAN_ENV_1_5;
@@ -264,8 +271,6 @@ class ChannelData implements SBRConstants, HuffmanTables {
 
 		//read delta coded huffman data
 		final int[] envBands = tables.getN();
-		final int bits = 7-((secCh&&coupling) ? 1 : 0)-(ampRes ? 1 : 0);
-		final int delta = ((secCh&&coupling) ? 1 : 0)+1;
 		final int odd = envBands[1]&1;
 
 		int j, k, frPrev;
@@ -277,26 +282,26 @@ class ChannelData implements SBRConstants, HuffmanTables {
 			if(dfEnv[i]) {
 				if(freqRes[i]==frPrev) {
 					for(j = 0; j<envBands[freqRes[i]]; j++) {
-						envelopeSF[i][j] = prev[j]+delta*(decodeHuffman(in, tHuff)-tLav);
+						envelopeSF[i][j] = prev[j]+((decodeHuffman(in, tHuff)-tLav)<<delta);
 					}
 				}
 				else if(freqRes[i]==1) {
 					for(j = 0; j<envBands[freqRes[i]]; j++) {
 						k = (j+odd)>>1; //fLow[k] <= fHigh[j] < fLow[k + 1]
-						envelopeSF[i][j] = prev[k]+delta*(decodeHuffman(in, tHuff)-tLav);
+						envelopeSF[i][j] = prev[k]+((decodeHuffman(in, tHuff)-tLav)<<delta);
 					}
 				}
 				else {
 					for(j = 0; j<envBands[freqRes[i]]; j++) {
 						k = (j!=0) ? (2*j-odd) : 0; //fHigh[k] == fLow[j]
-						envelopeSF[i][j] = prev[k]+delta*(decodeHuffman(in, tHuff)-tLav);
+						envelopeSF[i][j] = prev[k]+((decodeHuffman(in, tHuff)-tLav)<<delta);
 					}
 				}
 			}
 			else {
-				envelopeSF[i][0] = delta*in.readBits(bits);
+				envelopeSF[i][0] = in.readBits(bits)<<delta;
 				for(j = 1; j<envBands[freqRes[i]]; j++) {
-					envelopeSF[i][j] = envelopeSF[i][j-1]+delta*(decodeHuffman(in, fHuff)-fLav);
+					envelopeSF[i][j] = envelopeSF[i][j-1]+((decodeHuffman(in, fHuff)-fLav)<<delta);
 				}
 			}
 		}
@@ -309,13 +314,16 @@ class ChannelData implements SBRConstants, HuffmanTables {
 		//select huffman codebooks
 		final int[][] tHuff, fHuff;
 		final int tLav, fLav;
+		final int delta;
 		if(coupling&&secCh) {
+			delta = 1;
 			tHuff = T_HUFFMAN_NOISE_BAL_3_0;
 			tLav = T_HUFFMAN_NOISE_BAL_3_0_LAV;
 			fHuff = F_HUFFMAN_NOISE_BAL_3_0;
 			fLav = F_HUFFMAN_NOISE_BAL_3_0_LAV;
 		}
 		else {
+			delta = 0;
 			tHuff = T_HUFFMAN_NOISE_3_0;
 			tLav = T_HUFFMAN_NOISE_3_0_LAV;
 			fHuff = F_HUFFMAN_NOISE_3_0;
@@ -324,7 +332,6 @@ class ChannelData implements SBRConstants, HuffmanTables {
 
 		//read huffman data: i=noise, j=band
 		final int noiseBands = tables.getNq();
-		final int delta = ((secCh&&coupling) ? 1 : 0)+1;
 
 		int j;
 		float[] prev;
@@ -332,13 +339,13 @@ class ChannelData implements SBRConstants, HuffmanTables {
 			if(dfNoise[i]) {
 				prev = (i==0) ? noiseFDPrevious : noiseFloorData[i-1];
 				for(j = 0; j<noiseBands; j++) {
-					noiseFloorData[i][j] = prev[j]+delta*(decodeHuffman(in, tHuff)-tLav);
+					noiseFloorData[i][j] = prev[j]+((decodeHuffman(in, tHuff)-tLav)<<delta);
 				}
 			}
 			else {
-				noiseFloorData[i][0] = delta*in.readBits(5);
+				noiseFloorData[i][0] = in.readBits(5)<<delta;
 				for(j = 1; j<noiseBands; j++) {
-					noiseFloorData[i][j] = noiseFloorData[i][j-1]+delta*(decodeHuffman(in, fHuff)-fLav);
+					noiseFloorData[i][j] = noiseFloorData[i][j-1]+((decodeHuffman(in, fHuff)-fLav)<<delta);
 				}
 			}
 		}
@@ -484,6 +491,7 @@ class ChannelData implements SBRConstants, HuffmanTables {
 
 	/* ======================= copying ======================*/
 	void copyGrid(ChannelData cd) {
+		ampRes = cd.getAmpRes();
 		frameClass = cd.getFrameClass();
 		envCount = cd.getEnvCount();
 		noiseCount = cd.getNoiseCount();

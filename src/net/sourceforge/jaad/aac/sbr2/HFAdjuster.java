@@ -19,8 +19,6 @@
  */
 package net.sourceforge.jaad.aac.sbr2;
 
-import java.util.Arrays;
-
 /*
  * HFAdjustment accoding to 4.6.18.7: Xhigh -> Y
  * 
