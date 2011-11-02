@@ -70,7 +70,6 @@ class ADTSFrame {
 		id = ((i>>3)&0x1)==1;
 		layer = (i>>1)&0x3;
 		protectionAbsent = (i&0x1)==1;
-		if(!protectionAbsent) System.out.println("\t\tCRC!!!");
 
 		//2 bits profile, 4 bits sample frequency, 1 bit private bit
 		i = in.read();

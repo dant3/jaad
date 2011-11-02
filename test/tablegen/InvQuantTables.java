@@ -44,7 +44,7 @@ public class InvQuantTables {
 	private static float[] generateSFTable() {
 		float[] f = new float[428];
 		for(int i = 0; i<428; i++) {
-			f[i] = (float) Math.pow(2, (i-200)/4.);
+			f[i] = (float) Math.pow(2, (i-200)/4.0);
 		}
 		return f;
 	}

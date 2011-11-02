@@ -45,23 +45,24 @@ class AnalysisFilterbank implements SBRConstants, FilterbankTables {
 	//in: 1024 time samples, out: 32 x 32 complex
 	public void process(float[] in, float[][][] out, int ch) {
 		final float[] x = X[ch];
-		int n, k, off = 0;
-
+		int n, k, inOff = 0;
+		
 		//each loop creates 32 complex subband samples
 		for(int l = 0; l<TIME_SLOTS_RATE; l++) {
 			//1. shift buffer
-			System.arraycopy(x, 0, x, 32, 288);
+			for(n = 319; n>=32; n--) {
+				x[n] = x[n-32];
+			}
 
 			//2. add new samples
 			for(n = 31; n>=0; n--) {
-				x[n] = in[off];
-				off++;
+				x[n] = in[inOff];
+				inOff++;
 			}
 
 			//3. windowing
 			for(n = 0; n<320; n++) {
-				//TODO: convert WINDOW to floats
-				z[n] = x[n]*(float) WINDOW[2*n];
+				z[n] = (float) (x[n]*WINDOW[2*n]);
 			}
 
 			//4. sum samples
@@ -74,9 +75,9 @@ class AnalysisFilterbank implements SBRConstants, FilterbankTables {
 
 			//5. calculate subband samples, TODO: replace with FFT?
 			for(k = 0; k<32; k++) {
-				out[k][l][0] = 0.0f;
-				out[k][l][1] = 0.0f;
-				for(n = 0; n<64; n++) {
+				out[k][l][0] = u[0]*COEFS[k][0][0];
+				out[k][l][1] = u[0]*COEFS[k][0][1];
+				for(n = 1; n<64; n++) {
 					out[k][l][0] += u[n]*COEFS[k][n][0];
 					out[k][l][1] += u[n]*COEFS[k][n][1];
 				}

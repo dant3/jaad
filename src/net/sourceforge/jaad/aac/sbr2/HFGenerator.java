@@ -36,7 +36,7 @@ class HFGenerator implements SBRConstants {
 	};
 	private static final float CHIRP_MIN = 0.015625f;
 
-	//in: 32x40 complex Xlow, out: 23x40 complex Xhigh
+	//in: 32x40 complex Xlow, out: 32x40 complex Xhigh
 	public static void process(FrequencyTables tables, ChannelData cd, float[][][] Xlow, float[][][] Xhigh) throws AACException {
 		//calculate chirp factors
 		final float[] bwArray = calculateChirpFactors(tables, cd);

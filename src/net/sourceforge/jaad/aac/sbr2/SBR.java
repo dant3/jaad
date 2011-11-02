@@ -249,7 +249,7 @@ public class SBR implements SBRConstants {
 				f2 = (float) Math.pow(2.0f, PAN_OFFSETS[1]-q1[l][k]);
 				f3 = f1/(1.0f+f2);
 				q0[l][k] = f3;
-				q0[l][k] = f3*f2;
+				q1[l][k] = f3*f2;
 			}
 		}
 	}
@@ -277,7 +277,7 @@ public class SBR implements SBRConstants {
 		}
 
 		qmfS.process(X[0], left, 0);
-		if(stereo||psUsed) qmfS.process(X[1], right, 0);
+		if(stereo||psUsed) qmfS.process(X[1], right, 1);
 	}
 
 	private void processChannel(int ch, float[] data) throws AACException {
@@ -302,8 +302,8 @@ public class SBR implements SBRConstants {
 		final int kx = tables.getKx(false);
 		for(l = T_HF_GEN; l<TIME_SLOTS_RATE+T_HF_GEN; l++) {
 			for(k = 0; k<kx; k++) {
-				Xlow[k][l][0] = W[ch][l-T_HF_GEN][k][0];
-				Xlow[k][l][1] = W[ch][l-T_HF_GEN][k][1];
+				Xlow[k][l][0] = W[ch][k][l-T_HF_GEN][0];
+				Xlow[k][l][1] = W[ch][k][l-T_HF_GEN][1];
 			}
 			for(k = kx; k<32; k++) {
 				Xlow[k][l][0] = 0;

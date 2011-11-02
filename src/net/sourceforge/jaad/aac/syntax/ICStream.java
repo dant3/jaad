@@ -29,6 +29,7 @@ import net.sourceforge.jaad.aac.huffman.HCB;
 import net.sourceforge.jaad.aac.huffman.Huffman;
 import net.sourceforge.jaad.aac.tools.TNS;
 import java.util.logging.Level;
+import net.sourceforge.jaad.aac.Decoder;
 
 //TODO: apply pulse data
 public class ICStream implements Constants, HCB, ScaleFactorTable, IQTable {
@@ -205,7 +206,7 @@ public class ICStream implements Constants, HCB, ScaleFactorTable, IQTable {
 						for(; sfb<end; sfb++, idx++) {
 							offset[0] += Huffman.decodeScaleFactor(in)-SF_DELTA;
 							if(offset[0]>255) throw new AACException("scalefactor out of range: "+offset[0]);
-							scaleFactors[idx] = -SCALEFACTOR_TABLE[offset[0]-100+SF_OFFSET];
+							scaleFactors[idx] = SCALEFACTOR_TABLE[offset[0]-100+SF_OFFSET];
 						}
 						break;
 				}

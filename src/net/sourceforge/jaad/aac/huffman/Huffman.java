@@ -72,15 +72,7 @@ public class Huffman implements Codebooks {
 	}
 
 	public static void decodeSpectralData(BitStream in, int cb, int[] data, int off) throws AACException {
-		int[][] HCB;
-		try {
-			HCB = CODEBOOKS[cb-1];
-		}
-		catch(ArrayIndexOutOfBoundsException ex) {
-			System.out.println("codebook: "+cb);
-			ex.printStackTrace();
-			throw ex;
-		}
+		final int[][] HCB = CODEBOOKS[cb-1];
 
 		//find index
 		final int offset = findOffset(in, HCB);
