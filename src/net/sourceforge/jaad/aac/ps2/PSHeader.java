@@ -70,7 +70,7 @@ class PSHeader implements PSTables {
 
 		if(iccEnabled = in.readBool()) {
 			iccMode = in.readBits(3);
-			iccPars = IID_PARS[iccMode]; //same as for iid
+			iccPars = IID_PARS[iccMode%3]; //same as for iid
 			iccMixingB = iccMode>2;
 		}
 		else {

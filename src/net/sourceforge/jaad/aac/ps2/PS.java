@@ -271,7 +271,7 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
 		//calculate transients
 		final int parBands = PAR_BANDS[mode];
 		final float[][] power = new float[parBands][32];
-		for(k = 0; k<32; k++) {
+		for(k = 0; k<parBands; k++) {
 			Arrays.fill(power[k], 0);
 		}
 		for(k = 0; k<parBands; k++) {

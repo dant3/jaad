@@ -196,7 +196,7 @@ public class SyntacticElements implements Constants {
 	private void decodeFIL(BitStream in, Element prev) throws AACException {
 		if(curFIL==MAX_ELEMENTS) throw new AACException("too much FIL elements");
 		if(fils[curFIL]==null) fils[curFIL] = new FIL(config.isSBRDownSampled());
-		fils[curFIL].decode(in, prev, config.getSampleFrequency());
+		fils[curFIL].decode(in, prev, config.getSampleFrequency(), config.isSBREnabled());
 		curFIL++;
 
 		if(prev!=null&&prev.isSBRPresent()) {
@@ -275,7 +275,7 @@ public class SyntacticElements implements Constants {
 
 		//SBR
 		int chs = 1;
-		if(sbrPresent) {
+		if(sbrPresent&&config.isSBREnabled()) {
 			if(data[channel].length==config.getFrameLength()) LOGGER.log(Level.WARNING, "SBR data present, but buffer has normal size!");
 			final SBR sbr = scelfe.getSBR();
 			if(sbr.isPSUsed()) {
@@ -344,8 +344,8 @@ public class SyntacticElements implements Constants {
 		if(ics2.isGainControlPresent()) ics2.getGainControl().process(iqData2, info2.getWindowShape(ICSInfo.CURRENT), info2.getWindowShape(ICSInfo.PREVIOUS), info2.getWindowSequence());
 
 		//SBR
-		if(sbrPresent) {
-			//if(data[channel].length==config.getFrameLength()) LOGGER.log(Level.WARNING, "SBR data present, but buffer has normal size!");
+		if(sbrPresent&&config.isSBREnabled()) {
+			if(data[channel].length==config.getFrameLength()) LOGGER.log(Level.WARNING, "SBR data present, but buffer has normal size!");
 			cpe.getSBR().process(data[channel], data[channel+1], false);
 		}
 	}
@@ -404,7 +404,7 @@ public class SyntacticElements implements Constants {
 		final boolean be = buffer.isBigEndian();
 
 		final int chs = data.length;
-		final int mult = (sbrPresent) ? 2 : 1;
+		final int mult = (sbrPresent&&config.isSBREnabled()) ? 2 : 1;
 		final int length = mult*config.getFrameLength();
 		final int freq = mult*config.getSampleFrequency().getFrequency();
 

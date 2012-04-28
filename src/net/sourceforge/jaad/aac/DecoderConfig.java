@@ -24,8 +24,10 @@ import net.sourceforge.jaad.aac.syntax.Constants;
 import net.sourceforge.jaad.aac.syntax.PCE;
 
 /**
- * DecoderConfig that must be passed to the <code>Decoder</code> constructor.
- * Typically it is created via one of the static parsing methods.
+ * DecoderConfig that must be passed to the
+ * <code>Decoder</code> constructor. Typically it is created via one of the
+ * static parsing methods.
+ *
  * @author in-somnia
  */
 public class DecoderConfig implements Constants {
@@ -38,7 +40,7 @@ public class DecoderConfig implements Constants {
 	private int coreCoderDelay;
 	private boolean extensionFlag;
 	//extension: SBR
-	private boolean sbrPresent, downSampledSBR;
+	private boolean sbrPresent, downSampledSBR, sbrEnabled;
 	//extension: error resilience
 	private boolean sectionDataResilience, scalefactorResilience, spectralDataResilience;
 
@@ -50,6 +52,7 @@ public class DecoderConfig implements Constants {
 		frameLengthFlag = false;
 		sbrPresent = false;
 		downSampledSBR = false;
+		sbrEnabled = true;
 		sectionDataResilience = false;
 		scalefactorResilience = false;
 		spectralDataResilience = false;
@@ -121,12 +124,16 @@ public class DecoderConfig implements Constants {
 		return sbrPresent;
 	}
 
-	public void setSBRPresent(boolean sbrPresent) {
-		this.sbrPresent = sbrPresent;
-	}
-
 	public boolean isSBRDownSampled() {
 		return downSampledSBR;
+	}
+
+	public boolean isSBREnabled() {
+		return sbrEnabled;
+	}
+
+	public void setSBREnabled(boolean enabled) {
+		sbrEnabled = enabled;
 	}
 
 	//=========== ER =============
@@ -146,6 +153,7 @@ public class DecoderConfig implements Constants {
 	/**
 	 * Parses the input arrays as a DecoderSpecificInfo, as used in MP4
 	 * containers.
+	 * 
 	 * @return a DecoderConfig
 	 */
 	static DecoderConfig parseMP4DecoderSpecificInfo(byte[] data) throws AACException {

@@ -33,7 +33,7 @@ import net.sourceforge.jaad.adts.ADTSDemultiplexer;
 /**
  * Command line example, that can decode an AAC stream from an Shoutcast/Icecast
  * server.
- * 
+ *
  * @author in-somnia
  */
 public class Radio {
@@ -90,7 +90,7 @@ public class Radio {
 				b = adts.readNextFrame();
 				dec.decodeFrame(b, buf);
 
-				if(line!=null&&!line.getFormat().matches(aufmt)) {
+				if(line!=null&&formatChanged(line.getFormat(), buf)) {
 					//format has changed (e.g. SBR has started)
 					line.stop();
 					line.close();
@@ -112,5 +112,12 @@ public class Radio {
 				line.close();
 			}
 		}
+	}
+
+	private static boolean formatChanged(AudioFormat af, SampleBuffer buf) {
+		return af.getSampleRate()!=buf.getSampleRate()
+				||af.getChannels()!=buf.getChannels()
+				||af.getSampleSizeInBits()!=buf.getBitsPerSample()
+				||af.isBigEndian()!=buf.isBigEndian();
 	}
 }
