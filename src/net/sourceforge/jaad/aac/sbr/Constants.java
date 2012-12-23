@@ -16,6 +16,7 @@ interface Constants {
 	int VARVAR = 3;
 	int[] CEIL_LOG2 = {0, 1, 2, 2, 3, 3}; //CEIL_LOG2[i] = ceil(log(i+1)/log(2))
 	int[] TIME_SLOTS = {16, 15}; //1024->16, 960->15
+	int RATE = 2;
 	int NOISE_FLOOR_OFFSET = 6;
 	int[] PAN_OFFSET = {24, 12};
 }
