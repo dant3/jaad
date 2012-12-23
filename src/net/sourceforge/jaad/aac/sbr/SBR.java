@@ -1,6 +1,5 @@
 package net.sourceforge.jaad.aac.sbr;
 
-import java.util.Arrays;
 import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.SampleFrequency;
 import net.sourceforge.jaad.aac.syntax.BitStream;
@@ -46,12 +45,12 @@ public class SBR implements Constants {
 				in.skipBits(size);
 
 				/*int id;
-				while(size>7) {
-					id = in.readBits(2);
-					size -= 2;
-					decodeExtension(in, id);
-				}
-				in.readBits(size);*/
+				 while(size>7) {
+				 id = in.readBits(2);
+				 size -= 2;
+				 decodeExtension(in, id);
+				 }
+				 in.readBits(size);*/
 			}
 		}
 
@@ -70,6 +69,8 @@ public class SBR implements Constants {
 		channel1.decodeEnvelope(in, tables, false);
 		channel1.decodeNoise(in, tables, false);
 		channel1.decodeSinusoidals(in, tables);
+
+		dequantChannel(channel1);
 	}
 
 	private void decodeChannelPair(BitStream in) throws AACException {
@@ -104,9 +105,102 @@ public class SBR implements Constants {
 
 		channel1.decodeSinusoidals(in, tables);
 		channel2.decodeSinusoidals(in, tables);
+
+		if(coupling) dequantCoupledChannels();
+		else {
+			dequantChannel(channel1);
+			dequantChannel(channel2);
+		}
 	}
 
 	private void decodeExtension(BitStream in, int id) throws AACException {
+	}
+
+	private void dequantChannel(ChannelData cd) {
+		//envelopes
+		int[][] E = cd.getEnvelopeScalefactors();
+		int Le = cd.getNumEnv();
+		int[] r = cd.getFreqRes();
+		double a = (cd.getAmpRes()==0) ? 2 : 1;
+		int[] n = tables.getN();
+
+		double[][] Eorig = new double[Le][];
+		int len;
+		for(int l = 0; l<Le; l++) {
+			len = n[r[l]];
+			Eorig[l] = new double[len];
+			for(int k = 0; k<len; k++) {
+				Eorig[l][k] = 64*Math.pow(2, (E[l][k]/a));
+			}
+		}
+
+		//noise
+		int[][] Q = cd.getNoiseFloorData();
+		int Lq = cd.getNumNoise();
+		int Nq = tables.getNq();
+
+		double[][] Qorig = new double[Lq][Nq];
+		for(int l = 0; l<Lq; l++) {
+			for(int k = 0; k<Nq; k++) {
+				Qorig[l][k] = Math.pow(2, NOISE_FLOOR_OFFSET-Q[l][k]);
+			}
+		}
+
+		cd.setDequantData(Eorig, Qorig);
+	}
+
+	private void dequantCoupledChannels() {
+		//envelopes
+		int[][] E0 = channel1.getEnvelopeScalefactors();
+		int[][] E1 = channel2.getEnvelopeScalefactors();
+		int ampRes = channel1.getAmpRes();
+		double a = (ampRes==0) ? 2 : 1;
+		int Le = channel1.getNumEnv();
+		int[] r = channel1.getFreqRes();
+		int[] n = tables.getN();
+
+		double[][] Eleftorig = new double[Le][];
+		double[][] Erightorig = new double[Le][];
+		int len;
+		double d1, d2;
+		for(int l = 0; l<Le; l++) {
+			len = n[r[l]];
+			Eleftorig[l] = new double[len];
+			Erightorig[l] = new double[len];
+			for(int k = 0; k<len; k++) {
+				d1 = (double) E0[l][k]/a;
+				d1 = Math.pow(2, d1+1);
+				d2 = (double) (PAN_OFFSET[ampRes]-E1[l][k])/a;
+				d2 = 1+Math.pow(2, d2);
+				Eleftorig[l][k] = 64*(d1/d2);
+
+				d2 = (double) (E1[l][k]-PAN_OFFSET[ampRes])/a;
+				d2 = 1+Math.pow(2, d2);
+				Erightorig[l][k] = 64*(d1/d2);
+			}
+		}
+
+		//noise
+		int[][] Q0 = channel1.getNoiseFloorData();
+		int[][] Q1 = channel2.getNoiseFloorData();
+		int Lq = channel1.getNumNoise();
+		int Nq = tables.getNq();
+
+		double[][] Qleftorig = new double[Lq][Nq];
+		double[][] Qrightorig = new double[Lq][Nq];
+		for(int l = 0; l<Lq; l++) {
+			for(int k = 0; k<Nq; k++) {
+				d1 = Math.pow(2, NOISE_FLOOR_OFFSET-Q0[l][k]+1);
+				d2 = 1+Math.pow(2, PAN_OFFSET[1]-Q1[l][k]);
+				Qleftorig[l][k] = d1/d2;
+
+				d2 = 1+Math.pow(2, Q1[l][k]-PAN_OFFSET[1]);
+				Qrightorig[l][k] = d1/d2;
+			}
+		}
+
+		channel1.setDequantData(Eleftorig, Qleftorig);
+		channel2.setDequantData(Erightorig, Qrightorig);
 	}
 
 	public boolean isPSUsed() {

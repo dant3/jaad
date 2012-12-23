@@ -11,21 +11,30 @@ class ChannelData implements Constants, HuffmanTables {
 	private int frameClass;
 	private int numEnv, varBord0, varBord1, numRel0, numRel1, numNoise, pointer;
 	private int[] freqRes, relBord0, relBord1;
-	//private int freqResPrev;
+	private int freqResPrev;
 	private int[] dfEnv, dfNoise, invfMode;
 	private int[][] dataEnv, dataNoise;
-	//private float[] dataEnvPrev, dataNoisePrev;
 	private boolean harmonicsPresent;
 	private boolean[] addHarmonics;
+	private int[] te, tq;
+	private int[][] envelopeScalefactors, noiseFloorData;
+	private int[] envelopeScalefactorsPrev, noiseFloorDataPrev;
+	private double[][] Eorig, Qorig;
 
 	ChannelData(int channel) {
 		this.channel = channel;
+
+		freqResPrev = 0;
+		envelopeScalefactorsPrev = new int[50]; //TODO: max. size
+		noiseFloorDataPrev = new int[50]; //TODO: max. size
 	}
 
 	void decodeGrid(BitStream in, Header header) throws AACException {
 		ampRes = header.getAmpRes();
 
 		frameClass = in.readBits(2);
+		int absBordLead, absBordTrail, nRelLead, nRelTrail;
+		int[] relBordLead = null, relBordTrail = null;
 		switch(frameClass) {
 			case FIXFIX:
 				numEnv = 1<<in.readBits(2);
@@ -36,6 +45,13 @@ class ChannelData implements Constants, HuffmanTables {
 				for(int env = 1; env<numEnv; env++) {
 					freqRes[env] = freqRes[0];
 				}
+
+				absBordLead = 0;
+				absBordTrail = TIME_SLOTS[0];
+				nRelLead = numEnv-1;
+				relBordLead = new int[nRelLead];
+				Arrays.fill(relBordLead, (int) Math.round((double) TIME_SLOTS[0]/(double) numEnv));
+				nRelTrail = 0;
 				break;
 			case FIXVAR:
 				varBord1 = in.readBits(2);
@@ -53,6 +69,13 @@ class ChannelData implements Constants, HuffmanTables {
 				for(int env = 0; env<numEnv; env++) {
 					freqRes[numEnv-1-env] = in.readBit();
 				}
+
+				absBordLead = 0;
+				absBordTrail = varBord1+TIME_SLOTS[0];
+				nRelLead = 0;
+				nRelTrail = numRel1;
+				relBordTrail = new int[nRelTrail];
+				System.arraycopy(relBord1, 0, relBordTrail, 0, nRelTrail);
 				break;
 			case VARFIX:
 				varBord0 = in.readBits(2);
@@ -70,8 +93,15 @@ class ChannelData implements Constants, HuffmanTables {
 				for(int env = 0; env<numEnv; env++) {
 					freqRes[env] = in.readBit();
 				}
+
+				absBordLead = varBord0;
+				absBordTrail = TIME_SLOTS[0];
+				nRelLead = numRel0;
+				relBordLead = new int[nRelLead];
+				System.arraycopy(relBord0, 0, relBordLead, 0, nRelLead);
+				nRelTrail = 0;
 				break;
-			case VARVAR:
+			default: //VARVAR
 				varBord0 = in.readBits(2);
 				varBord1 = in.readBits(2);
 				numRel0 = in.readBits(2);
@@ -93,11 +123,57 @@ class ChannelData implements Constants, HuffmanTables {
 				for(int env = 0; env<numEnv; env++) {
 					freqRes[env] = in.readBit();
 				}
+
+				absBordLead = varBord0;
+				absBordTrail = varBord1+TIME_SLOTS[0];
+				nRelLead = numRel0;
+				relBordLead = new int[nRelLead];
+				System.arraycopy(relBord0, 0, relBordLead, 0, nRelLead);
+				nRelTrail = numRel1;
+				relBordTrail = new int[nRelTrail];
+				System.arraycopy(relBord1, 0, relBordTrail, 0, nRelTrail);
 				break;
 		}
 
 		if(numEnv>1) numNoise = 2;
 		else numNoise = 1;
+
+		te = new int[numEnv+1];
+		te[0] = 0;
+		int sum;
+		for(int l = 1; l<numEnv; l++) {
+			sum = 0;
+			if(l<=nRelLead) {
+				sum = absBordLead;
+				for(int i = 0; i<l; i++) {
+					sum += relBordLead[i];
+				}
+			}
+			else {
+				for(int i = 0; i<numEnv-l-1; i++) {
+					sum += relBordTrail[i];
+				}
+				sum = absBordTrail-sum;
+			}
+			te[l] = sum;
+		}
+		te[numEnv] = absBordTrail;
+
+		if(numEnv==1) tq = new int[]{te[0], te[1]};
+		else {
+			int middleBorder;
+			if(frameClass==FIXFIX) middleBorder = numEnv/2;
+			else if(frameClass==VARFIX) {
+				if(pointer==0) middleBorder = 1;
+				else if(pointer==1) middleBorder = numEnv-1;
+				else middleBorder = pointer-1;
+			}
+			else {
+				if(pointer<=1) middleBorder = numEnv-1;
+				else middleBorder = numEnv+1-pointer;
+			}
+			tq = new int[]{te[0], te[middleBorder], te[numEnv]};
+		}
 	}
 
 	void copyGrid(ChannelData cd) {
@@ -105,13 +181,14 @@ class ChannelData implements Constants, HuffmanTables {
 		frameClass = cd.frameClass;
 		numEnv = cd.numEnv;
 		numNoise = cd.numNoise;
+		pointer = cd.pointer;
 
 		freqRes = new int[cd.freqRes.length];
-		System.arraycopy(cd.freqRes, 0, freqRes, 0, numEnv);
-		//System.arraycopy(cd.getTe(), 0, te, 0, te.length);
-		//System.arraycopy(cd.getTq(), 0, tq, 0, tq.length);
-
-		pointer = cd.pointer;
+		System.arraycopy(cd.freqRes, 0, freqRes, 0, cd.freqRes.length);
+		te = new int[cd.te.length];
+		System.arraycopy(cd.te, 0, te, 0, te.length);
+		tq = new int[cd.tq.length];
+		System.arraycopy(cd.tq, 0, tq, 0, tq.length);
 	}
 
 	void decodeDTDF(BitStream in) throws AACException {
@@ -145,7 +222,7 @@ class ChannelData implements Constants, HuffmanTables {
 		int delta;
 		int[][] huffT, huffF;
 		if(coupling&&(channel==1)) {
-			delta = 1;
+			delta = 2;
 			if(ampRes==1) {
 				huffT = T_HUFFMAN_ENV_BAL_3_0DB;
 				huffF = F_HUFFMAN_ENV_BAL_3_0DB;
@@ -156,7 +233,7 @@ class ChannelData implements Constants, HuffmanTables {
 			}
 		}
 		else {
-			delta = 0;
+			delta = 1;
 			if(ampRes==1) {
 				huffT = T_HUFFMAN_ENV_3_0DB;
 				huffF = F_HUFFMAN_ENV_3_0DB;
@@ -167,36 +244,87 @@ class ChannelData implements Constants, HuffmanTables {
 			}
 		}
 
-		int j;
+		int numEnvBands;
 		dataEnv = new int[numEnv][];
-		for(int i = 0; i<numEnv; i++) {
-			int numEnvBands = tables.getN()[freqRes[i]];
-			dataEnv[i] = new int[numEnvBands];
-			if(dfEnv[i]==1) {
-				for(j = 0; j<numEnvBands; j++) {
-					dataEnv[i][j] = decodeHuffman(in, huffT)<<delta;
+		for(int l = 0; l<numEnv; l++) {
+			numEnvBands = tables.getN()[freqRes[l]];
+			dataEnv[l] = new int[numEnvBands];
+			if(dfEnv[l]==1) {
+				for(int k = 0; k<numEnvBands; k++) {
+					dataEnv[l][k] = decodeHuffman(in, huffT);
 				}
 			}
 			else {
-				dataEnv[0][i] = in.readBits(bits)<<delta;
+				dataEnv[0][l] = in.readBits(bits);
 
-				for(j = 1; j<numEnvBands; j++) {
-					dataEnv[i][j] = decodeHuffman(in, huffF)<<delta;
+				for(int k = 1; k<numEnvBands; k++) {
+					dataEnv[l][k] = decodeHuffman(in, huffF);
 				}
 			}
 		}
+
+		int sum, g;
+		int[] ge;
+		int[] fTableHigh = tables.getFTableHigh(), fTableLow = tables.getFTableLow();
+		envelopeScalefactors = new int[numEnv][];
+		for(int l = 0; l<numEnv; l++) {
+			numEnvBands = tables.getN()[freqRes[l]];
+			envelopeScalefactors[l] = new int[numEnvBands];
+
+			if(dfEnv[l]==0) {
+				for(int k = 0; k<numEnvBands; k++) {
+					sum = 0;
+					for(int i = 0; i<=k; i++) {
+						sum += delta*dataEnv[l][i];
+					}
+					envelopeScalefactors[l][k] = sum;
+				}
+			}
+			else {
+				g = (l==0) ? freqResPrev : freqRes[l-1];
+				ge = (l==0) ? envelopeScalefactorsPrev : envelopeScalefactors[l-1];
+				int i;
+				if(freqRes[l]==g) {
+					for(int k = 0; k<numEnvBands; k++) {
+						envelopeScalefactors[l][k] = ge[k]+delta*dataEnv[l][k];
+					}
+				}
+				else if(g==1) {
+					for(int k = 0; k<numEnvBands; k++) {
+						i = -1;
+						for(int j = 0; j<fTableHigh.length&&i<0; j++) {
+							if(fTableHigh[j]==fTableLow[k]) i = j;
+						}
+						envelopeScalefactors[l][k] = ge[i]+delta*dataEnv[l][k];
+					}
+				}
+				else {
+					for(int k = 0; k<numEnvBands; k++) {
+						i = -1;
+						for(int j = 0; j<fTableLow.length&&i<0; j++) {
+							if(fTableLow[j]>fTableHigh[k]) i = j-1;
+						}
+						envelopeScalefactors[l][k] = ge[i]+delta*dataEnv[l][k];
+					}
+				}
+			}
+		}
+
+		freqResPrev = freqRes[numEnv-1];
+		envelopeScalefactorsPrev = new int[envelopeScalefactors[numEnv-1].length];
+		System.arraycopy(envelopeScalefactors[numEnv-1], 0, envelopeScalefactorsPrev, 0, envelopeScalefactorsPrev.length);
 	}
 
 	void decodeNoise(BitStream in, FrequencyTables tables, boolean coupling) throws AACException {
 		int delta;
 		int[][] huffT, huffF;
 		if(coupling&&(channel==1)) {
-			delta = 1;
+			delta = 2;
 			huffT = T_HUFFMAN_NOISE_BAL_3_0DB;
 			huffF = F_HUFFMAN_ENV_BAL_3_0DB;
 		}
 		else {
-			delta = 0;
+			delta = 1;
 			huffT = T_HUFFMAN_NOISE_3_0DB;
 			huffF = F_HUFFMAN_ENV_3_0DB;
 		}
@@ -207,16 +335,41 @@ class ChannelData implements Constants, HuffmanTables {
 		for(int i = 0; i<numNoise; i++) {
 			if(dfNoise[i]==1) {
 				for(j = 0; j<len; j++) {
-					dataNoise[i][j] = decodeHuffman(in, huffT)<<delta;
+					dataNoise[i][j] = decodeHuffman(in, huffT);
 				}
 			}
 			else {
-				dataNoise[0][i] = in.readBits(5)<<delta;
+				dataNoise[0][i] = in.readBits(5);
 				for(j = 1; j<len; j++) {
-					dataNoise[i][j] = decodeHuffman(in, huffF)<<delta;
+					dataNoise[i][j] = decodeHuffman(in, huffF);
 				}
 			}
 		}
+
+		final int nq = tables.getNq();
+		noiseFloorData = new int[numNoise][nq];
+		int sum;
+		int[] prev;
+		for(int l = 0; l<numNoise; l++) {
+			if(dfNoise[l]==0) {
+				for(int k = 0; k<nq; k++) {
+					sum = 0;
+					for(int i = 0; i<=k; i++) {
+						sum += delta*dataNoise[l][i];
+					}
+					noiseFloorData[l][k] = sum;
+				}
+			}
+			else {
+				prev = (l==0) ? noiseFloorDataPrev : noiseFloorData[l-1];
+				for(int k = 0; k<nq; k++) {
+					noiseFloorData[l][k] = prev[k]+delta*dataNoise[l][k];
+				}
+			}
+		}
+
+		noiseFloorDataPrev = new int[noiseFloorData[numNoise-1].length];
+		System.arraycopy(noiseFloorData[numNoise-1], 0, noiseFloorDataPrev, 0, noiseFloorDataPrev.length);
 	}
 
 	void decodeSinusoidals(BitStream in, FrequencyTables tables) throws AACException {
@@ -239,5 +392,42 @@ class ChannelData implements Constants, HuffmanTables {
 			index = table[index][bit];
 		}
 		return index+HUFFMAN_OFFSET;
+	}
+
+	int getAmpRes() {
+		return ampRes;
+	}
+
+	int[][] getEnvelopeScalefactors() {
+		return envelopeScalefactors;
+	}
+
+	int[][] getNoiseFloorData() {
+		return noiseFloorData;
+	}
+
+	int getNumEnv() {
+		return numEnv;
+	}
+
+	int getNumNoise() {
+		return numNoise;
+	}
+
+	int[] getFreqRes() {
+		return freqRes;
+	}
+
+	double[][] getEorig() {
+		return Eorig;
+	}
+
+	double[][] getQorig() {
+		return Qorig;
+	}
+
+	void setDequantData(double[][] Eorig, double[][] Qorig) {
+		this.Eorig = Eorig;
+		this.Qorig = Qorig;
 	}
 }

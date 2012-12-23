@@ -26,8 +26,9 @@ class FrequencyTables implements Constants {
 
 		if(header.getFreqScale()==0) calculateMasterTableFS0(header);
 		else calculateMasterTableFS(header);
+		if(nMaster<header.getXOverBand()) throw new AACException("SBR: MFT length < xOver-band: "+nMaster+" < "+header.getXOverBand());
+		
 		calculateDerivedFrequencyTables(header);
-
 		if(kx>32) throw new AACException("SBR: start frequency border out of range");
 		if((kx+M)>64) throw new AACException("SBR: stop frequency border out of range");
 		if(Nq>5) throw new AACException("SBR: too many noise floor scalefactors: "+Nq);
@@ -47,7 +48,7 @@ class FrequencyTables implements Constants {
 		else if(sampleFrequency==32000) index = 3;
 		else if(sampleFrequency>=44100&&sampleFrequency<=64000) index = 4;
 		else index = 5;
-		k0 = startMin+OFFSETS[index][header.getStartFreq()];
+		k0 = startMin+OFFSET[index][header.getStartFreq()];
 
 		final int stopFreq = header.getStopFreq();
 		int min;
