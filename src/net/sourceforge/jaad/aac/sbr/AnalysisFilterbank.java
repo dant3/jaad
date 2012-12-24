@@ -3,10 +3,11 @@ package net.sourceforge.jaad.aac.sbr;
 class AnalysisFilterbank implements FilterbankTable, Constants {
 
 	private final float[][][] COEFS;
-	private final float[] x, z, u;
+	private final float[][] x; //for both channels
+	private final float[] z, u;
 
 	AnalysisFilterbank() {
-		x = new float[320];
+		x = new float[2][320];
 		z = new float[320];
 		u = new float[64];
 
@@ -22,22 +23,23 @@ class AnalysisFilterbank implements FilterbankTable, Constants {
 	}
 
 	//in: 1024 time samples, out: 32 x 32 complex
-	void process(float[] in, float[][][] out) {
+	void process(int channel, float[] in, float[][][] out) {
+		final float[] xc = x[channel];
 		int inOff = 0;
 		for(int l = 0; l<TIME_SLOTS[0]*RATE; l++) {
 			//shift x by 32, oldest are discarded
 			for(int n = 319; n>=32; n--) {
-				x[n] = x[n-32];
+				xc[n] = xc[n-32];
 			}
 
 			//insert new samples at 0..31
 			for(int n = 31; n>=0; n--) {
-				x[n] = in[inOff++];
+				xc[n] = in[inOff++];
 			}
 
 			//multiply with window
 			for(int n = 0; n<320; n++) {
-				z[n] = x[n]*WINDOW[2*n];
+				z[n] = xc[n]*WINDOW[2*n];
 			}
 
 			//sum samples, create u

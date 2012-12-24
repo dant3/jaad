@@ -19,4 +19,6 @@ interface Constants {
 	int RATE = 2;
 	int NOISE_FLOOR_OFFSET = 6;
 	int[] PAN_OFFSET = {24, 12};
+	int T_HF_GEN = 8;
+	int T_HF_ADJ = 2;
 }

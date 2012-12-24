@@ -9,14 +9,22 @@ class FrequencyTables implements Constants {
 
 	private final int sampleFrequency;
 	private int k0, k2, nMaster, M, kx, Nq, nLow, nHigh, Nl;
+	private int Mprev, kxPrev;
 	private int[] fMaster, nTable, fTableHigh, fTableLow, fTableNoise, fTableLim;
+	private int numPatches;
+	private int[] patchNumSubbands, patchStartSubband;
 	private int[] patchBorders;
 
 	FrequencyTables(int sampleFrequency) {
 		this.sampleFrequency = sampleFrequency;
+		kx = 0; //=kxPrev for first frame
+		M = 0; //=Mprev for first frame
 	}
 
 	void calculateTables(Header header) throws AACException {
+		kxPrev = kx;
+		Mprev = M;
+
 		calculateKs(header);
 		int maxBands;
 		if(sampleFrequency<=32000) maxBands = 48;
@@ -27,11 +35,14 @@ class FrequencyTables implements Constants {
 		if(header.getFreqScale()==0) calculateMasterTableFS0(header);
 		else calculateMasterTableFS(header);
 		if(nMaster<header.getXOverBand()) throw new AACException("SBR: MFT length < xOver-band: "+nMaster+" < "+header.getXOverBand());
-		
+
 		calculateDerivedFrequencyTables(header);
 		if(kx>32) throw new AACException("SBR: start frequency border out of range");
 		if((kx+M)>64) throw new AACException("SBR: stop frequency border out of range");
 		if(Nq>5) throw new AACException("SBR: too many noise floor scalefactors: "+Nq);
+
+		calculatePatches();
+		calculateLimiterFrequencyTables(header);
 	}
 
 	private void calculateKs(Header header) {
@@ -243,7 +254,48 @@ class FrequencyTables implements Constants {
 		}
 	}
 
-	void calculateLimiterFrequencyTables(Header header, int numPatches, int[] patchNumSubbands) {
+	private void calculatePatches() {
+		int msb = k0;
+		int usb = kx;
+		numPatches = 0;
+		int goalSb = (int) Math.round(2.048E6/sampleFrequency);
+		int k;
+		if(goalSb<kx+M) {
+			k = 0;
+			for(int i = 0; fMaster[i]<goalSb; i++) {
+				k = i+1;
+			}
+		}
+		else k = nMaster;
+
+		int sb, odd, j;
+		do {
+			j = k;
+			do {
+				sb = fMaster[j];
+				odd = (sb-2+k0)%2;
+				j--;
+			}
+			while(sb>(k0-1+msb-odd));
+
+			patchNumSubbands[numPatches] = Math.max(sb-usb, 0);
+			patchStartSubband[numPatches] = k0-odd-patchNumSubbands[numPatches];
+
+			if(patchNumSubbands[numPatches]>0) {
+				usb = sb;
+				msb = sb;
+				numPatches++;
+			}
+			else msb = kx;
+
+			if(fMaster[k]-sb<3) k = nMaster;
+		}
+		while(sb!=kx+M);
+
+		if(patchNumSubbands[numPatches-1]<3&&numPatches>1) numPatches--;
+	}
+
+	private void calculateLimiterFrequencyTables(Header header) {
 		int lb = header.getLimiterBands();
 		if(lb==0) fTableLim = new int[]{fTableLow[0], fTableLow[nLow]};
 		else {
@@ -274,7 +326,7 @@ class FrequencyTables implements Constants {
 			int nrLim = nLow+numPatches-1;
 			while(k<=nrLim) {
 				double nOctaves = Math.log((double) limTableL.get(k)/(double) limTableL.get(k-1))/Math.log(2);
-				if(nOctaves<0.49) {
+				if(nOctaves*limBands<0.49) {
 					if(limTableL.get(k)==limTableL.get(k-1)) {
 						limTableL.remove(k);
 						nrLim--;
@@ -358,8 +410,16 @@ class FrequencyTables implements Constants {
 		return M;
 	}
 
+	int getMPrev() {
+		return Mprev;
+	}
+
 	int getKx() {
 		return kx;
+	}
+
+	int getKxPrev() {
+		return kxPrev;
 	}
 
 	int getNq() {
@@ -384,5 +444,21 @@ class FrequencyTables implements Constants {
 
 	int getNl() {
 		return Nl;
+	}
+
+	int getNumPatches() {
+		return numPatches;
+	}
+
+	int[] getPatchNumSubbands() {
+		return patchNumSubbands;
+	}
+
+	int[] getPatchStartSubband() {
+		return patchStartSubband;
+	}
+
+	int[] getPatchBorders() {
+		return patchBorders;
 	}
 }

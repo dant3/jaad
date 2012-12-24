@@ -10,16 +10,19 @@ class ChannelData implements Constants, HuffmanTables {
 	private int ampRes;
 	private int frameClass;
 	private int numEnv, varBord0, varBord1, numRel0, numRel1, numNoise, pointer;
+	private int numEnvPrev;
 	private int[] freqRes, relBord0, relBord1;
 	private int freqResPrev;
 	private int[] dfEnv, dfNoise, invfMode;
+	private int[] invfModePrev;
 	private int[][] dataEnv, dataNoise;
 	private boolean harmonicsPresent;
 	private boolean[] addHarmonics;
-	private int[] te, tq;
+	private int[] te, tq, tePrev;
 	private int[][] envelopeScalefactors, noiseFloorData;
 	private int[] envelopeScalefactorsPrev, noiseFloorDataPrev;
 	private double[][] Eorig, Qorig;
+	private float[] bwArray, bwArrayPrev;
 
 	ChannelData(int channel) {
 		this.channel = channel;
@@ -27,6 +30,9 @@ class ChannelData implements Constants, HuffmanTables {
 		freqResPrev = 0;
 		envelopeScalefactorsPrev = new int[50]; //TODO: max. size
 		noiseFloorDataPrev = new int[50]; //TODO: max. size
+		tePrev = new int[1];
+		numEnvPrev = 0;
+		invfModePrev = new int[1];
 	}
 
 	void decodeGrid(BitStream in, Header header) throws AACException {
@@ -410,12 +416,32 @@ class ChannelData implements Constants, HuffmanTables {
 		return numEnv;
 	}
 
+	int getNumEnvPrev() {
+		return numEnvPrev;
+	}
+
 	int getNumNoise() {
 		return numNoise;
 	}
 
 	int[] getFreqRes() {
 		return freqRes;
+	}
+
+	int[] getTe() {
+		return te;
+	}
+
+	int[] getTePrev() {
+		return tePrev;
+	}
+
+	int[] getInvfMode() {
+		return invfMode;
+	}
+
+	int[] getInvfModePrev() {
+		return invfModePrev;
 	}
 
 	double[][] getEorig() {
@@ -429,5 +455,24 @@ class ChannelData implements Constants, HuffmanTables {
 	void setDequantData(double[][] Eorig, double[][] Qorig) {
 		this.Eorig = Eorig;
 		this.Qorig = Qorig;
+	}
+
+	float[] getBwArray() {
+		return bwArray;
+	}
+
+	float[] getBwArrayPrev() {
+		return bwArrayPrev;
+	}
+
+	void setBwArray(float[] bwArray) {
+		this.bwArray = bwArray;
+	}
+
+	void savePreviousData() {
+		numEnvPrev = numEnv;
+		tePrev = te;
+		invfModePrev = invfMode;
+		bwArrayPrev = bwArray;
 	}
 }

@@ -10,6 +10,10 @@ public class SBR implements Constants {
 	private final boolean downSampled;
 	private final Header header;
 	private final FrequencyTables tables;
+	private final AnalysisFilterbank analysisFilter;
+	private final SynthesisFilterbank synthesisFilter;
+	private final float[][][][] W, Y;
+	private final float[][][] Xlow, Xhigh, X;
 	private ChannelData channel1, channel2;
 	private boolean coupling;
 
@@ -19,6 +23,13 @@ public class SBR implements Constants {
 
 		header = new Header();
 		tables = new FrequencyTables(sampleFrequency);
+		analysisFilter = new AnalysisFilterbank();
+		synthesisFilter = new SynthesisFilterbank();
+		W = new float[2][32][32][2];
+		Xlow = new float[32][TIME_SLOTS[0]*RATE+T_HF_GEN][2];
+		Xhigh = new float[32][TIME_SLOTS[0]*RATE+T_HF_GEN][2];
+		Y = new float[2][32][TIME_SLOTS[0]*RATE+T_HF_GEN][2];
+		X = new float[64][TIME_SLOTS[0]*RATE][2];
 
 		channel1 = new ChannelData(0);
 		coupling = false;
@@ -207,6 +218,91 @@ public class SBR implements Constants {
 		return false;
 	}
 
+	//left/right: 1024 time samples
+	//4.6.18.5
 	public void process(float[] left, float[] right) {
+		processChannel(0, left, channel1);
+		if(right!=null) processChannel(1, right, channel2);
+
+		channel1.savePreviousData();
+		channel2.savePreviousData();
+	}
+
+	private void processChannel(int channel, float[] samples, ChannelData cd) {
+		int lf = TIME_SLOTS[0]*RATE;
+		int kx = tables.getKx();
+		int kxPrev = tables.getKxPrev();
+		int M = tables.getM();
+		int Mprev = tables.getMPrev();
+		int lTemp = RATE*cd.getTePrev()[cd.getNumEnvPrev()]-lf;
+
+		//copy old W
+		for(int l = 0; l<T_HF_GEN; l++) {
+			for(int k = 0; k<kxPrev; k++) {
+				Xlow[k][l][0] = W[channel][k][l+lf-T_HF_GEN][0];
+				Xlow[k][l][1] = W[channel][k][l+lf-T_HF_GEN][1];
+			}
+			for(int k = kxPrev; k<32; k++) {
+				Xlow[k][l][0] = 0;
+				Xlow[k][l][1] = 0;
+			}
+		}
+		//1. analysis QMF
+		analysisFilter.process(channel, samples, W[channel]);
+
+		//2. calculate Xlow
+		for(int l = T_HF_GEN; l<lf+T_HF_GEN; l++) {
+			for(int k = 0; k<kx; k++) {
+				Xlow[k][l][0] = W[channel][k][l+lf-T_HF_GEN][0];
+				Xlow[k][l][1] = W[channel][k][l+lf-T_HF_GEN][1];
+			}
+			for(int k = kx; k<32; k++) {
+				Xlow[k][l][0] = 0;
+				Xlow[k][l][1] = 0;
+			}
+		}
+
+		//3. HF generation
+		HFGenerator.process(tables, cd, Xlow, Xhigh);
+
+		//copy old Y
+		for(int l = 0; l<lTemp; l++) {
+			for(int k = 0; k<kxPrev; k++) {
+				X[k][l][0] = Xlow[k][l+T_HF_ADJ][0];
+				X[k][l][1] = Xlow[k][l+T_HF_ADJ][1];
+			}
+			for(int k = kxPrev; k<kxPrev+Mprev; k++) {
+				X[k][l][0] = Y[channel][k][l+T_HF_ADJ+lf][0];
+				X[k][l][1] = Y[channel][k][l+T_HF_ADJ+lf][1];
+
+			}
+			for(int k = kxPrev+Mprev; k<64; k++) {
+				X[k][l][0] = 0;
+				X[k][l][1] = 0;
+			}
+		}
+
+		//4. HF adjustment
+		HFAdjuster.process(Xhigh, Y);
+
+		//5. calculate Y
+		for(int l = lTemp; l<lf; l++) {
+			for(int k = 0; k<kx; k++) {
+				X[k][l][0] = Xlow[k][l+T_HF_ADJ][0];
+				X[k][l][1] = Xlow[k][l+T_HF_ADJ][1];
+			}
+			for(int k = kx; k<kx+M; k++) {
+				X[k][l][0] = Y[channel][k][l+T_HF_ADJ+lf][0];
+				X[k][l][1] = Y[channel][k][l+T_HF_ADJ+lf][1];
+
+			}
+			for(int k = kx+M; k<64; k++) {
+				X[k][l][0] = 0;
+				X[k][l][1] = 0;
+			}
+		}
+
+		//6. synthesis QMF
+		synthesisFilter.process(channel, X, samples);
 	}
 }
