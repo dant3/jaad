@@ -255,10 +255,13 @@ class FrequencyTables implements Constants {
 	}
 
 	private void calculatePatches() {
+		List<Integer> pns = new ArrayList<Integer>();
+		List<Integer> pss = new ArrayList<Integer>();
+
 		int msb = k0;
 		int usb = kx;
 		numPatches = 0;
-		int goalSb = (int) Math.round(2.048E6/sampleFrequency);
+		int goalSb = (int) Math.round(2.048E6f/(float) sampleFrequency);
 		int k;
 		if(goalSb<kx+M) {
 			k = 0;
@@ -278,10 +281,10 @@ class FrequencyTables implements Constants {
 			}
 			while(sb>(k0-1+msb-odd));
 
-			patchNumSubbands[numPatches] = Math.max(sb-usb, 0);
-			patchStartSubband[numPatches] = k0-odd-patchNumSubbands[numPatches];
+			pns.add(numPatches, Math.max(sb-usb, 0));
+			pss.add(numPatches, k0-odd-pns.get(numPatches));
 
-			if(patchNumSubbands[numPatches]>0) {
+			if(pns.get(numPatches)>0) {
 				usb = sb;
 				msb = sb;
 				numPatches++;
@@ -292,7 +295,16 @@ class FrequencyTables implements Constants {
 		}
 		while(sb!=kx+M);
 
-		if(patchNumSubbands[numPatches-1]<3&&numPatches>1) numPatches--;
+		if(pns.get(numPatches-1)<3&&numPatches>1) numPatches--;
+
+		patchNumSubbands = new int[numPatches];
+		for(int i = 0; i<numPatches; i++) {
+			patchNumSubbands[i] = pns.get(i);
+		}
+		patchStartSubband = new int[numPatches];
+		for(int i = 0; i<numPatches; i++) {
+			patchStartSubband[i] = pss.get(i);
+		}
 	}
 
 	private void calculateLimiterFrequencyTables(Header header) {
@@ -349,6 +361,7 @@ class FrequencyTables implements Constants {
 			}
 
 			Nl = nrLim;
+			fTableLim = new int[nrLim+1];
 			for(int i = 0; i<=nrLim; i++) {
 				fTableLim[i] = limTable[i];
 			}

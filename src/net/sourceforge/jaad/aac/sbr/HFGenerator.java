@@ -34,7 +34,7 @@ class HFGenerator implements Constants {
 
 					g = -1;
 					for(int z = 0; z<fTableNoise.length&&g<0; z++) {
-						if(fTableNoise[z]<=k&&fTableNoise[z]>k) g = z;
+						if(fTableNoise[z]<=k&&fTableNoise[z+1]>k) g = z;
 					}
 
 					//alpha0 * Xlow[p][l-1+T_HF_ADJ]

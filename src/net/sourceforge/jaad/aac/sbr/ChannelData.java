@@ -23,6 +23,7 @@ class ChannelData implements Constants, HuffmanTables {
 	private int[] envelopeScalefactorsPrev, noiseFloorDataPrev;
 	private double[][] Eorig, Qorig;
 	private float[] bwArray, bwArrayPrev;
+	private int lTemp;
 
 	ChannelData(int channel) {
 		this.channel = channel;
@@ -32,7 +33,9 @@ class ChannelData implements Constants, HuffmanTables {
 		noiseFloorDataPrev = new int[50]; //TODO: max. size
 		tePrev = new int[1];
 		numEnvPrev = 0;
-		invfModePrev = new int[1];
+		invfModePrev = new int[50]; //TODO: max. size
+		bwArrayPrev = new float[50]; //TODO: max. size
+		lTemp = 0;
 	}
 
 	void decodeGrid(BitStream in, Header header) throws AACException {
@@ -469,7 +472,13 @@ class ChannelData implements Constants, HuffmanTables {
 		this.bwArray = bwArray;
 	}
 
+	int getLTemp() {
+		return lTemp;
+	}
+
 	void savePreviousData() {
+		lTemp = te[numEnv]*RATE-TIME_SLOTS[0]*RATE;
+
 		numEnvPrev = numEnv;
 		tePrev = te;
 		invfModePrev = invfMode;

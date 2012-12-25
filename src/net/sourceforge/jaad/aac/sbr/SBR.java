@@ -25,10 +25,10 @@ public class SBR implements Constants {
 		tables = new FrequencyTables(sampleFrequency);
 		analysisFilter = new AnalysisFilterbank();
 		synthesisFilter = new SynthesisFilterbank();
-		W = new float[2][32][32][2];
+		W = new float[2][32][64][2];
 		Xlow = new float[32][TIME_SLOTS[0]*RATE+T_HF_GEN][2];
-		Xhigh = new float[32][TIME_SLOTS[0]*RATE+T_HF_GEN][2];
-		Y = new float[2][32][TIME_SLOTS[0]*RATE+T_HF_GEN][2];
+		Xhigh = new float[64][TIME_SLOTS[0]*RATE+T_HF_GEN][2];
+		Y = new float[2][64][TIME_SLOTS[0]*RATE+T_HF_GEN][2];
 		X = new float[64][TIME_SLOTS[0]*RATE][2];
 
 		channel1 = new ChannelData(0);
@@ -234,7 +234,7 @@ public class SBR implements Constants {
 		int kxPrev = tables.getKxPrev();
 		int M = tables.getM();
 		int Mprev = tables.getMPrev();
-		int lTemp = RATE*cd.getTePrev()[cd.getNumEnvPrev()]-lf;
+		int lTemp = cd.getLTemp();
 
 		//copy old W
 		for(int l = 0; l<T_HF_GEN; l++) {
@@ -274,7 +274,6 @@ public class SBR implements Constants {
 			for(int k = kxPrev; k<kxPrev+Mprev; k++) {
 				X[k][l][0] = Y[channel][k][l+T_HF_ADJ+lf][0];
 				X[k][l][1] = Y[channel][k][l+T_HF_ADJ+lf][1];
-
 			}
 			for(int k = kxPrev+Mprev; k<64; k++) {
 				X[k][l][0] = 0;
@@ -292,9 +291,8 @@ public class SBR implements Constants {
 				X[k][l][1] = Xlow[k][l+T_HF_ADJ][1];
 			}
 			for(int k = kx; k<kx+M; k++) {
-				X[k][l][0] = Y[channel][k][l+T_HF_ADJ+lf][0];
-				X[k][l][1] = Y[channel][k][l+T_HF_ADJ+lf][1];
-
+				X[k][l][0] = Y[channel][k][l+T_HF_ADJ][0];
+				X[k][l][1] = Y[channel][k][l+T_HF_ADJ][1];
 			}
 			for(int k = kx+M; k<64; k++) {
 				X[k][l][0] = 0;
