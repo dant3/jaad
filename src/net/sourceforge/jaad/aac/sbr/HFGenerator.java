@@ -11,6 +11,7 @@ class HFGenerator implements Constants {
 
 		float[] bwArray = new float[tables.getNq()];
 		calculateChirpFactors(tables, cd, bwArray);
+		cd.setBwArray(bwArray);
 
 		int[] te = cd.getTe();
 		int Le = cd.getNumEnv();

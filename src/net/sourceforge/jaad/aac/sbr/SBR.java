@@ -1,5 +1,6 @@
 package net.sourceforge.jaad.aac.sbr;
 
+import java.util.Arrays;
 import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.SampleFrequency;
 import net.sourceforge.jaad.aac.syntax.BitStream;
@@ -14,6 +15,7 @@ public class SBR implements Constants {
 	private final SynthesisFilterbank synthesisFilter;
 	private final float[][][][] W, Y;
 	private final float[][][] Xlow, Xhigh, X;
+	private final HFAdjuster adjuster;
 	private ChannelData channel1, channel2;
 	private boolean coupling;
 
@@ -30,6 +32,8 @@ public class SBR implements Constants {
 		Xhigh = new float[64][TIME_SLOTS[0]*RATE+T_HF_GEN][2];
 		Y = new float[2][64][TIME_SLOTS[0]*RATE+T_HF_GEN][2];
 		X = new float[64][TIME_SLOTS[0]*RATE][2];
+
+		adjuster = new HFAdjuster();
 
 		channel1 = new ChannelData(0);
 		coupling = false;
@@ -74,7 +78,7 @@ public class SBR implements Constants {
 	private void decodeSingleChannel(BitStream in) throws AACException {
 		if(in.readBool()) in.skipBits(4); //reserved
 
-		channel1.decodeGrid(in, header);
+		channel1.decodeGrid(in, header, tables);
 		channel1.decodeDTDF(in);
 		channel1.decodeInvF(in, tables);
 		channel1.decodeEnvelope(in, tables, false);
@@ -91,19 +95,20 @@ public class SBR implements Constants {
 
 		coupling = in.readBool();
 		if(coupling) {
-			channel1.decodeGrid(in, header);
+			channel1.decodeGrid(in, header, tables);
 			channel2.copyGrid(channel1);
 			channel1.decodeDTDF(in);
 			channel2.decodeDTDF(in);
 			channel1.decodeInvF(in, tables);
+			channel2.copyInvF(channel1);
 			channel1.decodeEnvelope(in, tables, coupling);
 			channel1.decodeNoise(in, tables, coupling);
 			channel2.decodeEnvelope(in, tables, coupling);
 			channel2.decodeNoise(in, tables, coupling);
 		}
 		else {
-			channel1.decodeGrid(in, header);
-			channel2.decodeGrid(in, header);
+			channel1.decodeGrid(in, header, tables);
+			channel2.decodeGrid(in, header, tables);
 			channel1.decodeDTDF(in);
 			channel2.decodeDTDF(in);
 			channel1.decodeInvF(in, tables);
@@ -132,16 +137,14 @@ public class SBR implements Constants {
 		int[][] E = cd.getEnvelopeScalefactors();
 		int Le = cd.getNumEnv();
 		int[] r = cd.getFreqRes();
-		double a = (cd.getAmpRes()==0) ? 2 : 1;
+		float a = (cd.getAmpRes()==0) ? 2 : 1;
 		int[] n = tables.getN();
 
-		double[][] Eorig = new double[Le][];
-		int len;
+		int len = Math.max(n[0], n[1]);
+		float[][] Eorig = new float[len][Le];
 		for(int l = 0; l<Le; l++) {
-			len = n[r[l]];
-			Eorig[l] = new double[len];
-			for(int k = 0; k<len; k++) {
-				Eorig[l][k] = 64*Math.pow(2, (E[l][k]/a));
+			for(int k = 0; k<n[r[l]]; k++) {
+				Eorig[k][l] = 64.0f*(float) Math.pow(2, (E[l][k]/a));
 			}
 		}
 
@@ -150,10 +153,10 @@ public class SBR implements Constants {
 		int Lq = cd.getNumNoise();
 		int Nq = tables.getNq();
 
-		double[][] Qorig = new double[Lq][Nq];
+		float[][] Qorig = new float[Nq][Lq];
 		for(int l = 0; l<Lq; l++) {
 			for(int k = 0; k<Nq; k++) {
-				Qorig[l][k] = Math.pow(2, NOISE_FLOOR_OFFSET-Q[l][k]);
+				Qorig[k][l] = (float) Math.pow(2, NOISE_FLOOR_OFFSET-Q[l][k]);
 			}
 		}
 
@@ -162,51 +165,51 @@ public class SBR implements Constants {
 
 	private void dequantCoupledChannels() {
 		//envelopes
+		//!!! indizes change: E0[l][k] -> Eorig[k][l]
 		int[][] E0 = channel1.getEnvelopeScalefactors();
 		int[][] E1 = channel2.getEnvelopeScalefactors();
 		int ampRes = channel1.getAmpRes();
-		double a = (ampRes==0) ? 2 : 1;
+		float a = (ampRes==0) ? 2 : 1;
 		int Le = channel1.getNumEnv();
 		int[] r = channel1.getFreqRes();
 		int[] n = tables.getN();
 
-		double[][] Eleftorig = new double[Le][];
-		double[][] Erightorig = new double[Le][];
-		int len;
-		double d1, d2;
-		for(int l = 0; l<Le; l++) {
-			len = n[r[l]];
-			Eleftorig[l] = new double[len];
-			Erightorig[l] = new double[len];
-			for(int k = 0; k<len; k++) {
-				d1 = (double) E0[l][k]/a;
-				d1 = Math.pow(2, d1+1);
-				d2 = (double) (PAN_OFFSET[ampRes]-E1[l][k])/a;
-				d2 = 1+Math.pow(2, d2);
-				Eleftorig[l][k] = 64*(d1/d2);
+		int len = Math.max(n[0], n[1]);
+		float[][] Eleftorig = new float[len][Le];
+		float[][] Erightorig = new float[len][Le];
 
-				d2 = (double) (E1[l][k]-PAN_OFFSET[ampRes])/a;
-				d2 = 1+Math.pow(2, d2);
-				Erightorig[l][k] = 64*(d1/d2);
+		float f1, f2;
+		for(int l = 0; l<Le; l++) {
+			for(int k = 0; k<n[r[l]]; k++) {
+				f1 = (float) E0[l][k]/a;
+				f1 = (float) Math.pow(2, f1+1);
+				f2 = (float) (PAN_OFFSET[ampRes]-E1[l][k])/a;
+				f2 = 1.0f+(float) Math.pow(2, f2);
+				Eleftorig[k][l] = 64*(f1/f2);
+
+				f2 = (float) (E1[l][k]-PAN_OFFSET[ampRes])/a;
+				f2 = 1.0f+(float) Math.pow(2, f2);
+				Erightorig[k][l] = 64*(f1/f2);
 			}
 		}
 
 		//noise
+		//!!! indizes change: Q0[l][k] -> Qorig[k][l]
 		int[][] Q0 = channel1.getNoiseFloorData();
 		int[][] Q1 = channel2.getNoiseFloorData();
 		int Lq = channel1.getNumNoise();
 		int Nq = tables.getNq();
 
-		double[][] Qleftorig = new double[Lq][Nq];
-		double[][] Qrightorig = new double[Lq][Nq];
+		float[][] Qleftorig = new float[Nq][Lq];
+		float[][] Qrightorig = new float[Nq][Lq];
 		for(int l = 0; l<Lq; l++) {
 			for(int k = 0; k<Nq; k++) {
-				d1 = Math.pow(2, NOISE_FLOOR_OFFSET-Q0[l][k]+1);
-				d2 = 1+Math.pow(2, PAN_OFFSET[1]-Q1[l][k]);
-				Qleftorig[l][k] = d1/d2;
+				f1 = (float) Math.pow(2, NOISE_FLOOR_OFFSET-Q0[l][k]+1);
+				f2 = 1.0f+(float) Math.pow(2, PAN_OFFSET[1]-Q1[l][k]);
+				Qleftorig[k][l] = f1/f2;
 
-				d2 = 1+Math.pow(2, Q1[l][k]-PAN_OFFSET[1]);
-				Qrightorig[l][k] = d1/d2;
+				f2 = 1.0f+(float) Math.pow(2, Q1[l][k]-PAN_OFFSET[1]);
+				Qrightorig[k][l] = f1/f2;
 			}
 		}
 
@@ -225,7 +228,7 @@ public class SBR implements Constants {
 		if(right!=null) processChannel(1, right, channel2);
 
 		channel1.savePreviousData();
-		channel2.savePreviousData();
+		if(channel2!=null) channel2.savePreviousData();
 	}
 
 	private void processChannel(int channel, float[] samples, ChannelData cd) {
@@ -282,7 +285,7 @@ public class SBR implements Constants {
 		}
 
 		//4. HF adjustment
-		HFAdjuster.process(Xhigh, Y);
+		adjuster.process(header, tables, cd, Xhigh, Y[channel]);
 
 		//5. calculate Y
 		for(int l = lTemp; l<lf; l++) {

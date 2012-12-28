@@ -17,13 +17,14 @@ class ChannelData implements Constants, HuffmanTables {
 	private int[] invfModePrev;
 	private int[][] dataEnv, dataNoise;
 	private boolean harmonicsPresent;
-	private boolean[] addHarmonics;
+	private int[] addHarmonics;
 	private int[] te, tq, tePrev;
 	private int[][] envelopeScalefactors, noiseFloorData;
 	private int[] envelopeScalefactorsPrev, noiseFloorDataPrev;
-	private double[][] Eorig, Qorig;
+	private float[][] Eorig, Qorig;
 	private float[] bwArray, bwArrayPrev;
-	private int lTemp;
+	private int lTemp, La, LaPrev;
+	private int[] sIndexMappedPrev;
 
 	ChannelData(int channel) {
 		this.channel = channel;
@@ -36,9 +37,25 @@ class ChannelData implements Constants, HuffmanTables {
 		invfModePrev = new int[50]; //TODO: max. size
 		bwArrayPrev = new float[50]; //TODO: max. size
 		lTemp = 0;
+		sIndexMappedPrev = new int[0];
+		LaPrev = 0;
 	}
 
-	void decodeGrid(BitStream in, Header header) throws AACException {
+	void decodeGrid(BitStream in, Header header, FrequencyTables tables) throws AACException {
+		int len = tables.getFTableHigh()[tables.getNHigh()];
+		if(sIndexMappedPrev.length<len) {
+			int[] tmp = new int[len];
+			System.arraycopy(sIndexMappedPrev, 0, tmp, 0, sIndexMappedPrev.length);
+			Arrays.fill(tmp, sIndexMappedPrev.length, tmp.length-1, 0);
+			sIndexMappedPrev = tmp;
+		}
+		else if(sIndexMappedPrev.length>len) {
+			//TODO: needed?
+			int[] tmp = new int[len];
+			System.arraycopy(sIndexMappedPrev, 0, tmp, 0, len);
+			sIndexMappedPrev = tmp;
+		}
+
 		ampRes = header.getAmpRes();
 
 		frameClass = in.readBits(2);
@@ -61,6 +78,8 @@ class ChannelData implements Constants, HuffmanTables {
 				relBordLead = new int[nRelLead];
 				Arrays.fill(relBordLead, (int) Math.round((double) TIME_SLOTS[0]/(double) numEnv));
 				nRelTrail = 0;
+
+				La = -1;
 				break;
 			case FIXVAR:
 				varBord1 = in.readBits(2);
@@ -85,6 +104,8 @@ class ChannelData implements Constants, HuffmanTables {
 				nRelTrail = numRel1;
 				relBordTrail = new int[nRelTrail];
 				System.arraycopy(relBord1, 0, relBordTrail, 0, nRelTrail);
+
+				La = pointer==0 ? -1 : numEnv+1-pointer;
 				break;
 			case VARFIX:
 				varBord0 = in.readBits(2);
@@ -109,6 +130,8 @@ class ChannelData implements Constants, HuffmanTables {
 				relBordLead = new int[nRelLead];
 				System.arraycopy(relBord0, 0, relBordLead, 0, nRelLead);
 				nRelTrail = 0;
+
+				La = pointer>1 ? pointer-1 : -1;
 				break;
 			default: //VARVAR
 				varBord0 = in.readBits(2);
@@ -141,6 +164,8 @@ class ChannelData implements Constants, HuffmanTables {
 				nRelTrail = numRel1;
 				relBordTrail = new int[nRelTrail];
 				System.arraycopy(relBord1, 0, relBordTrail, 0, nRelTrail);
+
+				La = pointer==0 ? -1 : numEnv+1-pointer;
 				break;
 		}
 
@@ -382,15 +407,15 @@ class ChannelData implements Constants, HuffmanTables {
 	}
 
 	void decodeSinusoidals(BitStream in, FrequencyTables tables) throws AACException {
-		addHarmonics = new boolean[tables.getNHigh()];
+		addHarmonics = new int[tables.getNHigh()];
 
 		harmonicsPresent = in.readBool();
 		if(harmonicsPresent) {
 			for(int n = 0; n<addHarmonics.length; n++) {
-				addHarmonics[n] = in.readBool();
+				addHarmonics[n] = in.readBit();
 			}
 		}
-		else Arrays.fill(addHarmonics, false);
+		else Arrays.fill(addHarmonics, 0);
 	}
 
 	private int decodeHuffman(BitStream in, int[][] table) throws AACException {
@@ -401,6 +426,10 @@ class ChannelData implements Constants, HuffmanTables {
 			index = table[index][bit];
 		}
 		return index+HUFFMAN_OFFSET;
+	}
+
+	int getChannelNumber() {
+		return channel;
 	}
 
 	int getAmpRes() {
@@ -435,6 +464,10 @@ class ChannelData implements Constants, HuffmanTables {
 		return te;
 	}
 
+	int[] getTq() {
+		return tq;
+	}
+
 	int[] getTePrev() {
 		return tePrev;
 	}
@@ -447,15 +480,15 @@ class ChannelData implements Constants, HuffmanTables {
 		return invfModePrev;
 	}
 
-	double[][] getEorig() {
+	float[][] getEorig() {
 		return Eorig;
 	}
 
-	double[][] getQorig() {
+	float[][] getQorig() {
 		return Qorig;
 	}
 
-	void setDequantData(double[][] Eorig, double[][] Qorig) {
+	void setDequantData(float[][] Eorig, float[][] Qorig) {
 		this.Eorig = Eorig;
 		this.Qorig = Qorig;
 	}
@@ -476,6 +509,30 @@ class ChannelData implements Constants, HuffmanTables {
 		return lTemp;
 	}
 
+	boolean areHarmonicsPresent() {
+		return harmonicsPresent;
+	}
+
+	int[] getAddHarmonics() {
+		return addHarmonics;
+	}
+
+	int getLa() {
+		return La;
+	}
+
+	int getLaPrev() {
+		return LaPrev;
+	}
+
+	int[] getSIndexMappedPrev() {
+		return sIndexMappedPrev;
+	}
+
+	void setSIndexMappedPrev(int[] sIndexMappedPrev) {
+		this.sIndexMappedPrev = sIndexMappedPrev;
+	}
+
 	void savePreviousData() {
 		lTemp = te[numEnv]*RATE-TIME_SLOTS[0]*RATE;
 
@@ -483,5 +540,6 @@ class ChannelData implements Constants, HuffmanTables {
 		tePrev = te;
 		invfModePrev = invfMode;
 		bwArrayPrev = bwArray;
+		LaPrev = La;
 	}
 }

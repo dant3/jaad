@@ -309,7 +309,10 @@ class FrequencyTables implements Constants {
 
 	private void calculateLimiterFrequencyTables(Header header) {
 		int lb = header.getLimiterBands();
-		if(lb==0) fTableLim = new int[]{fTableLow[0], fTableLow[nLow]};
+		if(lb==0) {
+			fTableLim = new int[]{fTableLow[0], fTableLow[nLow]};
+			Nl = 1;
+		}
 		else {
 			double[] limiterBandsPerOctave = {1.2, 2, 3};
 			double limBands = limiterBandsPerOctave[lb-1];
@@ -320,7 +323,7 @@ class FrequencyTables implements Constants {
 				patchBorders[k] = patchBorders[k-1]+patchNumSubbands[k-1];
 			}
 
-			int[] limTable = new int[numPatches+nLow];
+			int[] limTable = new int[nLow+numPatches];
 			for(int k = 0; k<=nLow; k++) {
 				limTable[k] = fTableLow[k];
 			}
@@ -363,7 +366,7 @@ class FrequencyTables implements Constants {
 			Nl = nrLim;
 			fTableLim = new int[nrLim+1];
 			for(int i = 0; i<=nrLim; i++) {
-				fTableLim[i] = limTable[i];
+				fTableLim[i] = limTableL.get(i);
 			}
 		}
 	}
