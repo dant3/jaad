@@ -191,7 +191,7 @@ public class SyntacticElements implements Constants {
 	private void decodeFIL(BitStream in, Element prev) throws AACException {
 		if(curFIL==MAX_ELEMENTS) throw new AACException("too much FIL elements");
 		if(fils[curFIL]==null) fils[curFIL] = new FIL(config.isSBRDownSampled());
-		fils[curFIL].decode(in, prev, config.getSampleFrequency(), config.isSBREnabled());
+		fils[curFIL].decode(in, prev, config.getSampleFrequency(), config.isSBREnabled(), config.isSmallFrameUsed());
 		curFIL++;
 
 		if(prev!=null&&prev.isSBRPresent()) {
@@ -275,9 +275,9 @@ public class SyntacticElements implements Constants {
 			final SBR sbr = scelfe.getSBR();
 			if(sbr.isPSUsed()) {
 				chs = 2;
-				scelfe.getSBR().process(data[channel], data[channel+1]);
+				scelfe.getSBR().process(data[channel], data[channel+1], false);
 			}
-			else scelfe.getSBR().process(data[channel], null);
+			else scelfe.getSBR().process(data[channel], false);
 		}
 		return chs;
 	}
@@ -341,7 +341,7 @@ public class SyntacticElements implements Constants {
 		//SBR
 		if(sbrPresent&&config.isSBREnabled()) {
 			if(data[channel].length==config.getFrameLength()) LOGGER.log(Level.WARNING, "SBR data present, but buffer has normal size!");
-			cpe.getSBR().process(data[channel], data[channel+1]);
+			cpe.getSBR().process(data[channel], data[channel+1], false);
 		}
 	}
 

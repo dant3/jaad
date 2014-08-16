@@ -60,7 +60,7 @@ class FIL extends Element implements Constants {
 		this.downSampledSBR = downSampledSBR;
 	}
 
-	void decode(BitStream in, Element prev, SampleFrequency sf, boolean sbrEnabled) throws AACException {
+	void decode(BitStream in, Element prev, SampleFrequency sf, boolean sbrEnabled, boolean smallFrames) throws AACException {
 		int count = in.readBits(4);
 		if(count==15) count += in.readBits(8)-1;
 		count *= 8; //convert to bits
@@ -69,7 +69,7 @@ class FIL extends Element implements Constants {
 		final int pos = in.getPosition();
 
 		while(count>0) {
-			count = decodeExtensionPayload(in, count, prev, sf, sbrEnabled);
+			count = decodeExtensionPayload(in, count, prev, sf, sbrEnabled, smallFrames);
 		}
 
 		final int pos2 = in.getPosition()-pos;
@@ -78,7 +78,7 @@ class FIL extends Element implements Constants {
 		else if(bitsLeft<0) throw new AACException("FIL element overread: "+bitsLeft);
 	}
 
-	private int decodeExtensionPayload(BitStream in, int count, Element prev, SampleFrequency sf, boolean sbrEnabled) throws AACException {
+	private int decodeExtensionPayload(BitStream in, int count, Element prev, SampleFrequency sf, boolean sbrEnabled, boolean smallFrames) throws AACException {
 		final int type = in.readBits(4);
 		int ret = count-4;
 		switch(type) {
@@ -89,7 +89,7 @@ class FIL extends Element implements Constants {
 			case TYPE_SBR_DATA_CRC:
 				if(sbrEnabled) {
 					if(prev instanceof SCE_LFE||prev instanceof CPE||prev instanceof CCE) {
-						prev.decodeSBR(in, sf, ret, (prev instanceof CPE), (type==TYPE_SBR_DATA_CRC), downSampledSBR);
+						prev.decodeSBR(in, sf, ret, (prev instanceof CPE), (type==TYPE_SBR_DATA_CRC), downSampledSBR, smallFrames);
 						ret = 0;
 						break;
 					}

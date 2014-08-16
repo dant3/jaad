@@ -1,198 +1,359 @@
-/*
- *  Copyright (C) 2011 in-somnia
- * 
- *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
- *  License, or (at your option) any later version.
- *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
- *  Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library.
- *  If not, see <http://www.gnu.org/licenses/>.
- */
 package net.sourceforge.jaad.aac.ps;
 
-class Filterbank implements FilterbankTables {
+class Filterbank implements PSTables {
 
-	private static final int FB_LEN = 32;
+	private int frame_len;
+	private int[] resolution20 = new int[3];
+	private int[] resolution34 = new int[5];
 
-	//=============================== analysis =============================
-	//out: [91][32][2], buf: [5][44][2], in:[38][64][2]
-	static void performAnalysis(float[][][] in, float[][][] out, float[][][] buf, boolean use34) {
-		int i, j;
-		for(i = 0; i<5; i++) {
-			for(j = 0; j<38; j++) {
-				buf[i][j+6][0] = in[j][i][0];
-				buf[i][j+6][1] = in[j][i][1];
-			}
-		}
-		if(use34) {
-			perfomFilter4C(buf[0], out, 0, F34_0_12, 12);
-			perfomFilter4C(buf[1], out, 12, F34_1_8, 8);
-			perfomFilter4C(buf[2], out, 20, F34_2_4, 4);
-			perfomFilter4C(buf[3], out, 24, F34_2_4, 4);
-			perfomFilter4C(buf[4], out, 28, F34_2_4, 4);
-			for(i = 0; i<59; i++) {
-				for(j = 0; j<FB_LEN; j++) {
-					out[i+32][j][0] = in[j][i+5][0];
-					out[i+32][j][1] = in[j][i+5][1];
-				}
-			}
-		}
-		else {
-			performFilter6C(buf[0], out, 0, F20_0_8);
-			performFilter2R(buf[1], out, 6, G1_Q2, true);
-			performFilter2R(buf[2], out, 8, G1_Q2, false);
-			for(i = 0; i<61; i++) {
-				for(j = 0; j<FB_LEN; j++) {
-					out[i+10][j][0] = in[j][i+3][0];
-					out[i+10][j][1] = in[j][i+3][1];
-				}
-			}
-		}
-		//update in_buf
-		for(i = 0; i<5; i++) {
-			System.arraycopy(buf[i], 32, buf[i], 0, 6);
-			//memcpy(in[i], in[i]+32, 6*sizeof(in[i][0]));
-		}
+	private float[][] work;
+	private float[][][] buffer;
+	private float[][][] temp;
+
+	Filterbank(int numTimeSlotsRate) {
+		int i;
+
+		this.resolution34[0] = 12;
+		this.resolution34[1] = 8;
+		this.resolution34[2] = 4;
+		this.resolution34[3] = 4;
+		this.resolution34[4] = 4;
+
+		this.resolution20[0] = 8;
+		this.resolution20[1] = 2;
+		this.resolution20[2] = 2;
+
+		this.frame_len = numTimeSlotsRate;
+
+		this.work = new float[(this.frame_len+12)][2];
+
+		this.buffer = new float[5][2][2];
+
+		temp = new float[frame_len][12][2];
 	}
 
-	//splits one subband into 2 sub-subbands with a symmetric real filter
-	//the filter must have its non-center even coefficients equal to zero
-	private static void performFilter2R(float[][] in, float[][][] out, int outOff, float[] filter, boolean reverse) {
-		int i, j;
-		int inOff = 0;
-		for(i = 0; i<FB_LEN; i++, inOff++) {
-			float re_in = filter[6]*in[inOff+6][0];          //real inphase
-			float re_op = 0.0f;                          //real out of phase
-			float im_in = filter[6]*in[inOff+6][1];          //imag inphase
-			float im_op = 0.0f;                          //imag out of phase
-			for(j = 0; j<6; j += 2) {
-				re_op += filter[j+1]*(in[inOff+j+1][0]+in[inOff+12-j-1][0]);
-				im_op += filter[j+1]*(in[inOff+j+1][1]+in[inOff+12-j-1][1]);
+	void hybrid_analysis(float[][][] X, float[][][] X_hybrid, boolean use34, int numTimeSlotsRate) {
+		int k, n, band;
+		int offset = 0;
+		int qmf_bands = (use34) ? 5 : 3;
+		int[] resolution = (use34) ? this.resolution34 : this.resolution20;
+
+		for(band = 0; band<qmf_bands; band++) {
+			/* build working buffer */
+			//memcpy(this.work, this.buffer[band], 12*sizeof(qmf_t));
+			for(int i = 0; i<12; i++) {
+				work[i][0] = buffer[band][i][0];
+				work[i][1] = buffer[band][i][1];
 			}
-			out[outOff+(reverse ? 1 : 0)][i][0] = re_in+re_op;
-			out[outOff+(reverse ? 1 : 0)][i][1] = im_in+im_op;
-			out[outOff+(reverse ? 0 : 1)][i][0] = re_in-re_op;
-			out[outOff+(reverse ? 0 : 1)][i][1] = im_in-im_op;
-		}
-	}
 
-	//splits one subband into 6 sub-subbands with a complex filter
-	private static void performFilter6C(float[][] in, float[][][] out, int outOff, float[][][] filter) {
-		final int N = 8;
-		final float[][] temp = new float[8][2];
-
-		int i, j, ssb;
-		int inOff = 0;
-		for(i = 0; i<FB_LEN; i++, inOff++) {
-			for(ssb = 0; ssb<N; ssb++) {
-				float sum_re = filter[ssb][6][0]*in[inOff+6][0], sum_im = filter[ssb][6][0]*in[inOff+6][1];
-				for(j = 0; j<6; j++) {
-					float in0_re = in[inOff+j][0];
-					float in0_im = in[inOff+j][1];
-					float in1_re = in[inOff+12-j][0];
-					float in1_im = in[inOff+12-j][1];
-					sum_re += filter[ssb][j][0]*(in0_re+in1_re)-filter[ssb][j][1]*(in0_im-in1_im);
-					sum_im += filter[ssb][j][0]*(in0_im+in1_im)+filter[ssb][j][1]*(in0_re-in1_re);
-				}
-				temp[ssb][0] = sum_re;
-				temp[ssb][1] = sum_im;
+			/* add new samples */
+			for(n = 0; n<this.frame_len; n++) {
+				this.work[12+n][0] = X[n+6 /*delay*/][band][0];
+				this.work[12+n][0] = X[n+6 /*delay*/][band][0];
 			}
-			out[outOff+0][i][0] = temp[6][0];
-			out[outOff+0][i][1] = temp[6][1];
-			out[outOff+1][i][0] = temp[7][0];
-			out[outOff+1][i][1] = temp[7][1];
-			out[outOff+2][i][0] = temp[0][0];
-			out[outOff+2][i][1] = temp[0][1];
-			out[outOff+3][i][0] = temp[1][0];
-			out[outOff+3][i][1] = temp[1][1];
-			out[outOff+4][i][0] = temp[2][0]+temp[5][0];
-			out[outOff+4][i][1] = temp[2][1]+temp[5][1];
-			out[outOff+5][i][0] = temp[3][0]+temp[4][0];
-			out[outOff+5][i][1] = temp[3][1]+temp[4][1];
-		}
-	}
 
-	private static void perfomFilter4C(float[][] in, float[][][] out, int outOff, float[][][] filter, int len) {
-		int i, j, ssb;
-		int inOff = 0;
+			/* store samples */
+			//memcpy(this.buffer[band], this.work+this.frame_len, 12*sizeof(qmf_t));
+			for(int i = 0; i<12; i++) {
+				buffer[band][i][0] = work[frame_len+i][0];
+				buffer[band][i][1] = work[frame_len+i][1];
+			}
 
-		for(i = 0; i<FB_LEN; i++, inOff++) {
-			for(ssb = 0; ssb<len; ssb++) {
-				float sum_re = filter[ssb][6][0]*in[inOff+6][0], sum_im = filter[ssb][6][0]*in[inOff+6][1];
-				for(j = 0; j<6; j++) {
-					float in0_re = in[inOff+j][0];
-					float in0_im = in[inOff+j][1];
-					float in1_re = in[inOff+12-j][0];
-					float in1_im = in[inOff+12-j][1];
-					sum_re += filter[ssb][j][0]*(in0_re+in1_re)-filter[ssb][j][1]*(in0_im-in1_im);
-					sum_im += filter[ssb][j][0]*(in0_im+in1_im)+filter[ssb][j][1]*(in0_re-in1_re);
+			switch(resolution[band]) {
+				case 2:
+					/* Type B real filter, Q[p] = 2 */
+					channel_filter2(this.frame_len, p2_13_20, this.work, this.temp);
+					break;
+				case 4:
+					/* Type A complex filter, Q[p] = 4 */
+					channel_filter4(this.frame_len, p4_13_34, this.work, this.temp);
+					break;
+				case 8:
+					/* Type A complex filter, Q[p] = 8 */
+					channel_filter8(this.frame_len, (use34) ? p8_13_34 : p8_13_20,
+						this.work, this.temp);
+					break;
+				case 12:
+					/* Type A complex filter, Q[p] = 12 */
+					channel_filter12(this.frame_len, p12_13_34, this.work, this.temp);
+					break;
+			}
+
+			for(n = 0; n<this.frame_len; n++) {
+				for(k = 0; k<resolution[band]; k++) {
+					X_hybrid[n][offset+k][0] = this.temp[n][k][0];
+					X_hybrid[n][offset+k][1] = this.temp[n][k][1];
 				}
-				out[outOff+ssb][i][0] = sum_re;
-				out[outOff+ssb][i][1] = sum_im;
+			}
+			offset += resolution[band];
+		}
+
+		/* group hybrid channels */
+		if(!use34) {
+			for(n = 0; n<numTimeSlotsRate; n++) {
+				X_hybrid[n][3][0] += X_hybrid[n][4][0];
+				X_hybrid[n][3][1] += X_hybrid[n][4][1];
+				X_hybrid[n][4][0] = 0;
+				X_hybrid[n][4][1] = 0;
+
+				X_hybrid[n][2][0] += X_hybrid[n][5][0];
+				X_hybrid[n][2][1] += X_hybrid[n][5][1];
+				X_hybrid[n][5][0] = 0;
+				X_hybrid[n][5][1] = 0;
 			}
 		}
 	}
 
-	//=============================== synthesis =============================
-	//out: [38][64][2], in: [91][32][2]
-	static void performSynthesis(float[][][] in, float[][][] out, boolean use34) {
+	/* real filter, size 2 */
+	static void channel_filter2(int frame_len, float[] filter,
+		float[][] buffer, float[][][] X_hybrid) {
+		int i;
+
+		for(i = 0; i<frame_len; i++) {
+			float r0 = (filter[0]*(buffer[0+i][0]+buffer[12+i][0]));
+			float r1 = (filter[1]*(buffer[1+i][0]+buffer[11+i][0]));
+			float r2 = (filter[2]*(buffer[2+i][0]+buffer[10+i][0]));
+			float r3 = (filter[3]*(buffer[3+i][0]+buffer[9+i][0]));
+			float r4 = (filter[4]*(buffer[4+i][0]+buffer[8+i][0]));
+			float r5 = (filter[5]*(buffer[5+i][0]+buffer[7+i][0]));
+			float r6 = (filter[6]*buffer[6+i][0]);
+			float i0 = (filter[0]*(buffer[0+i][1]+buffer[12+i][1]));
+			float i1 = (filter[1]*(buffer[1+i][1]+buffer[11+i][1]));
+			float i2 = (filter[2]*(buffer[2+i][1]+buffer[10+i][1]));
+			float i3 = (filter[3]*(buffer[3+i][1]+buffer[9+i][1]));
+			float i4 = (filter[4]*(buffer[4+i][1]+buffer[8+i][1]));
+			float i5 = (filter[5]*(buffer[5+i][1]+buffer[7+i][1]));
+			float i6 = (filter[6]*buffer[6+i][1]);
+
+			/* q = 0 */
+			X_hybrid[i][0][0] = r0+r1+r2+r3+r4+r5+r6;
+			X_hybrid[i][0][1] = i0+i1+i2+i3+i4+i5+i6;
+
+			/* q = 1 */
+			X_hybrid[i][1][0] = r0-r1+r2-r3+r4-r5+r6;
+			X_hybrid[i][1][1] = i0-i1+i2-i3+i4-i5+i6;
+		}
+	}
+
+	/* complex filter, size 4 */
+	static void channel_filter4(int frame_len, float[] filter,
+		float[][] buffer, float[][][] X_hybrid) {
+		int i;
+		float[] input_re1 = new float[2], input_re2 = new float[2];
+		float[] input_im1 = new float[2], input_im2 = new float[2];
+
+		for(i = 0; i<frame_len; i++) {
+			input_re1[0] = -(filter[2]*(buffer[i+2][0]+buffer[i+10][0]))
+				+(filter[6]*buffer[i+6][0]);
+			input_re1[1] = (-0.70710678118655f
+				*((filter[1]*(buffer[i+1][0]+buffer[i+11][0]))
+				+(filter[3]*(buffer[i+3][0]+buffer[i+9][0]))
+				-(filter[5]*(buffer[i+5][0]+buffer[i+7][0]))));
+
+			input_im1[0] = (filter[0]*(buffer[i+0][1]-buffer[i+12][1]))
+				-(filter[4]*(buffer[i+4][1]-buffer[i+8][1]));
+			input_im1[1] = (0.70710678118655f
+				*((filter[1]*(buffer[i+1][1]-buffer[i+11][1]))
+				-(filter[3]*(buffer[i+3][1]-buffer[i+9][1]))
+				-(filter[5]*(buffer[i+5][1]-buffer[i+7][1]))));
+
+			input_re2[0] = (filter[0]*(buffer[i+0][0]-buffer[i+12][0]))
+				-(filter[4]*(buffer[i+4][0]-buffer[i+8][0]));
+			input_re2[1] = (0.70710678118655f
+				*((filter[1]*(buffer[i+1][0]-buffer[i+11][0]))
+				-(filter[3]*(buffer[i+3][0]-buffer[i+9][0]))
+				-(filter[5]*(buffer[i+5][0]-buffer[i+7][0]))));
+
+			input_im2[0] = -(filter[2]*(buffer[i+2][1]+buffer[i+10][1]))
+				+(filter[6]*buffer[i+6][1]);
+			input_im2[1] = (-0.70710678118655f
+				*((filter[1]*(buffer[i+1][1]+buffer[i+11][1]))
+				+(filter[3]*(buffer[i+3][1]+buffer[i+9][1]))
+				-(filter[5]*(buffer[i+5][1]+buffer[i+7][1]))));
+
+			/* q == 0 */
+			X_hybrid[i][0][0] = input_re1[0]+input_re1[1]+input_im1[0]+input_im1[1];
+			X_hybrid[i][0][1] = -input_re2[0]-input_re2[1]+input_im2[0]+input_im2[1];
+
+			/* q == 1 */
+			X_hybrid[i][1][0] = input_re1[0]-input_re1[1]-input_im1[0]+input_im1[1];
+			X_hybrid[i][1][1] = input_re2[0]-input_re2[1]+input_im2[0]-input_im2[1];
+
+			/* q == 2 */
+			X_hybrid[i][2][0] = input_re1[0]-input_re1[1]+input_im1[0]-input_im1[1];
+			X_hybrid[i][2][1] = -input_re2[0]+input_re2[1]+input_im2[0]-input_im2[1];
+
+			/* q == 3 */
+			X_hybrid[i][3][0] = input_re1[0]+input_re1[1]-input_im1[0]-input_im1[1];
+			X_hybrid[i][3][1] = input_re2[0]+input_re2[1]+input_im2[0]+input_im2[1];
+		}
+	}
+
+	static void DCT3_4_unscaled(float[] y, float[] x) {
+		float f0, f1, f2, f3, f4, f5, f6, f7, f8;
+
+		f0 = (x[2]*0.7071067811865476f);
+		f1 = x[0]-f0;
+		f2 = x[0]+f0;
+		f3 = x[1]+x[3];
+		f4 = (x[1]*1.3065629648763766f);
+		f5 = (f3*(-0.9238795325112866f));
+		f6 = (x[3]*(-0.5411961001461967f));
+		f7 = f4+f5;
+		f8 = f6-f5;
+		y[3] = f2-f8;
+		y[0] = f2+f8;
+		y[2] = f1-f7;
+		y[1] = f1+f7;
+	}
+
+	/* complex filter, size 8 */
+	void channel_filter8(int frame_len, float[] filter,
+		float[][] buffer, float[][][] X_hybrid) {
 		int i, n;
-		if(use34) {
-			for(n = 0; n<FB_LEN; n++) {
-				for(i = 0; i<5; i++) {
-					out[n][i][0] = 0;
-					out[n][i][1] = 0;
-				}
-				for(i = 0; i<12; i++) {
-					out[n][0][0] += in[i][n][0];
-					out[n][0][1] += in[i][n][1];
-				}
-				for(i = 0; i<8; i++) {
-					out[n][1][0] += in[12+i][n][0];
-					out[n][1][1] += in[12+i][n][1];
-				}
-				for(i = 0; i<4; i++) {
-					out[n][2][0] += in[20+i][n][0];
-					out[n][2][1] += in[20+i][n][1];
-					out[n][3][0] += in[24+i][n][0];
-					out[n][3][1] += in[24+i][n][1];
-					out[n][4][0] += in[28+i][n][0];
-					out[n][4][1] += in[28+i][n][1];
-				}
+		float[] input_re1 = new float[4], input_re2 = new float[4];
+		float[] input_im1 = new float[4], input_im2 = new float[4];
+		float[] x = new float[4];
+
+		for(i = 0; i<frame_len; i++) {
+			input_re1[0] = (filter[6]*buffer[6+i][0]);
+			input_re1[1] = (filter[5]*(buffer[5+i][0]+buffer[7+i][0]));
+			input_re1[2] = -(filter[0]*(buffer[0+i][0]+buffer[12+i][0]))+(filter[4]*(buffer[4+i][0]+buffer[8+i][0]));
+			input_re1[3] = -(filter[1]*(buffer[1+i][0]+buffer[11+i][0]))+(filter[3]*(buffer[3+i][0]+buffer[9+i][0]));
+
+			input_im1[0] = (filter[5]*(buffer[7+i][1]-buffer[5+i][1]));
+			input_im1[1] = (filter[0]*(buffer[12+i][1]-buffer[0+i][1]))+(filter[4]*(buffer[8+i][1]-buffer[4+i][1]));
+			input_im1[2] = (filter[1]*(buffer[11+i][1]-buffer[1+i][1]))+(filter[3]*(buffer[9+i][1]-buffer[3+i][1]));
+			input_im1[3] = (filter[2]*(buffer[10+i][1]-buffer[2+i][1]));
+
+			for(n = 0; n<4; n++) {
+				x[n] = input_re1[n]-input_im1[3-n];
 			}
-			for(i = 0; i<59; i++) {
-				for(n = 0; n<FB_LEN; n++) {
-					out[n][i+5][0] = in[i+32][n][0];
-					out[n][i+5][1] = in[i+32][n][1];
+			DCT3_4_unscaled(x, x);
+			X_hybrid[i][7][0] = x[0];
+			X_hybrid[i][5][0] = x[2];
+			X_hybrid[i][3][0] = x[3];
+			X_hybrid[i][1][0] = x[1];
+
+			for(n = 0; n<4; n++) {
+				x[n] = input_re1[n]+input_im1[3-n];
+			}
+			DCT3_4_unscaled(x, x);
+			X_hybrid[i][6][0] = x[1];
+			X_hybrid[i][4][0] = x[3];
+			X_hybrid[i][2][0] = x[2];
+			X_hybrid[i][0][0] = x[0];
+
+			input_im2[0] = (filter[6]*buffer[6+i][1]);
+			input_im2[1] = (filter[5]*(buffer[5+i][1]+buffer[7+i][1]));
+			input_im2[2] = -(filter[0]*(buffer[0+i][1]+buffer[12+i][1]))+(filter[4]*(buffer[4+i][1]+buffer[8+i][1]));
+			input_im2[3] = -(filter[1]*(buffer[1+i][1]+buffer[11+i][1]))+(filter[3]*(buffer[3+i][1]+buffer[9+i][1]));
+
+			input_re2[0] = (filter[5]*(buffer[7+i][0]-buffer[5+i][0]));
+			input_re2[1] = (filter[0]*(buffer[12+i][0]-buffer[0+i][0]))+(filter[4]*(buffer[8+i][0]-buffer[4+i][0]));
+			input_re2[2] = (filter[1]*(buffer[11+i][0]-buffer[1+i][0]))+(filter[3]*(buffer[9+i][0]-buffer[3+i][0]));
+			input_re2[3] = (filter[2]*(buffer[10+i][0]-buffer[2+i][0]));
+
+			for(n = 0; n<4; n++) {
+				x[n] = input_im2[n]+input_re2[3-n];
+			}
+			DCT3_4_unscaled(x, x);
+			X_hybrid[i][7][1] = x[0];
+			X_hybrid[i][5][1] = x[2];
+			X_hybrid[i][3][1] = x[3];
+			X_hybrid[i][1][1] = x[1];
+
+			for(n = 0; n<4; n++) {
+				x[n] = input_im2[n]-input_re2[3-n];
+			}
+			DCT3_4_unscaled(x, x);
+			X_hybrid[i][6][1] = x[1];
+			X_hybrid[i][4][1] = x[3];
+			X_hybrid[i][2][1] = x[2];
+			X_hybrid[i][0][1] = x[0];
+		}
+	}
+
+	void DCT3_6_unscaled(float[] y, float[] x) {
+		float f0, f1, f2, f3, f4, f5, f6, f7;
+
+		f0 = (x[3]*0.70710678118655f);
+		f1 = x[0]+f0;
+		f2 = x[0]-f0;
+		f3 = ((x[1]-x[5])*0.70710678118655f);
+		f4 = (x[2]*0.86602540378444f)+(x[4]*0.5f);
+		f5 = f4-x[4];
+		f6 = (x[1]*0.96592582628907f)+(x[5]*0.25881904510252f);
+		f7 = f6-f3;
+		y[0] = f1+f6+f4;
+		y[1] = f2+f3-x[4];
+		y[2] = f7+f2-f5;
+		y[3] = f1-f7-f5;
+		y[4] = f1-f3-x[4];
+		y[5] = f2-f6+f4;
+	}
+
+	/* complex filter, size 12 */
+	void channel_filter12(int frame_len, float[] filter,
+		float[][] buffer, float[][][] X_hybrid) {
+		int i, n;
+		float[] input_re1 = new float[6], input_re2 = new float[6];
+		float[] input_im1 = new float[6], input_im2 = new float[6];
+		float[] out_re1 = new float[6], out_re2 = new float[6];
+		float[] out_im1 = new float[6], out_im2 = new float[6];
+
+		for(i = 0; i<frame_len; i++) {
+			for(n = 0; n<6; n++) {
+				if(n==0) {
+					input_re1[0] = (buffer[6+i][0]*filter[6]);
+					input_re2[0] = (buffer[6+i][1]*filter[6]);
 				}
+				else {
+					input_re1[6-n] = ((buffer[n+i][0]+buffer[12-n+i][0])*filter[n]);
+					input_re2[6-n] = ((buffer[n+i][1]+buffer[12-n+i][1])*filter[n]);
+				}
+				input_im2[n] = ((buffer[n+i][0]-buffer[12-n+i][0])*filter[n]);
+				input_im1[n] = ((buffer[n+i][1]-buffer[12-n+i][1])*filter[n]);
+			}
+
+			DCT3_6_unscaled(out_re1, input_re1);
+			DCT3_6_unscaled(out_re2, input_re2);
+
+			DCT3_6_unscaled(out_im1, input_im1);
+			DCT3_6_unscaled(out_im2, input_im2);
+
+			for(n = 0; n<6; n += 2) {
+				X_hybrid[i][n][0] = out_re1[n]-out_im1[n];
+				X_hybrid[i][n][1] = out_re2[n]+out_im2[n];
+				X_hybrid[i][n+1][0] = out_re1[n+1]+out_im1[n+1];
+				X_hybrid[i][n+1][1] = out_re2[n+1]-out_im2[n+1];
+
+				X_hybrid[i][10-n][0] = out_re1[n+1]-out_im1[n+1];
+				X_hybrid[i][10-n][1] = out_re2[n+1]+out_im2[n+1];
+				X_hybrid[i][11-n][0] = out_re1[n]+out_im1[n];
+				X_hybrid[i][11-n][1] = out_re2[n]-out_im2[n];
 			}
 		}
-		else {
-			for(n = 0; n<FB_LEN; n++) {
-				out[n][0][0] = in[0][n][0]+in[1][n][0]+in[2][n][0]
-						+in[3][n][0]+in[4][n][0]+in[5][n][0];
-				out[n][0][1] = in[0][n][1]+in[1][n][1]+in[2][n][1]
-						+in[3][n][1]+in[4][n][1]+in[5][n][1];
-				out[n][1][0] = in[6][n][0]+in[7][n][0];
-				out[n][1][1] = in[6][n][1]+in[7][n][1];
-				out[n][2][0] = in[8][n][0]+in[9][n][0];
-				out[n][2][1] = in[8][n][1]+in[9][n][1];
-			}
-			for(i = 0; i<61; i++) {
-				for(n = 0; n<FB_LEN; n++) {
-					out[n][i+3][0] = in[i+10][n][0];
-					out[n][i+3][1] = in[i+10][n][1];
+	}
+
+	void hybrid_synthesis(float[][][] X, float[][][] X_hybrid,
+		boolean use34, int numTimeSlotsRate) {
+		int k, n, band;
+		int offset = 0;
+		int qmf_bands = (use34) ? 5 : 3;
+		int[] resolution = (use34) ? this.resolution34 : this.resolution20;
+
+		for(band = 0; band<qmf_bands; band++) {
+			for(n = 0; n<this.frame_len; n++) {
+				X[n][band][0] = 0;
+				X[n][band][1] = 0;
+
+				for(k = 0; k<resolution[band]; k++) {
+					X[n][band][0] += X_hybrid[n][offset+k][0];
+					X[n][band][1] += X_hybrid[n][offset+k][1];
 				}
 			}
+			offset += resolution[band];
 		}
 	}
 }
